@@ -174,11 +174,11 @@ const Signup = () => {
             {/* Username */}
             <div className="space-y-1.5">
               <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
-              <Input
-                id="username"
-                placeholder="john_smith"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                <Input
+                  id="username"
+                  placeholder="john_smith"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 onBlur={() => handleBlur("username")}
                 className={touched.username && errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
