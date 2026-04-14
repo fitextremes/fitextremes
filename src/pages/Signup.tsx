@@ -17,6 +17,7 @@ const roles = [
 const Signup = () => {
   const [searchParams] = useSearchParams();
   const [selectedRole, setSelectedRole] = useState(searchParams.get("role") || "user");
+  const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +28,7 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, selectedRole);
+    const { error } = await signUp(email, password, fullName, selectedRole, username);
     setLoading(false);
     if (error) {
       toast.error(error.message);
@@ -78,6 +79,12 @@ const Signup = () => {
               <Label htmlFor="name">Full Name</Label>
               <Input id="name" placeholder="John Smith" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
             </div>
+            {selectedRole === "user" && (
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" placeholder="@fituser" value={username} onChange={(e) => setUsername(e.target.value)} required />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
