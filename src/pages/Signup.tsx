@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const roles = [
@@ -18,10 +20,21 @@ const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will integrate with backend
+    setLoading(true);
+    const { error } = await signUp(email, password, fullName, selectedRole);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Account created! Check your email to confirm.");
+      navigate("/login?role=" + selectedRole);
+    }
   };
 
   return (
@@ -38,7 +51,6 @@ const Signup = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-card space-y-5">
-            {/* Role Selection */}
             <div className="space-y-2">
               <Label>I am a...</Label>
               <div className="grid grid-cols-3 gap-2">
@@ -75,8 +87,8 @@ const Signup = () => {
               <Input id="password" type="password" placeholder="Min 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
             </div>
 
-            <Button variant="hero" className="w-full" size="lg" type="submit">
-              Create Account
+            <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
 
             {selectedRole !== "user" && (
