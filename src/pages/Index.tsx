@@ -79,7 +79,7 @@ const Index = () => {
             transition={{ delay: 0.7, duration: 0.5 }}
           >
             <Button variant="hero" size="lg" className="animate-pulse-glow" asChild>
-              <Link to="/signup?role=user">Join as User</Link>
+              <Link to="/signup?role=user">Join as FitExtremes Socials</Link>
             </Button>
             <Button variant="accent" size="lg" asChild>
               <Link to="/signup?role=trainer">Join as Trainer</Link>
