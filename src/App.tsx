@@ -8,6 +8,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Discover from "./pages/Discover";
 import About from "./pages/About";
+import Dashboard from "./pages/Dashboard";
+import TrainerProfile from "./pages/TrainerProfile";
+import BusinessProfile from "./pages/BusinessProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/about" element={<About />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/trainer/:id" element={<TrainerProfile />} />
+          <Route path="/business/:id" element={<BusinessProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
