@@ -39,7 +39,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar minimal />
       <div className="flex min-h-screen items-center justify-center px-4 pt-20 pb-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
