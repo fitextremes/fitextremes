@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 
-const Navbar = () => {
+const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, signOut } = useAuth();
@@ -28,14 +28,16 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden items-center gap-6 md:flex">
-          <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-            Discover
-          </Link>
+          {!minimal && (
+            <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              Discover
+            </Link>
+          )}
           <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
             About
           </Link>
 
-          {user ? (
+          {user && !minimal ? (
             <>
               <Link to="/dashboard" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Dashboard
@@ -81,9 +83,9 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="border-t border-border bg-background px-4 py-4 md:hidden">
           <div className="flex flex-col gap-3">
-            <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>
+            {!minimal && <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>}
             <Link to="/about" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>About</Link>
-            {user ? (
+            {user && !minimal ? (
               <>
                 <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-sm text-muted-foreground text-left">Sign Out</button>
