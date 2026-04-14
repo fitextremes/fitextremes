@@ -35,32 +35,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: string, username?: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username?.trim().toLowerCase() || undefined;
+
     const { error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, role, username },
+        data: { full_name: fullName.trim(), role, username: normalizedUsername },
       },
     });
     return { error };
   };
 
   const signIn = async (emailOrUsername: string, password: string) => {
-    let email = emailOrUsername;
+    const identifier = emailOrUsername.trim();
+    let email = identifier.toLowerCase();
 
-    // If input doesn't look like an email, try to resolve username from profiles table
-    if (!emailOrUsername.includes("@")) {
+    if (!identifier.includes("@")) {
+      const normalizedUsername = identifier.toLowerCase();
       const { data, error: lookupError } = await supabase
         .from("profiles")
         .select("email")
-        .eq("username", emailOrUsername)
+        .ilike("username", normalizedUsername)
         .maybeSingle();
 
       if (lookupError || !data?.email) {
         return { error: { message: "No account found with that username" } };
       }
-      email = data.email;
+      email = data.email.toLowerCase();
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
