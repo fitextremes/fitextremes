@@ -61,7 +61,7 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.7 }}
           >
-            All-in-One<br />
+            One-Ecosystem<br />
             <span className="text-gradient-primary">Fitness Platform</span>
           </motion.h1>
           <motion.p
