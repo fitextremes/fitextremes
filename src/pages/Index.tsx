@@ -84,8 +84,8 @@ const Index = () => {
             <Button variant="accent" size="lg" asChild>
               <Link to="/signup?role=trainer">Join as Trainer</Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/signup?role=business">List Your Business</Link>
+            <Button variant="accent" size="lg" asChild>
+              <Link to="/signup?role=business">Join as Business</Link>
             </Button>
           </motion.div>
 
