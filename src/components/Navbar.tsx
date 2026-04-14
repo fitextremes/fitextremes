@@ -29,15 +29,17 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
         {/* Desktop */}
         <div className="hidden items-center gap-6 md:flex">
           {!minimal && (
-            <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-              Discover
-            </Link>
+            <>
+              <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                Discover
+              </Link>
+              <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                About
+              </Link>
+            </>
           )}
-          <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-            About
-          </Link>
 
-          {user && !minimal ? (
+          {!minimal && user ? (
             <>
               <Link to="/dashboard" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Dashboard
@@ -49,7 +51,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
                 <LogOut className="h-4 w-4" /> Sign Out
               </button>
             </>
-          ) : (
+          ) : !minimal ? (
             <>
               <div className="relative">
                 <button
@@ -70,7 +72,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
                 <Link to="/signup">Join Now</Link>
               </Button>
             </>
-          )}
+          ) : null}
         </div>
 
         {/* Mobile toggle */}
@@ -80,12 +82,12 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
+      {mobileOpen && !minimal && (
         <div className="border-t border-border bg-background px-4 py-4 md:hidden">
           <div className="flex flex-col gap-3">
-            {!minimal && <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>}
+            <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>
             <Link to="/about" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>About</Link>
-            {user && !minimal ? (
+            {user ? (
               <>
                 <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-sm text-muted-foreground text-left">Sign Out</button>
