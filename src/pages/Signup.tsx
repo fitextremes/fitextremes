@@ -88,16 +88,15 @@ const Signup = () => {
 
   const errors = useMemo(() => ({
     fullName: validateFullName(fullName),
-    username: selectedRole === "user" ? validateUsername(username) : "",
+    username: validateUsername(username),
     email: validateEmail(email),
     password: validatePassword(password),
-  }), [fullName, username, email, password, selectedRole]);
+  }), [fullName, username, email, password]);
 
   const pwChecks = useMemo(() => passwordChecks(password), [password]);
   const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  const isFormValid = !errors.fullName && !errors.email && !errors.password &&
-    (selectedRole !== "user" || !errors.username);
+  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username;
 
   const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -172,23 +171,21 @@ const Signup = () => {
               )}
             </div>
 
-            {/* Username (Social User only) */}
-            {selectedRole === "user" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
-                <Input
-                  id="username"
-                  placeholder="john_smith"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onBlur={() => handleBlur("username")}
-                  className={touched.username && errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}
-                />
-                {touched.username && errors.username && (
-                  <p className="text-xs text-red-500">{errors.username}</p>
-                )}
-              </div>
-            )}
+            {/* Username */}
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
+              <Input
+                id="username"
+                placeholder="john_smith"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onBlur={() => handleBlur("username")}
+                className={touched.username && errors.username ? "border-red-500 focus-visible:ring-red-500" : ""}
+              />
+              {touched.username && errors.username && (
+                <p className="text-xs text-red-500">{errors.username}</p>
+              )}
+            </div>
 
             {/* Email */}
             <div className="space-y-1.5">
