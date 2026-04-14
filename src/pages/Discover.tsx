@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, MapPin, Star, Dumbbell, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MobileTabBar from "@/components/MobileTabBar";
 
 type Tab = "gyms" | "trainers" | "supplements";
 
@@ -114,8 +116,8 @@ const Discover = () => {
               {"rate" in item && (
                 <p className="mt-1 text-sm font-semibold text-primary">{item.rate}</p>
               )}
-              <Button variant="hero" size="sm" className="mt-4 w-full">
-                View Profile
+              <Button variant="hero" size="sm" className="mt-4 w-full" asChild>
+                <Link to={`/${activeTab === "trainers" ? "trainer" : "business"}/${item.id}`}>View Profile</Link>
               </Button>
             </div>
           ))}
@@ -129,6 +131,7 @@ const Discover = () => {
         )}
       </div>
       <Footer />
+      <MobileTabBar />
     </div>
   );
 };
