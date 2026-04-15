@@ -102,7 +102,6 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mark all touched
     setTouched({ fullName: true, username: true, email: true, password: true });
     if (!isFormValid) return;
 
@@ -112,8 +111,8 @@ const Signup = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! Check your email to confirm, then log in.");
-      navigate("/login?role=" + selectedRole);
+      toast.success("Welcome to FitExtremes!");
+      navigate("/profile");
     }
   };
 
