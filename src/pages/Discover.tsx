@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Star, Dumbbell, ShoppingBag } from "lucide-react";
+import { Search, MapPin, Star, Dumbbell, ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
 
-type Tab = "gyms" | "trainers" | "supplements";
+type Tab = "gyms" | "supplements" | "trainers";
 
 const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "gyms", label: "Gyms", icon: Dumbbell },
-  { key: "trainers", label: "Trainers", icon: Star },
-  { key: "supplements", label: "Supplements", icon: ShoppingBag },
+  { key: "supplements", label: "Supplement Stores", icon: ShoppingBag },
+  { key: "trainers", label: "Personal Trainers", icon: Star },
 ];
 
 const mockGyms = [
@@ -24,50 +25,73 @@ const mockGyms = [
   { id: 6, name: "Peak Performance", location: "Edmonton, AB", rating: 4.8, type: "Athletic Training", image: "🏔️" },
 ];
 
-const mockTrainers = [
-  { id: 1, name: "Alex Carter", location: "Toronto, ON", rating: 5.0, specialty: "Strength & Conditioning", rate: "$40–$60/hr", image: "💪" },
-  { id: 2, name: "Maria Santos", location: "Vancouver, BC", rating: 4.9, specialty: "Weight Loss", rate: "$35–$50/hr", image: "🏃" },
-  { id: 3, name: "James Wilson", location: "Calgary, AB", rating: 4.8, specialty: "Bodybuilding", rate: "$45–$70/hr", image: "🏋️" },
-  { id: 4, name: "Priya Sharma", location: "Montreal, QC", rating: 4.7, specialty: "Yoga & Flexibility", rate: "$30–$45/hr", image: "🧘" },
-];
-
 const mockSupplements = [
   { id: 1, name: "NutriMax Store", location: "Toronto, ON", rating: 4.7, type: "Full Range Supplements", image: "💊" },
   { id: 2, name: "Protein Planet", location: "Vancouver, BC", rating: 4.8, type: "Protein & Recovery", image: "🥤" },
   { id: 3, name: "Vitality Health", location: "Calgary, AB", rating: 4.6, type: "Vitamins & Wellness", image: "🌿" },
+  { id: 4, name: "MuscleFuel", location: "Montreal, QC", rating: 4.5, type: "Performance Supplements", image: "💪" },
+];
+
+const mockTrainers = [
+  { id: 1, name: "Alex Carter", location: "Toronto, ON", rating: 5.0, specialty: "Strength & Conditioning", priceMin: 40, priceMax: 60, image: "💪" },
+  { id: 2, name: "Maria Santos", location: "Vancouver, BC", rating: 4.9, specialty: "Weight Loss", priceMin: 35, priceMax: 50, image: "🏃" },
+  { id: 3, name: "James Wilson", location: "Calgary, AB", rating: 4.8, specialty: "Bodybuilding", priceMin: 45, priceMax: 70, image: "🏋️" },
+  { id: 4, name: "Priya Sharma", location: "Montreal, QC", rating: 4.7, specialty: "Yoga & Flexibility", priceMin: 30, priceMax: 45, image: "🧘" },
+  { id: 5, name: "Derek Lee", location: "Ottawa, ON", rating: 4.6, specialty: "HIIT & Cardio", priceMin: 25, priceMax: 40, image: "⚡" },
+  { id: 6, name: "Samantha Cross", location: "Edmonton, AB", rating: 4.9, specialty: "Powerlifting", priceMin: 50, priceMax: 80, image: "🔥" },
+];
+
+const locations = ["All Locations", "Toronto, ON", "Vancouver, BC", "Montreal, QC", "Calgary, AB", "Ottawa, ON", "Edmonton, AB"];
+const priceRanges = [
+  { label: "All Prices", min: 0, max: Infinity },
+  { label: "Under $30/hr", min: 0, max: 30 },
+  { label: "$30 – $50/hr", min: 30, max: 50 },
+  { label: "$50 – $80/hr", min: 50, max: 80 },
+  { label: "$80+/hr", min: 80, max: Infinity },
 ];
 
 const Discover = () => {
   const [activeTab, setActiveTab] = useState<Tab>("gyms");
   const [searchQuery, setSearchQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("All Locations");
+  const [priceRange, setPriceRange] = useState(0); // index into priceRanges
 
-  const getItems = () => {
-    const items = activeTab === "gyms" ? mockGyms : activeTab === "trainers" ? mockTrainers : mockSupplements;
-    if (!searchQuery) return items;
-    return items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const getFilteredItems = () => {
+    if (activeTab === "trainers") {
+      return mockTrainers.filter((t) => {
+        const matchSearch = !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchLocation = locationFilter === "All Locations" || t.location === locationFilter;
+        const range = priceRanges[priceRange];
+        const matchPrice = t.priceMin <= range.max && t.priceMax >= range.min;
+        return matchSearch && matchLocation && matchPrice;
+      });
+    }
+
+    const items = activeTab === "gyms" ? mockGyms : mockSupplements;
+    return items.filter((item) => {
+      const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchLocation = locationFilter === "All Locations" || item.location === locationFilter;
+      return matchSearch && matchLocation;
+    });
   };
 
-  const items = getItems();
+  const items = getFilteredItems();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
         <h1 className="font-display text-4xl uppercase tracking-wider text-foreground md:text-5xl">
           <span className="text-gradient-primary">Discover</span>
         </h1>
-        <p className="mt-2 text-muted-foreground">Find gyms, trainers, and supplement stores near you</p>
+        <p className="mt-2 text-muted-foreground">Find gyms, supplement stores, and personal trainers near you</p>
 
         {/* Tabs */}
-        <div className="mt-8 flex gap-2">
+        <div className="mt-8 flex flex-wrap gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => { setActiveTab(tab.key); setSearchQuery(""); }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2.5 font-display text-sm uppercase tracking-wider transition-all ${
                 activeTab === tab.key
                   ? "gradient-primary text-primary-foreground shadow-glow"
@@ -80,20 +104,46 @@ const Discover = () => {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative mt-6">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Filter by location..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Filters */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={activeTab === "trainers" ? "Search by name or specialty..." : "Search by name..."}
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={locationFilter} onValueChange={setLocationFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map((loc) => (
+                <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {activeTab === "trainers" && (
+            <Select value={String(priceRange)} onValueChange={(v) => setPriceRange(Number(v))}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SlidersHorizontal className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {priceRanges.map((r, i) => (
+                  <SelectItem key={i} value={String(i)}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Grid */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <div
               key={item.id}
               className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:border-primary/30 hover:shadow-glow"
@@ -111,10 +161,10 @@ const Discover = () => {
                 {item.rating}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                {"specialty" in item ? item.specialty : "type" in item ? item.type : ""}
+                {item.specialty || item.type}
               </p>
-              {"rate" in item && (
-                <p className="mt-1 text-sm font-semibold text-primary">{item.rate}</p>
+              {activeTab === "trainers" && (
+                <p className="mt-1 text-sm font-semibold text-primary">${item.priceMin}–${item.priceMax} CAD/hr</p>
               )}
               <Button variant="hero" size="sm" className="mt-4 w-full" asChild>
                 <Link to={`/${activeTab === "trainers" ? "trainer" : "business"}/${item.id}`}>View Profile</Link>
@@ -126,7 +176,7 @@ const Discover = () => {
         {items.length === 0 && (
           <div className="mt-16 text-center text-muted-foreground">
             <p className="text-lg">No results found</p>
-            <p className="text-sm">Try a different search term or location</p>
+            <p className="text-sm">Try adjusting your filters</p>
           </div>
         )}
       </div>
