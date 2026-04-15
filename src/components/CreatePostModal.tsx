@@ -17,45 +17,40 @@ interface CreatePostModalProps {
 
 const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
   const [caption, setCaption] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const createPost = useCreatePost();
 
-  const handleFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files || []);
-    const valid: File[] = [];
-    const newPreviews: string[] = [];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
 
-    for (const file of selected) {
-      if (!ACCEPTED_TYPES.includes(file.type)) {
-        toast.error(`${file.name}: Only JPG, JPEG, PNG, WEBP allowed`);
-        continue;
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name}: File must be under 5 MB`);
-        continue;
-      }
-      valid.push(file);
-      newPreviews.push(URL.createObjectURL(file));
+    if (!ACCEPTED_TYPES.includes(selected.type)) {
+      toast.error("Only JPG, JPEG, PNG, WEBP allowed");
+      return;
+    }
+    if (selected.size > MAX_FILE_SIZE) {
+      toast.error("File must be under 5 MB");
+      return;
     }
 
-    setFiles((prev) => [...prev, ...valid]);
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
 
-    // Reset input so same file can be re-selected
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const removeFile = (index: number) => {
-    URL.revokeObjectURL(previews[index]);
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  const removeFile = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(null);
+    setPreview(null);
   };
 
   const handleSubmit = async () => {
-    if (files.length === 0) {
-      toast.error("At least one image is required");
+    if (!file) {
+      toast.error("An image is required");
       return;
     }
     if (!caption.trim()) {
@@ -64,12 +59,10 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
     }
 
     try {
-      // Create post with the first image (multi-image can be extended later)
-      await createPost.mutateAsync({ content: caption.trim(), imageFile: files[0] });
+      await createPost.mutateAsync({ content: caption.trim(), imageFile: file });
       toast.success("Post created!");
       setCaption("");
-      setFiles([]);
-      setPreviews([]);
+      removeFile();
       onOpenChange(false);
     } catch {
       toast.error("Failed to create post");
@@ -79,9 +72,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
   const handleClose = (val: boolean) => {
     if (!val) {
       setCaption("");
-      setFiles([]);
-      previews.forEach((p) => URL.revokeObjectURL(p));
-      setPreviews([]);
+      removeFile();
     }
     onOpenChange(val);
   };
@@ -94,43 +85,38 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Image upload */}
+          {/* Single image upload */}
           <div>
             <Label className="text-xs text-muted-foreground mb-2 block">
-              Images <span className="text-destructive">*</span> (JPG, PNG, WEBP · Max 5 MB each)
+              Image <span className="text-destructive">*</span> (JPG, PNG, WEBP · Max 5 MB)
             </Label>
 
-            {previews.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                {previews.map((p, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-secondary">
-                    <img src={p} alt="" className="h-full w-full object-cover" />
-                    <button
-                      onClick={() => removeFile(i)}
-                      className="absolute top-1 right-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+            {preview ? (
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-secondary max-w-[200px] mx-auto mb-3">
+                <img src={preview} alt="" className="h-full w-full object-cover" />
+                <button
+                  onClick={removeFile}
+                  className="absolute top-1 right-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                className="w-full border-dashed"
+              >
+                <ImagePlus className="h-4 w-4 mr-2" />
+                Add Image
+              </Button>
             )}
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileRef.current?.click()}
-              className="w-full border-dashed"
-            >
-              <ImagePlus className="h-4 w-4 mr-2" />
-              {files.length === 0 ? "Add Images" : "Add More"}
-            </Button>
             <input
               ref={fileRef}
               type="file"
               accept=".jpg,.jpeg,.png,.webp"
-              multiple
-              onChange={handleFilesSelect}
+              onChange={handleFileSelect}
               className="hidden"
             />
           </div>
@@ -151,7 +137,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
             variant="hero"
             className="w-full"
             onClick={handleSubmit}
-            disabled={createPost.isPending || files.length === 0 || !caption.trim()}
+            disabled={createPost.isPending || !file || !caption.trim()}
           >
             {createPost.isPending ? (
               <>

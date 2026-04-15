@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { MapPin, UserPlus, UserMinus } from "lucide-react";
+import { MapPin, UserPlus, UserMinus, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -14,7 +14,6 @@ const UserProfile = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const { user } = useAuth();
 
-  // Try to load by username first, fallback to ID
   const isUUID = identifier && /^[0-9a-f-]{36}$/i.test(identifier);
   const { data: profileByUsername } = useProfileByUsername(!isUUID ? identifier || "" : "");
   const { data: profileById } = useProfile(isUUID ? identifier : undefined);
@@ -22,13 +21,15 @@ const UserProfile = () => {
   const profile = profileByUsername || profileById;
   const profileId = profile?.id;
 
-  const { data: posts, isLoading: postsLoading } = useUserPosts(profileId);
+  const isOwnProfile = user?.id === profileId;
+  const isPrivate = profile?.profile_visibility === "private";
   const { data: isFollowing } = useFollowStatus(profileId);
+  const canViewContent = isOwnProfile || !isPrivate || isFollowing;
+
+  const { data: posts, isLoading: postsLoading } = useUserPosts(canViewContent ? profileId : undefined);
   const toggleFollow = useToggleFollow();
   const { data: followerCount } = useFollowerCount(profileId);
   const { data: followingCount } = useFollowingCount(profileId);
-
-  const isOwnProfile = user?.id === profileId;
 
   if (!profile) {
     return (
@@ -63,18 +64,23 @@ const UserProfile = () => {
           {profile.username && (
             <p className="text-sm text-primary">@{profile.username}</p>
           )}
+          {isPrivate && !isOwnProfile && (
+            <div className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <Lock className="h-3 w-3" /> Private Profile
+            </div>
+          )}
           {profile.location && (
             <div className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" /> {profile.location}
             </div>
           )}
-          {profile.bio && (
+          {canViewContent && profile.bio && (
             <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">{profile.bio}</p>
           )}
 
           <div className="mt-6 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
             <div className="text-center">
-              <p className="font-display text-lg text-foreground">{posts?.length || 0}</p>
+              <p className="font-display text-lg text-foreground">{canViewContent ? (posts?.length || 0) : "—"}</p>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Posts</p>
             </div>
             <div className="text-center">
@@ -105,7 +111,13 @@ const UserProfile = () => {
         {/* User's posts */}
         <div className="mt-8 space-y-4">
           <h2 className="font-display text-xl uppercase tracking-wider text-foreground">Posts</h2>
-          {postsLoading ? (
+          {!canViewContent ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Lock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-lg">This account is private</p>
+              <p className="text-sm mt-1">Follow this user to see their posts</p>
+            </div>
+          ) : postsLoading ? (
             <p className="text-center text-muted-foreground py-8">Loading...</p>
           ) : posts && posts.length > 0 ? (
             posts.map((post: any) => <PostCard key={post.id} post={post} />)
