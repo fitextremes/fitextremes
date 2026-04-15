@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
-const REACTION_EMOJIS = ["❤️", "🔥", "💪", "👏", "😂"];
+const REACTION_EMOJIS = ["💪", "✊", "🔥", "🔩"];
 
 interface PostCardProps {
   post: {
