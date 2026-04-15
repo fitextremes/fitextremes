@@ -15,6 +15,7 @@ const passwordChecks = (value: string) => ({
   lowercase: /[a-z]/.test(value),
   number: /[0-9]/.test(value),
   special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value),
+  noSpaces: !/\s/.test(value),
 });
 
 const PasswordCheck = ({ met, label }: { met: boolean; label: string }) => (
@@ -65,7 +66,7 @@ const ResetPassword = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Password reset successfully!");
+      toast.success("Your password has been reset successfully. Please log in with your new password.");
       navigate("/login");
     }
   };
@@ -134,6 +135,7 @@ const ResetPassword = () => {
                   <PasswordCheck met={checks.lowercase} label="Lowercase (a-z)" />
                   <PasswordCheck met={checks.number} label="Number (0-9)" />
                   <PasswordCheck met={checks.special} label="Special char" />
+                  <PasswordCheck met={checks.noSpaces} label="No spaces" />
                 </div>
               )}
             </div>
