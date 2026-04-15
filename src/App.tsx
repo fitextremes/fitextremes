@@ -8,8 +8,10 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Discover from "./pages/Discover";
+import Explore from "./pages/Explore";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
+import UserProfile from "./pages/UserProfile";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessProfile from "./pages/BusinessProfile";
 import NotFound from "./pages/NotFound";
@@ -28,8 +30,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/discover" element={<Discover />} />
+            <Route path="/explore" element={<Explore />} />
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/user/:identifier" element={<UserProfile />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
             <Route path="*" element={<NotFound />} />
