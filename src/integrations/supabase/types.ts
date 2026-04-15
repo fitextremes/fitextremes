@@ -53,6 +53,36 @@ export type Database = {
           },
         ]
       }
+      connection_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_id: string
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_id: string
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
