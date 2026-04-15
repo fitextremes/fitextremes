@@ -11,6 +11,8 @@ import Discover from "./pages/Discover";
 import Explore from "./pages/Explore";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 import UserProfile from "./pages/UserProfile";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessProfile from "./pages/BusinessProfile";
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/explore" element={<Explore />} />
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/user/:identifier" element={<UserProfile />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />

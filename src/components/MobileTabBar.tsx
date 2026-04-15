@@ -2,10 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Search, Users, User, Compass } from "lucide-react";
 
 const tabs = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/discover", icon: Compass, label: "Discover" },
+  { to: "/dashboard", icon: Home, label: "Feed" },
   { to: "/explore", icon: Users, label: "Explore" },
-  { to: "/dashboard", icon: User, label: "Profile" },
+  { to: "/discover", icon: Compass, label: "Discover" },
+  { to: "/profile", icon: User, label: "Profile" },
 ];
 
 const MobileTabBar = () => {
