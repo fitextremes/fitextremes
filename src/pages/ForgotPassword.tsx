@@ -28,7 +28,7 @@ const ForgotPassword = () => {
       toast.error(error.message);
     } else {
       setSent(true);
-      toast.success("Password reset email sent!");
+      toast.success("A reset password link has been sent to your email ID.");
     }
   };
 
