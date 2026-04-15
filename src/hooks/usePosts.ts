@@ -17,7 +17,17 @@ export const useFeedPosts = () => {
         .eq("follower_id", user.id);
 
       const followedIds = follows?.map((f) => f.following_id) || [];
-      const feedUserIds = [user.id, ...followedIds];
+
+      // Get public profiles (not followed but public)
+      const { data: publicProfiles } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("profile_visibility", "public")
+        .not("id", "in", `(${[user.id, ...followedIds].join(",")})`)
+        .limit(20);
+
+      const publicIds = publicProfiles?.map((p) => p.id) || [];
+      const feedUserIds = [user.id, ...followedIds, ...publicIds];
 
       const { data, error } = await supabase
         .from("posts")
