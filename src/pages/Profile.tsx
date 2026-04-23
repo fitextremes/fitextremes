@@ -1,19 +1,17 @@
 import { useState } from "react";
-import { Plus, LogOut, Grid3X3, MapPin, Edit } from "lucide-react";
+import { Plus, Grid3X3, MapPin, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import MobileTabBar from "@/components/MobileTabBar";
-import PostCard from "@/components/PostCard";
+import SocialTopBar from "@/components/SocialTopBar";
 import CreatePostModal from "@/components/CreatePostModal";
 import FollowListModal from "@/components/FollowListModal";
 import PostExpandDialog from "@/components/PostExpandDialog";
-import LogoutConfirmDialog from "@/components/LogoutConfirmDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserPosts } from "@/hooks/usePosts";
 import { useFollowerCount, useFollowingCount } from "@/hooks/useSocial";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "@/assets/logo.png";
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -23,7 +21,6 @@ const Profile = () => {
   const { data: followerCount } = useFollowerCount(user?.id);
   const { data: followingCount } = useFollowingCount(user?.id);
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [logoutOpen, setLogoutOpen] = useState(false);
   const [followListType, setFollowListType] = useState<"followers" | "following" | null>(null);
   const [expandedPost, setExpandedPost] = useState<any>(null);
 
@@ -50,34 +47,18 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4 max-w-2xl">
-          <button
-            onClick={() => setCreatePostOpen(true)}
-            className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors"
-            title="Add new post"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
+    <div className="min-h-screen bg-background pb-20">
+      <SocialTopBar title="Profile" />
 
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="FitExtremes" className="h-8 w-8 object-contain" />
-            <span className="font-display text-lg uppercase tracking-wider text-foreground">
-              Fit<span className="text-primary">Extremes</span>
-            </span>
-          </Link>
-
-          <button
-            onClick={() => setLogoutOpen(true)}
-            className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
-            title="Logout"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+      {/* Floating Create Post button */}
+      <button
+        onClick={() => setCreatePostOpen(true)}
+        className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow hover:bg-primary/90 transition-all"
+        title="Create new post"
+        aria-label="Create new post"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
 
       <div className="container mx-auto px-4 pt-20 pb-12 max-w-2xl">
         <motion.div
@@ -201,7 +182,6 @@ const Profile = () => {
 
       {/* Modals */}
       <CreatePostModal open={createPostOpen} onOpenChange={setCreatePostOpen} />
-      <LogoutConfirmDialog open={logoutOpen} onOpenChange={setLogoutOpen} />
       {followListType && user && (
         <FollowListModal
           open={!!followListType}

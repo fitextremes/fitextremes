@@ -4,8 +4,7 @@ import { Search, MapPin, Star, Dumbbell, ShoppingBag, SlidersHorizontal } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 
 type Tab = "gyms" | "supplements" | "trainers";
@@ -78,13 +77,10 @@ const Discover = () => {
   const items = getFilteredItems();
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <h1 className="font-display text-4xl uppercase tracking-wider text-foreground md:text-5xl">
-          <span className="text-gradient-primary">Discover</span>
-        </h1>
-        <p className="mt-2 text-muted-foreground">Find gyms, supplement stores, and personal trainers near you</p>
+    <div className="min-h-screen bg-background pb-20">
+      <SocialTopBar title="Discover" />
+      <div className="container mx-auto px-4 pt-20 pb-12">
+        <p className="text-muted-foreground">Find gyms, supplement stores, and personal trainers near you</p>
 
         {/* Tabs */}
         <div className="mt-8 flex flex-wrap gap-2">
@@ -180,7 +176,6 @@ const Discover = () => {
           </div>
         )}
       </div>
-      <Footer />
       <MobileTabBar />
     </div>
   );
