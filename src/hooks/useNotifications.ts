@@ -24,6 +24,8 @@ export interface NotificationItem {
   follow_request_id: string | null;
   read: boolean;
   created_at: string;
+  /** True only when this notification's follow_request still exists and is pending. */
+  request_pending?: boolean;
   actor?: {
     id: string;
     username: string | null;
