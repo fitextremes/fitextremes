@@ -140,7 +140,7 @@ const NotificationBell = ({ className }: Props) => {
           ) : (
             <ul className="divide-y divide-border">
               {notifications.slice(0, 12).map((n) => {
-                const isRequest = n.type === "follow_request_received";
+                const isRequest = n.type === "follow_request_received" && n.request_pending;
                 return (
                   <li
                     key={n.id}
