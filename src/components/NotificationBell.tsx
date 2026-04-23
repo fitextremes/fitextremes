@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell, Check, X, UserPlus, UserCheck, UserX, Send, Heart } from "lucide-react";
+import { Bell, Check, X, UserPlus, UserCheck, UserX, Send, Heart, MessageCircle, Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNotifications, useMarkNotificationsRead, NotificationItem } from "@/hooks/useNotifications";
 import { useRespondFollowRequest } from "@/hooks/useFollowRequest";
@@ -23,6 +23,10 @@ const typeIcon = (type: NotificationItem["type"]) => {
       return <Heart className="h-4 w-4 text-primary" />;
     case "follow_success":
       return <UserCheck className="h-4 w-4 text-primary" />;
+    case "post_reaction":
+      return <Smile className="h-4 w-4 text-primary" />;
+    case "post_comment":
+      return <MessageCircle className="h-4 w-4 text-primary" />;
     default:
       return <Bell className="h-4 w-4" />;
   }
@@ -47,6 +51,10 @@ const typeText = (n: NotificationItem) => {
       return `${name} started following you`;
     case "follow_success":
       return `You started following ${name}`;
+    case "post_reaction":
+      return `${name} reacted to your post`;
+    case "post_comment":
+      return `${name} commented on your post`;
     default:
       return "Notification";
   }
