@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createNotification } from "@/hooks/useNotifications";
 
 export const useFollowStatus = (targetUserId?: string) => {
   const { user } = useAuth();
@@ -106,12 +107,27 @@ export const useToggleReaction = () => {
 
       if (existing) {
         await supabase.from("reactions").delete().eq("id", existing.id);
+        return { added: false };
       } else {
         await supabase.from("reactions").insert({
           post_id: postId,
           user_id: user.id,
           emoji,
         });
+        // Notify post owner (if not self)
+        const { data: post } = await supabase
+          .from("posts")
+          .select("user_id")
+          .eq("id", postId)
+          .maybeSingle();
+        if (post && post.user_id && post.user_id !== user.id) {
+          await createNotification({
+            recipientId: post.user_id,
+            actorId: user.id,
+            type: "post_reaction",
+          });
+        }
+        return { added: true };
       }
     },
     onSuccess: () => {
@@ -134,6 +150,19 @@ export const useAddComment = () => {
         .select(`*, profiles:user_id (id, username, full_name, avatar_url)`)
         .single();
       if (error) throw error;
+      // Notify post owner (if not self)
+      const { data: post } = await supabase
+        .from("posts")
+        .select("user_id")
+        .eq("id", postId)
+        .maybeSingle();
+      if (post && post.user_id && post.user_id !== user.id) {
+        await createNotification({
+          recipientId: post.user_id,
+          actorId: user.id,
+          type: "post_comment",
+        });
+      }
       return data;
     },
     onSuccess: () => {

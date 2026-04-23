@@ -12,7 +12,9 @@ export type NotificationType =
   | "follow_request_declined_self"
   | "follow_request_cancelled"
   | "follow_success"
-  | "new_follower";
+  | "new_follower"
+  | "post_reaction"
+  | "post_comment";
 
 export interface NotificationItem {
   id: string;
