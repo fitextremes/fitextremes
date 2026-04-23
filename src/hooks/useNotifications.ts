@@ -72,6 +72,13 @@ export const useNotifications = () => {
       const actorIds = Array.from(
         new Set(rows.map((r) => r.actor_id).filter(Boolean))
       ) as string[];
+      const requestIds = Array.from(
+        new Set(
+          rows
+            .filter((r) => r.type === "follow_request_received" && r.follow_request_id)
+            .map((r) => r.follow_request_id)
+        )
+      ) as string[];
       let profiles: Record<string, any> = {};
       if (actorIds.length) {
         const { data: pr } = await supabase
@@ -80,7 +87,23 @@ export const useNotifications = () => {
           .in("id", actorIds);
         (pr ?? []).forEach((p: any) => (profiles[p.id] = p));
       }
-      return rows.map((r) => ({ ...r, actor: r.actor_id ? profiles[r.actor_id] ?? null : null }));
+      let pendingRequests: Record<string, true> = {};
+      if (requestIds.length) {
+        const { data: reqs } = await supabase
+          .from("follow_requests")
+          .select("id, status")
+          .in("id", requestIds)
+          .eq("status", "pending");
+        (reqs ?? []).forEach((r: any) => (pendingRequests[r.id] = true));
+      }
+      return rows.map((r) => ({
+        ...r,
+        actor: r.actor_id ? profiles[r.actor_id] ?? null : null,
+        request_pending:
+          r.type === "follow_request_received"
+            ? !!(r.follow_request_id && pendingRequests[r.follow_request_id])
+            : undefined,
+      }));
     },
     enabled: !!user,
     refetchInterval: 30000,
