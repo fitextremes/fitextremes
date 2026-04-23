@@ -107,27 +107,6 @@ const ForgotPassword = () => {
               </Link>
             </form>
           )}
-            <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-card space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !email.trim()}>
-                {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                Remember your password?{" "}
-                <Link to="/login" className="text-primary hover:underline">Login</Link>
-              </p>
-            </form>
-          )}
         </div>
       </div>
     </div>
