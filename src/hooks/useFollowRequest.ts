@@ -178,6 +178,15 @@ export const useRespondFollowRequest = () => {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Always remove the actionable "follow_request_received" notification
+      // for the responder so the request item disappears from their bell.
+      const removeActionable = supabase
+        .from("notifications" as any)
+        .delete()
+        .eq("recipient_id", user.id)
+        .eq("type", "follow_request_received")
+        .eq("follow_request_id", requestId);
+
       if (accept) {
         const { error: followErr } = await supabase
           .from("follows")
@@ -185,46 +194,44 @@ export const useRespondFollowRequest = () => {
         if (followErr && !`${followErr.message}`.toLowerCase().includes("duplicate")) {
           throw followErr;
         }
+        // Delete the resolved request row entirely (Instagram-style: no lingering record)
         const { error } = await supabase
           .from("follow_requests" as any)
-          .update({ status: "accepted" })
+          .delete()
           .eq("id", requestId);
         if (error) throw error;
         await Promise.all([
+          removeActionable,
           createNotification({
             recipientId: requesterId,
             actorId: user.id,
             type: "follow_request_accepted",
-            followRequestId: requestId,
-          }),
-          createNotification({
-            recipientId: user.id,
-            actorId: user.id,
-            type: "follow_request_accepted_self",
-            followRequestId: requestId,
           }),
         ]);
         return { accepted: true };
       }
 
+      // Decline: delete the request entirely so sender can re-request later.
       const { error } = await supabase
         .from("follow_requests" as any)
-        .update({ status: "declined" })
+        .delete()
         .eq("id", requestId);
       if (error) throw error;
       await Promise.all([
+        removeActionable,
         createNotification({
           recipientId: requesterId,
           actorId: user.id,
           type: "follow_request_declined",
-          followRequestId: requestId,
         }),
-        createNotification({
-          recipientId: user.id,
-          actorId: user.id,
-          type: "follow_request_declined_self",
-          followRequestId: requestId,
-        }),
+        // Also clean up the sender's "follow_request_sent" confirmation so their
+        // bell reflects the resolved state.
+        supabase
+          .from("notifications" as any)
+          .delete()
+          .eq("recipient_id", requesterId)
+          .eq("type", "follow_request_sent")
+          .eq("follow_request_id", requestId),
       ]);
       return { accepted: false };
     },
