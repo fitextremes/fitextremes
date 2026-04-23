@@ -50,10 +50,10 @@ const ForgotPassword = () => {
           <div className="text-center mb-8">
             <img src={logo} alt="FitExtremes" className="mx-auto h-16 w-16 object-contain mb-4" />
             <h1 className="font-display text-3xl uppercase tracking-wider text-foreground">
-              Forgot Password
+              Reset your password
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Enter your email and we'll send you a reset link
+              Enter your email address and we'll send you a password reset link.
             </p>
           </div>
 
