@@ -13,23 +13,33 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Email is required.");
+      return;
+    }
+    if (!validateEmail(trimmed)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError("");
 
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    // Always call reset — Supabase intentionally doesn't reveal whether the email exists.
+    await supabase.auth.resetPasswordForEmail(trimmed, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      setSent(true);
-      toast.success("A reset password link has been sent to your email ID.");
-    }
+    // Generic confirmation regardless of outcome (do not reveal account existence)
+    setSent(true);
+    toast.success("If an account with this email exists, a password reset link has been sent.");
   };
 
   return (
