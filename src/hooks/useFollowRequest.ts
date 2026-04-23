@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createNotification } from "@/hooks/useNotifications";
 
 /**
  * Status of follow relationship between current user and a target profile.
@@ -86,10 +87,28 @@ export const useFollowAction = () => {
 
       // currentState === "none"
       if (isPrivate) {
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from("follow_requests" as any)
-          .insert({ requester_id: user.id, target_id: targetUserId, status: "pending" });
+          .insert({ requester_id: user.id, target_id: targetUserId, status: "pending" })
+          .select("id")
+          .single();
         if (error) throw error;
+        const reqId = (inserted as any)?.id ?? null;
+        // Notify target (new request received) and sender (request sent confirmation)
+        await Promise.all([
+          createNotification({
+            recipientId: targetUserId,
+            actorId: user.id,
+            type: "follow_request_received",
+            followRequestId: reqId,
+          }),
+          createNotification({
+            recipientId: user.id,
+            actorId: user.id,
+            type: "follow_request_sent",
+            followRequestId: reqId,
+          }),
+        ]);
         return { state: "requested" as FollowState, action: "request_sent" };
       }
 
@@ -97,6 +116,11 @@ export const useFollowAction = () => {
         .from("follows")
         .insert({ follower_id: user.id, following_id: targetUserId });
       if (error) throw error;
+      // Notify target (new follower) and sender (follow success)
+      await Promise.all([
+        createNotification({ recipientId: targetUserId, actorId: user.id, type: "new_follower" }),
+        createNotification({ recipientId: user.id, actorId: user.id, type: "follow_success" }),
+      ]);
       return { state: "following" as FollowState, action: "followed" };
     },
     onSuccess: (_, variables) => {
@@ -106,6 +130,7 @@ export const useFollowAction = () => {
       queryClient.invalidateQueries({ queryKey: ["feed-posts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-users"] });
       queryClient.invalidateQueries({ queryKey: ["follow-requests-incoming"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 };
@@ -154,11 +179,9 @@ export const useRespondFollowRequest = () => {
       if (!user) throw new Error("Not authenticated");
 
       if (accept) {
-        // Create follow relationship requester -> me, then mark request accepted.
         const { error: followErr } = await supabase
           .from("follows")
           .insert({ follower_id: requesterId, following_id: user.id });
-        // Ignore unique-violation if relationship already exists.
         if (followErr && !`${followErr.message}`.toLowerCase().includes("duplicate")) {
           throw followErr;
         }
@@ -167,6 +190,20 @@ export const useRespondFollowRequest = () => {
           .update({ status: "accepted" })
           .eq("id", requestId);
         if (error) throw error;
+        await Promise.all([
+          createNotification({
+            recipientId: requesterId,
+            actorId: user.id,
+            type: "follow_request_accepted",
+            followRequestId: requestId,
+          }),
+          createNotification({
+            recipientId: user.id,
+            actorId: user.id,
+            type: "follow_request_accepted_self",
+            followRequestId: requestId,
+          }),
+        ]);
         return { accepted: true };
       }
 
@@ -175,6 +212,20 @@ export const useRespondFollowRequest = () => {
         .update({ status: "declined" })
         .eq("id", requestId);
       if (error) throw error;
+      await Promise.all([
+        createNotification({
+          recipientId: requesterId,
+          actorId: user.id,
+          type: "follow_request_declined",
+          followRequestId: requestId,
+        }),
+        createNotification({
+          recipientId: user.id,
+          actorId: user.id,
+          type: "follow_request_declined_self",
+          followRequestId: requestId,
+        }),
+      ]);
       return { accepted: false };
     },
     onSuccess: () => {
@@ -182,6 +233,7 @@ export const useRespondFollowRequest = () => {
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
       queryClient.invalidateQueries({ queryKey: ["follow-state"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 };

@@ -4,6 +4,7 @@ import { LogOut, Bell } from "lucide-react";
 import LogoutConfirmDialog from "@/components/LogoutConfirmDialog";
 import { useIncomingFollowRequests } from "@/hooks/useFollowRequest";
 import { useUserRole } from "@/hooks/useUserRole";
+import NotificationBell from "@/components/NotificationBell";
 import logo from "@/assets/logo.png";
 
 interface SocialTopBarProps {
@@ -32,6 +33,7 @@ const SocialTopBar = ({ title }: SocialTopBarProps) => {
           </h1>
 
           <div className="flex items-center gap-3">
+            {isSocial && <NotificationBell />}
             {isSocial && (
               <Link
                 to="/follow-requests"
