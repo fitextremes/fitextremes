@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { createNotification } from "@/hooks/useNotifications";
+import { useEffect } from "react";
 
 /**
  * Status of follow relationship between current user and a target profile.
@@ -14,6 +15,30 @@ export type FollowState = "self" | "following" | "requested" | "none";
 
 export const useFollowState = (targetUserId?: string) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Live-update the button state when the target accepts/declines our request,
+  // or when our follow row is created/removed elsewhere.
+  useEffect(() => {
+    if (!user || !targetUserId || user.id === targetUserId) return;
+    const suffix = Math.random().toString(36).slice(2);
+    const channel = supabase
+      .channel(`follow-state-${user.id}-${targetUserId}-${suffix}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "follow_requests", filter: `requester_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["follow-state", user.id, targetUserId] })
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "follows", filter: `follower_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["follow-state", user.id, targetUserId] })
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, targetUserId, queryClient]);
 
   return useQuery({
     queryKey: ["follow-state", user?.id, targetUserId],
