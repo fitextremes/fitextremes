@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { MapPin, Star, Clock, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
 import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
+import ProfileViewHeader from "@/components/ProfileViewHeader";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
 import ConnectButton from "@/components/ConnectButton";
@@ -34,7 +34,7 @@ const BusinessProfile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
+      <ProfileViewHeader />
       <div className="container mx-auto px-4 pt-20 pb-12">
         <Link to="/discover" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Back to Discover
