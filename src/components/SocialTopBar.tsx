@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Bell } from "lucide-react";
+import { LogOut } from "lucide-react";
 import LogoutConfirmDialog from "@/components/LogoutConfirmDialog";
-import { useIncomingFollowRequests } from "@/hooks/useFollowRequest";
 import { useUserRole } from "@/hooks/useUserRole";
 import NotificationBell from "@/components/NotificationBell";
 import logo from "@/assets/logo.png";
@@ -14,8 +13,6 @@ interface SocialTopBarProps {
 const SocialTopBar = ({ title }: SocialTopBarProps) => {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const { isSocial } = useUserRole();
-  const { data: requests } = useIncomingFollowRequests();
-  const pendingCount = isSocial ? requests?.length || 0 : 0;
 
   return (
     <>
@@ -34,21 +31,6 @@ const SocialTopBar = ({ title }: SocialTopBarProps) => {
 
           <div className="flex items-center gap-3">
             {isSocial && <NotificationBell />}
-            {isSocial && (
-              <Link
-                to="/follow-requests"
-                className="relative text-muted-foreground hover:text-primary transition-colors"
-                title="Follow requests"
-                aria-label="Follow requests"
-              >
-                <Bell className="h-5 w-5" />
-                {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                    {pendingCount > 9 ? "9+" : pendingCount}
-                  </span>
-                )}
-              </Link>
-            )}
             <button
               onClick={() => setLogoutOpen(true)}
               className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
