@@ -3,12 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import logo from "@/assets/logo.png";
 
 const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isSocial } = useUserRole();
+  const showDiscover = !minimal && !!user && isSocial;
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -31,15 +34,15 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
           <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
             Home
           </Link>
+          {showDiscover && (
+            <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              Discover
+            </Link>
+          )}
           {!minimal && (
-            <>
-              <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Discover
-              </Link>
-              <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                About
-              </Link>
-            </>
+            <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              About
+            </Link>
           )}
 
           {!minimal && user ? (
@@ -89,11 +92,11 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
         <div className="border-t border-border bg-background px-4 py-4 md:hidden">
           <div className="flex flex-col gap-3">
             <Link to="/" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Home</Link>
+            {showDiscover && (
+              <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>
+            )}
             {!minimal && (
-              <>
-                <Link to="/discover" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Discover</Link>
-                <Link to="/about" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>About</Link>
-              </>
+              <Link to="/about" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>About</Link>
             )}
             {!minimal && user ? (
               <>
