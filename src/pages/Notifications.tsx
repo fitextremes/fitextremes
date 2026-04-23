@@ -83,14 +83,20 @@ const Notifications = () => {
     if (!n.follow_request_id || !n.actor_id) return;
     respond.mutate(
       { requestId: n.follow_request_id, requesterId: n.actor_id, accept: true },
-      { onSuccess: () => toast.success("Follower accepted"), onError: () => toast.error("Action failed") }
+      {
+        onSuccess: () => toast.success("Follower accepted"),
+        onError: (e: any) => toast.error(e?.message || "Could not complete action. Please try again."),
+      }
     );
   };
   const handleDecline = (n: NotificationItem) => {
     if (!n.follow_request_id || !n.actor_id) return;
     respond.mutate(
       { requestId: n.follow_request_id, requesterId: n.actor_id, accept: false },
-      { onSuccess: () => toast.success("Request declined"), onError: () => toast.error("Action failed") }
+      {
+        onSuccess: () => toast.success("Request declined"),
+        onError: (e: any) => toast.error(e?.message || "Could not complete action. Please try again."),
+      }
     );
   };
 
