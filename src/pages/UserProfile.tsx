@@ -1,13 +1,14 @@
 import { useParams } from "react-router-dom";
-import { MapPin, UserPlus, UserMinus, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MapPin, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import MobileTabBar from "@/components/MobileTabBar";
 import PostCard from "@/components/PostCard";
+import FollowButton from "@/components/FollowButton";
 import { useProfile, useProfileByUsername } from "@/hooks/useProfile";
 import { useUserPosts } from "@/hooks/usePosts";
-import { useFollowStatus, useToggleFollow, useFollowerCount, useFollowingCount } from "@/hooks/useSocial";
+import { useFollowerCount, useFollowingCount } from "@/hooks/useSocial";
+import { useFollowState } from "@/hooks/useFollowRequest";
 import { useAuth } from "@/contexts/AuthContext";
 
 const UserProfile = () => {
@@ -23,11 +24,11 @@ const UserProfile = () => {
 
   const isOwnProfile = user?.id === profileId;
   const isPrivate = profile?.profile_visibility === "private";
-  const { data: isFollowing } = useFollowStatus(profileId);
+  const { data: followState } = useFollowState(profileId);
+  const isFollowing = followState === "following";
   const canViewContent = isOwnProfile || !isPrivate || isFollowing;
 
   const { data: posts, isLoading: postsLoading } = useUserPosts(canViewContent ? profileId : undefined);
-  const toggleFollow = useToggleFollow();
   const { data: followerCount } = useFollowerCount(profileId);
   const { data: followingCount } = useFollowingCount(profileId);
 
@@ -93,18 +94,10 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {!isOwnProfile && user && (
-            <Button
-              variant={isFollowing ? "outline" : "hero"}
-              className="mt-4"
-              onClick={() => profileId && toggleFollow.mutate(profileId)}
-            >
-              {isFollowing ? (
-                <><UserMinus className="h-4 w-4 mr-2" /> Unfollow</>
-              ) : (
-                <><UserPlus className="h-4 w-4 mr-2" /> Follow</>
-              )}
-            </Button>
+          {!isOwnProfile && user && profileId && (
+            <div className="mt-4 flex justify-center">
+              <FollowButton targetUserId={profileId} isPrivate={isPrivate} size="default" />
+            </div>
           )}
         </motion.div>
 
@@ -115,7 +108,11 @@ const UserProfile = () => {
             <div className="text-center py-12 text-muted-foreground">
               <Lock className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-lg">This account is private</p>
-              <p className="text-sm mt-1">Follow this user to see their posts</p>
+              <p className="text-sm mt-1">
+                {followState === "requested"
+                  ? "Your follow request is pending approval"
+                  : "Send a follow request to see their posts"}
+              </p>
             </div>
           ) : postsLoading ? (
             <p className="text-center text-muted-foreground py-8">Loading...</p>
