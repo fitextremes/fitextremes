@@ -297,7 +297,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      resolve_follow_request: {
+        Args: { _accept: boolean; _request_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
