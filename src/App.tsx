@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import UserProfile from "./pages/UserProfile";
+import FollowRequests from "./pages/FollowRequests";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessProfile from "./pages/BusinessProfile";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/user/:identifier" element={<UserProfile />} />
+            <Route path="/follow-requests" element={<FollowRequests />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
             <Route path="*" element={<NotFound />} />

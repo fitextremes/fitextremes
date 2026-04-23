@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Search, UserPlus, MapPin } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
-import { useExploreUsers, useToggleFollow } from "@/hooks/useSocial";
+import FollowButton from "@/components/FollowButton";
+import { useExploreUsers } from "@/hooks/useSocial";
 import { motion } from "framer-motion";
 
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: users, isLoading } = useExploreUsers(searchQuery || undefined);
-  const toggleFollow = useToggleFollow();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -70,13 +70,12 @@ const Explore = () => {
                   <Button variant="hero" size="sm" className="flex-1" asChild>
                     <Link to={`/user/${u.username || u.id}`}>View Profile</Link>
                   </Button>
-                  <Button
+                  <FollowButton
+                    targetUserId={u.id}
+                    isPrivate={u.profile_visibility === "private"}
+                    iconOnly
                     variant="outline"
-                    size="sm"
-                    onClick={() => toggleFollow.mutate(u.id)}
-                  >
-                    <UserPlus className="h-4 w-4" />
-                  </Button>
+                  />
                 </div>
               </motion.div>
             ))
