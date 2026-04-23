@@ -64,8 +64,8 @@ const ForgotPassword = () => {
               </div>
               <h2 className="font-display text-xl uppercase tracking-wider text-foreground">Check Your Email</h2>
               <p className="text-sm text-muted-foreground">
-                We've sent a password reset link to <span className="text-foreground font-medium">{email}</span>.
-                Click the link in the email to reset your password.
+                If an account with <span className="text-foreground font-medium">{email}</span> exists,
+                a password reset link has been sent. Click the link in the email to reset your password.
               </p>
               <p className="text-xs text-muted-foreground">
                 Didn't receive the email? Check your spam folder or{" "}
@@ -78,6 +78,35 @@ const ForgotPassword = () => {
               </Button>
             </div>
           ) : (
+            <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-card space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError("");
+                  }}
+                  aria-invalid={!!error}
+                  required
+                />
+                {error && <p className="text-xs text-destructive">{error}</p>}
+              </div>
+              <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !email.trim()}>
+                {loading ? "Sending..." : "Send Reset Link"}
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                Remember your password?{" "}
+                <Link to="/login" className="text-primary hover:underline">Login</Link>
+              </p>
+              <Link to="/login" className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                <ArrowLeft className="h-3 w-3" /> Back to Login
+              </Link>
+            </form>
+          )}
             <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-card space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
