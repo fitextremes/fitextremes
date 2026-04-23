@@ -187,21 +187,44 @@ export const useRespondFollowRequest = () => {
         .eq("type", "follow_request_received")
         .eq("follow_request_id", requestId);
 
+      // Always clean up the sender's "follow_request_sent" confirmation
+      // so their bell reflects the resolved state — regardless of accept/decline.
+      const removeSenderSent = supabase
+        .from("notifications" as any)
+        .delete()
+        .eq("recipient_id", requesterId)
+        .eq("type", "follow_request_sent")
+        .eq("follow_request_id", requestId);
+
       if (accept) {
-        const { error: followErr } = await supabase
+        // Check if relationship already exists to avoid duplicate insert errors
+        const { data: existing } = await supabase
           .from("follows")
-          .insert({ follower_id: requesterId, following_id: user.id });
-        if (followErr && !`${followErr.message}`.toLowerCase().includes("duplicate")) {
-          throw followErr;
+          .select("id")
+          .eq("follower_id", requesterId)
+          .eq("following_id", user.id)
+          .maybeSingle();
+
+        if (!existing) {
+          const { error: followErr } = await supabase
+            .from("follows")
+            .insert({ follower_id: requesterId, following_id: user.id });
+          // Ignore unique-violation (23505) in case of race conditions
+          if (followErr && (followErr as any).code !== "23505") {
+            throw followErr;
+          }
         }
-        // Delete the resolved request row entirely (Instagram-style: no lingering record)
-        const { error } = await supabase
+
+        // Delete the resolved request row (Instagram-style: no lingering record).
+        // Don't fail if it's already gone.
+        await supabase
           .from("follow_requests" as any)
           .delete()
           .eq("id", requestId);
-        if (error) throw error;
+
         await Promise.all([
           removeActionable,
+          removeSenderSent,
           createNotification({
             recipientId: requesterId,
             actorId: user.id,
@@ -212,26 +235,18 @@ export const useRespondFollowRequest = () => {
       }
 
       // Decline: delete the request entirely so sender can re-request later.
-      const { error } = await supabase
+      await supabase
         .from("follow_requests" as any)
         .delete()
         .eq("id", requestId);
-      if (error) throw error;
       await Promise.all([
         removeActionable,
+        removeSenderSent,
         createNotification({
           recipientId: requesterId,
           actorId: user.id,
           type: "follow_request_declined",
         }),
-        // Also clean up the sender's "follow_request_sent" confirmation so their
-        // bell reflects the resolved state.
-        supabase
-          .from("notifications" as any)
-          .delete()
-          .eq("recipient_id", requesterId)
-          .eq("type", "follow_request_sent")
-          .eq("follow_request_id", requestId),
       ]);
       return { accepted: false };
     },
