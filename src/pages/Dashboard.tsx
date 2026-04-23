@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Camera, MapPin, Edit, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
+import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import PostCard from "@/components/PostCard";
 import CreatePost from "@/components/CreatePost";
@@ -40,8 +40,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
+    <div className="min-h-screen bg-background pb-20">
+      <SocialTopBar title="Feed" />
       <div className="container mx-auto px-4 pt-20 pb-12">
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Profile Card */}

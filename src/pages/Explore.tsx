@@ -3,8 +3,7 @@ import { Search, UserPlus, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { useExploreUsers, useToggleFollow } from "@/hooks/useSocial";
 import { motion } from "framer-motion";
@@ -15,18 +14,15 @@ const Explore = () => {
   const toggleFollow = useToggleFollow();
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <h1 className="font-display text-4xl uppercase tracking-wider text-foreground md:text-5xl">
-          <span className="text-gradient-primary">Explore</span> Users
-        </h1>
-        <p className="mt-2 text-muted-foreground">Find and follow fitness enthusiasts</p>
+    <div className="min-h-screen bg-background pb-20">
+      <SocialTopBar title="Explore" />
+      <div className="container mx-auto px-4 pt-20 pb-12">
+        <p className="text-muted-foreground">Find and follow fitness enthusiasts</p>
 
         <div className="relative mt-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, username, or location..."
+            placeholder="Search by name or location"
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,7 +88,6 @@ const Explore = () => {
           )}
         </div>
       </div>
-      <Footer />
       <MobileTabBar />
     </div>
   );
