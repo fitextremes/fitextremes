@@ -28,6 +28,9 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
 
         {/* Desktop */}
         <div className="hidden items-center gap-6 md:flex">
+          <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+            Home
+          </Link>
           {!minimal && (
             <>
               <Link to="/discover" className="text-sm text-muted-foreground transition-colors hover:text-primary">
