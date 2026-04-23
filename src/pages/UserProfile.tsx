@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { MapPin, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
+import ProfileViewHeader from "@/components/ProfileViewHeader";
 import MobileTabBar from "@/components/MobileTabBar";
 import PostCard from "@/components/PostCard";
 import FollowButton from "@/components/FollowButton";
@@ -35,7 +35,7 @@ const UserProfile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
+        <ProfileViewHeader />
         <div className="flex items-center justify-center pt-32">
           <p className="text-muted-foreground">User not found</p>
         </div>
@@ -45,7 +45,7 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <Navbar />
+      <ProfileViewHeader />
       <div className="container mx-auto px-4 pt-20 pb-12 max-w-2xl">
         <motion.div
           className="rounded-xl border border-border bg-card p-8 shadow-card text-center"
