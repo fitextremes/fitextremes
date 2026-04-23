@@ -4,6 +4,7 @@ import { LogOut, Bell } from "lucide-react";
 import LogoutConfirmDialog from "@/components/LogoutConfirmDialog";
 import { useIncomingFollowRequests } from "@/hooks/useFollowRequest";
 import { useUserRole } from "@/hooks/useUserRole";
+import NotificationBell from "@/components/NotificationBell";
 import logo from "@/assets/logo.png";
 
 interface SocialTopBarProps {

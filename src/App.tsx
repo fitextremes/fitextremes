@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import UserProfile from "./pages/UserProfile";
 import FollowRequests from "./pages/FollowRequests";
+import Notifications from "./pages/Notifications";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessProfile from "./pages/BusinessProfile";
 import NotFound from "./pages/NotFound";
