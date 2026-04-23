@@ -113,7 +113,7 @@ const Notifications = () => {
         ) : notifications.length > 0 ? (
           <div className="space-y-2">
             {notifications.map((n, i) => {
-              const isRequest = n.type === "follow_request_received";
+              const isRequest = n.type === "follow_request_received" && n.request_pending;
               return (
                 <motion.div
                   key={n.id}
