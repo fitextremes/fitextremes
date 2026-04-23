@@ -82,7 +82,7 @@ const NotificationBell = ({ className }: Props) => {
       { requestId: n.follow_request_id, requesterId: n.actor_id, accept: true },
       {
         onSuccess: () => toast.success("Follower accepted"),
-        onError: () => toast.error("Action failed"),
+        onError: (e: any) => toast.error(e?.message || "Could not complete action. Please try again."),
       }
     );
   };
@@ -93,7 +93,7 @@ const NotificationBell = ({ className }: Props) => {
       { requestId: n.follow_request_id, requesterId: n.actor_id, accept: false },
       {
         onSuccess: () => toast.success("Request declined"),
-        onError: () => toast.error("Action failed"),
+        onError: (e: any) => toast.error(e?.message || "Could not complete action. Please try again."),
       }
     );
   };
