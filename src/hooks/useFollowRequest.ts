@@ -203,77 +203,28 @@ export const useRespondFollowRequest = () => {
     }) => {
       if (!user) throw new Error("Not authenticated");
 
-      // Always remove the actionable "follow_request_received" notification
-      // for the responder so the request item disappears from their bell.
-      const removeActionable = supabase
-        .from("notifications" as any)
-        .delete()
-        .eq("recipient_id", user.id)
-        .eq("type", "follow_request_received")
-        .eq("follow_request_id", requestId);
-
-      // Always clean up the sender's "follow_request_sent" confirmation
-      // so their bell reflects the resolved state — regardless of accept/decline.
-      const removeSenderSent = supabase
-        .from("notifications" as any)
-        .delete()
-        .eq("recipient_id", requesterId)
-        .eq("type", "follow_request_sent")
-        .eq("follow_request_id", requestId);
-
-      if (accept) {
-        // Check if relationship already exists to avoid duplicate insert errors
-        const { data: existing } = await supabase
-          .from("follows")
-          .select("id")
-          .eq("follower_id", requesterId)
-          .eq("following_id", user.id)
-          .maybeSingle();
-
-        if (!existing) {
-          const { error: followErr } = await supabase
-            .from("follows")
-            .insert({ follower_id: requesterId, following_id: user.id });
-          // Ignore unique-violation (23505) in case of race conditions
-          if (followErr && (followErr as any).code !== "23505") {
-            throw followErr;
-          }
+      // All follow-request resolution happens server-side via a SECURITY DEFINER
+      // function so the target (private user) can atomically:
+      //  - validate ownership
+      //  - create the follows row on behalf of the requester
+      //  - delete the pending request
+      //  - clean up both notification entries
+      //  - notify the sender of the outcome
+      // This is required because RLS prevents the target from inserting a
+      // follows row where follower_id = requesterId, or deleting the request.
+      const { data, error } = await (supabase as any).rpc("resolve_follow_request", {
+        _request_id: requestId,
+        _accept: accept,
+      });
+      if (error) throw error;
+      const result = data as { ok: boolean; reason?: string; status?: string };
+      if (!result?.ok) {
+        if (result?.reason === "already_resolved" || result?.reason === "not_found") {
+          throw new Error("This request was already resolved");
         }
-
-        // Delete the resolved request row (Instagram-style: no lingering record).
-        // Don't fail if it's already gone.
-        await supabase
-          .from("follow_requests" as any)
-          .delete()
-          .eq("id", requestId);
-
-        await Promise.all([
-          removeActionable,
-          removeSenderSent,
-          createNotification({
-            recipientId: requesterId,
-            actorId: user.id,
-            type: "follow_request_accepted",
-          }),
-        ]);
-        return { accepted: true };
+        throw new Error("Could not complete action. Please try again.");
       }
-
-      // Decline: delete the request entirely so sender can re-request later.
-      await supabase
-        .from("follow_requests" as any)
-        .delete()
-        .eq("id", requestId);
-      await Promise.all([
-        removeActionable,
-        removeSenderSent,
-        createNotification({
-          recipientId: requesterId,
-          actorId: user.id,
-          type: "follow_request_declined",
-        }),
-      ]);
-      return { accepted: false };
+      return { accepted: accept, requesterId };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["follow-requests-incoming"] });
