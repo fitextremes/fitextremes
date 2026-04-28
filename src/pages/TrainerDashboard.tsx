@@ -36,10 +36,8 @@ const TrainerDashboard = () => {
     );
   }
 
-  const status = computeSubscriptionStatus(
-    profile?.trial_started_at ?? null,
-    profile?.subscription_status ?? "inactive"
-  );
+  const initials = (profile?.full_name || "T")
+    .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   const initials = (profile?.full_name || "T")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
