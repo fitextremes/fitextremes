@@ -78,7 +78,7 @@ const TrainerGallery = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-12">
-      <SocialTopBar title="Gallery" />
+      <SocialTopBar title="Profile" />
       <div className="container mx-auto px-4 pt-20 max-w-5xl space-y-6">
         <Link
           to="/trainer-dashboard"
