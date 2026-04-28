@@ -112,7 +112,11 @@ const Signup = () => {
       toast.error(error.message);
     } else {
       toast.success("Welcome to FitExtremes!");
-      navigate("/profile");
+      if (selectedRole === "trainer") {
+        navigate("/trainer-dashboard");
+      } else {
+        navigate("/profile");
+      }
     }
   };
 

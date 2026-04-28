@@ -35,7 +35,11 @@ const Login = () => {
       toast.error(error.message);
     } else {
       toast.success("Welcome back!");
-      navigate("/profile");
+      if (roleParam === "trainer") {
+        navigate("/trainer-dashboard");
+      } else {
+        navigate("/profile");
+      }
     }
   };
 
