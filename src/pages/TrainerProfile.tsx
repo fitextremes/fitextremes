@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, Clock, Award, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
@@ -11,13 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTrainerProfile, useRecordProfileView, useSubmitLead } from "@/hooks/useTrainer";
+import { useTrainerGallery } from "@/hooks/useTrainerGallery";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const TrainerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const { data: trainer, isLoading } = useTrainerProfile(id);
+  const { data: gallery = [] } = useTrainerGallery(id);
   const recordView = useRecordProfileView();
   const submitLead = useSubmitLead(id || "");
   const [open, setOpen] = useState(false);
@@ -78,9 +81,22 @@ const TrainerProfilePage = () => {
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <ProfileViewHeader />
       <div className="container mx-auto px-4 pt-20 pb-12">
-        <Link to="/discover" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-          <ArrowLeft className="h-4 w-4" /> Back to Discover
-        </Link>
+        {(() => {
+          const source = searchParams.get("source");
+          const isOwner = !!user && user.id === id;
+          const effective = source || (isOwner ? "profile" : "discover");
+          const map: Record<string, { to: string; label: string }> = {
+            profile: { to: "/trainer-dashboard", label: "Back to Profile" },
+            search: { to: "/discover", label: "Back to Search Results" },
+            discover: { to: "/discover", label: "Back to Discover" },
+          };
+          const back = map[effective] ?? map.discover;
+          return (
+            <Link to={back.to} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+              <ArrowLeft className="h-4 w-4" /> {back.label}
+            </Link>
+          );
+        })()}
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
@@ -129,6 +145,24 @@ const TrainerProfilePage = () => {
                 <div className="flex flex-wrap gap-2">
                   {certList.map((c, i) => (
                     <span key={i} className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm text-foreground">{c}</span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {gallery.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card">
+                <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">Workout Gallery</h2>
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+                  {gallery.map((g) => (
+                    <div key={g.id} className="group rounded-xl overflow-hidden border border-border bg-secondary aspect-square">
+                      <img
+                        src={g.image_url}
+                        alt={g.caption || `${trainer.full_name} gallery`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
                   ))}
                 </div>
               </motion.div>

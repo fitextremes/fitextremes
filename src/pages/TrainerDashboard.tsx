@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, Calendar } from "lucide-react";
+import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, Calendar, ImagePlus } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,10 @@ const TrainerDashboard = () => {
                   <Link to="/trainer/edit"><Edit className="h-3 w-3 mr-1" /> Edit Profile</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link to={`/trainer/${user?.id}`}>
+                  <Link to="/profile/gallery"><ImagePlus className="h-3 w-3 mr-1" /> Add Photos</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/trainer/${user?.id}?source=profile`}>
                     <ExternalLink className="h-3 w-3 mr-1" /> View Public Profile
                   </Link>
                 </Button>
