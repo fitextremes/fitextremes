@@ -1,23 +1,16 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, Calendar, ImagePlus } from "lucide-react";
+import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
-import { useTrainerStats, useTrainerLeads, computeSubscriptionStatus } from "@/hooks/useTrainer";
+import { useTrainerStats, useTrainerLeads } from "@/hooks/useTrainer";
 
-const statusColor: Record<string, string> = {
-  Active: "bg-primary/20 text-primary border-primary/40",
-  Trial: "bg-primary/20 text-primary border-primary/40",
-  "Trial Ending Soon": "bg-accent/20 text-accent border-accent/40",
-  Expired: "bg-destructive/20 text-destructive border-destructive/40",
-  Cancelled: "bg-muted text-muted-foreground border-border",
-};
 
 const TrainerDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -42,11 +35,6 @@ const TrainerDashboard = () => {
       </div>
     );
   }
-
-  const status = computeSubscriptionStatus(
-    profile?.trial_started_at ?? null,
-    profile?.subscription_status ?? "inactive"
-  );
 
   const initials = (profile?.full_name || "T")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -93,27 +81,8 @@ const TrainerDashboard = () => {
           </div>
         </motion.div>
 
-        {/* Subscription status */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="rounded-2xl border border-border bg-card p-6 shadow-card"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Subscription</p>
-              <p className="font-display text-xl text-foreground mt-1">{status}</p>
-              {profile?.trial_started_at && (
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  Trial started {new Date(profile.trial_started_at).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-            <Badge className={`border ${statusColor[status]}`}>{status}</Badge>
-          </div>
-        </motion.div>
+        {/* Dynamic subscription card */}
+        <SubscriptionCard />
 
         {/* Counters */}
         <div className="grid grid-cols-2 gap-4">

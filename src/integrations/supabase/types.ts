@@ -376,6 +376,163 @@ export type Database = {
           },
         ]
       }
+      subscription_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          from_status: string | null
+          id: string
+          metadata: Json | null
+          subscription_id: string | null
+          to_status: string | null
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          subscription_id?: string | null
+          to_status?: string | null
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          subscription_id?: string | null
+          to_status?: string | null
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          billing_cycle: string
+          code: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default_trial: boolean
+          name: string
+          price_cents: number
+          sort_order: number
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle: string
+          code: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default_trial?: boolean
+          name: string
+          price_cents?: number
+          sort_order?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          code?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default_trial?: boolean
+          name?: string
+          price_cents?: number
+          sort_order?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          billing_cycle: string
+          cancel_at_period_end: boolean
+          created_at: string
+          currency: string
+          end_date: string | null
+          id: string
+          next_billing_date: string | null
+          payment_provider: string
+          plan_id: string
+          price_cents: number
+          start_date: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trainer_id: string
+          trial_used: boolean
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle: string
+          cancel_at_period_end?: boolean
+          created_at?: string
+          currency?: string
+          end_date?: string | null
+          id?: string
+          next_billing_date?: string | null
+          payment_provider?: string
+          plan_id: string
+          price_cents?: number
+          start_date?: string
+          status: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trainer_id: string
+          trial_used?: boolean
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          cancel_at_period_end?: boolean
+          created_at?: string
+          currency?: string
+          end_date?: string | null
+          id?: string
+          next_billing_date?: string | null
+          payment_provider?: string
+          plan_id?: string
+          price_cents?: number
+          start_date?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trainer_id?: string
+          trial_used?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_gallery: {
         Row: {
           caption: string | null
@@ -414,11 +571,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_subscription: { Args: never; Returns: Json }
+      get_my_subscription: { Args: never; Returns: Json }
       get_trainer_stats: { Args: { _trainer_id: string }; Returns: Json }
+      reactivate_subscription: { Args: never; Returns: Json }
+      recompute_subscription_status: {
+        Args: { _trainer_id?: string }
+        Returns: Json
+      }
       record_profile_view: { Args: { _trainer_id: string }; Returns: undefined }
       resolve_follow_request: {
         Args: { _accept: boolean; _request_id: string }
         Returns: Json
+      }
+      subscribe_to_plan: { Args: { _plan_code: string }; Returns: Json }
+      trainer_has_active_subscription: {
+        Args: { _trainer_id: string }
+        Returns: boolean
       }
     }
     Enums: {

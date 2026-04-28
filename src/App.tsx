@@ -23,6 +23,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerEditProfile from "./pages/TrainerEditProfile";
 import TrainerGallery from "./pages/TrainerGallery";
+import TrainerBilling from "./pages/TrainerBilling";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/trainer-dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/edit" element={<TrainerEditProfile />} />
             <Route path="/profile/gallery" element={<TrainerGallery />} />
+            <Route path="/trainer/billing" element={<TrainerBilling />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
             <Route path="*" element={<NotFound />} />
