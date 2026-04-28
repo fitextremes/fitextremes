@@ -163,8 +163,12 @@ const Discover = () => {
               key={item.id}
               className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:border-primary/30 hover:shadow-glow"
             >
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-2xl">
-                {item.image}
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-2xl overflow-hidden">
+                {item.avatar_url ? (
+                  <img src={item.avatar_url} alt={item.name} className="h-full w-full object-cover" />
+                ) : (
+                  item.image
+                )}
               </div>
               <h3 className="font-display text-lg uppercase tracking-wider text-foreground">{item.name}</h3>
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
