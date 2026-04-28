@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_events: {
+        Row: {
+          business_id: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          visitor_id: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          visitor_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      business_gallery: {
+        Row: {
+          business_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_featured: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_featured?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_featured?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -155,6 +215,7 @@ export type Database = {
           name: string
           phone: string | null
           sender_id: string | null
+          status: string
           trainer_id: string
         }
         Insert: {
@@ -165,6 +226,7 @@ export type Database = {
           name: string
           phone?: string | null
           sender_id?: string | null
+          status?: string
           trainer_id: string
         }
         Update: {
@@ -175,6 +237,7 @@ export type Database = {
           name?: string
           phone?: string | null
           sender_id?: string | null
+          status?: string
           trainer_id?: string
         }
         Relationships: []
@@ -272,13 +335,18 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          business_hours: Json | null
+          business_type: string | null
           certifications: string | null
           created_at: string
           email: string | null
           full_name: string
+          home_delivery: string | null
           hourly_max: number | null
           hourly_min: number | null
           id: string
+          instagram_url: string | null
+          is_suspended: boolean
           latitude: number | null
           location: string | null
           longitude: number | null
@@ -289,18 +357,25 @@ export type Database = {
           trial_started_at: string | null
           updated_at: string
           username: string | null
+          website_url: string | null
+          whatsapp_number: string | null
           years_experience: number | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          business_hours?: Json | null
+          business_type?: string | null
           certifications?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
+          home_delivery?: string | null
           hourly_max?: number | null
           hourly_min?: number | null
           id: string
+          instagram_url?: string | null
+          is_suspended?: boolean
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -311,18 +386,25 @@ export type Database = {
           trial_started_at?: string | null
           updated_at?: string
           username?: string | null
+          website_url?: string | null
+          whatsapp_number?: string | null
           years_experience?: number | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          business_hours?: Json | null
+          business_type?: string | null
           certifications?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
+          home_delivery?: string | null
           hourly_max?: number | null
           hourly_min?: number | null
           id?: string
+          instagram_url?: string | null
+          is_suspended?: boolean
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -333,6 +415,8 @@ export type Database = {
           trial_started_at?: string | null
           updated_at?: string
           username?: string | null
+          website_url?: string | null
+          whatsapp_number?: string | null
           years_experience?: number | null
         }
         Relationships: []
@@ -572,12 +656,17 @@ export type Database = {
     }
     Functions: {
       cancel_subscription: { Args: never; Returns: Json }
+      get_business_stats: { Args: { _business_id: string }; Returns: Json }
       get_my_subscription: { Args: never; Returns: Json }
       get_trainer_stats: { Args: { _trainer_id: string }; Returns: Json }
       reactivate_subscription: { Args: never; Returns: Json }
       recompute_subscription_status: {
         Args: { _trainer_id?: string }
         Returns: Json
+      }
+      record_business_event: {
+        Args: { _business_id: string; _event_type: string }
+        Returns: undefined
       }
       record_profile_view: { Args: { _trainer_id: string }; Returns: undefined }
       resolve_follow_request: {
@@ -588,6 +677,10 @@ export type Database = {
       trainer_has_active_subscription: {
         Args: { _trainer_id: string }
         Returns: boolean
+      }
+      update_lead_status: {
+        Args: { _lead_id: string; _status: string }
+        Returns: Json
       }
     }
     Enums: {

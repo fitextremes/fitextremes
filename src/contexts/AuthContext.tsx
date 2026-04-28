@@ -6,7 +6,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: string, username?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: string, username?: string, extra?: Record<string, any>) => Promise<{ error: any }>;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, role: string, username?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: string, username?: string, extra?: Record<string, any>) => {
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedUsername = username?.trim().toLowerCase() || undefined;
 
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName.trim(), role, username: normalizedUsername },
+        data: { full_name: fullName.trim(), role, username: normalizedUsername, ...(extra || {}) },
       },
     });
     return { error };
