@@ -1,37 +1,78 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { MapPin, Star, Clock, Award, Phone, Mail, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { MapPin, Clock, Award, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
-import ConnectButton from "@/components/ConnectButton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useTrainerProfile, useRecordProfileView, useSubmitLead } from "@/hooks/useTrainer";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-const mockTrainers: Record<string, {
-  name: string; location: string; rating: number; specialty: string;
-  rate: string; bio: string; experience: string; certifications: string[];
-  phone: string; email: string; gallery: string[];
-}> = {
-  "1": {
-    name: "Alex Carter", location: "Toronto, ON", rating: 5.0,
-    specialty: "Strength & Conditioning", rate: "$40–$60/hr",
-    bio: "Certified strength and conditioning specialist with 8+ years of experience helping clients build functional strength and improve athletic performance.",
-    experience: "8+ years", certifications: ["CSCS", "NSCA-CPT", "Precision Nutrition L1"],
-    phone: "(416) 555-0123", email: "alex@fitextremes.com",
-    gallery: ["🏋️", "💪", "🔥", "⚡"],
-  },
-  "2": {
-    name: "Maria Santos", location: "Vancouver, BC", rating: 4.9,
-    specialty: "Weight Loss", rate: "$35–$50/hr",
-    bio: "Passionate about helping people transform their lives through sustainable fitness and nutrition habits.",
-    experience: "6 years", certifications: ["ACE-CPT", "CanFitPro", "Nutrition Coach"],
-    phone: "(604) 555-0456", email: "maria@fitextremes.com",
-    gallery: ["🏃", "🧘", "🥗", "✨"],
-  },
-};
+const TrainerProfilePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { data: trainer, isLoading } = useTrainerProfile(id);
+  const recordView = useRecordProfileView();
+  const submitLead = useSubmitLead(id || "");
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
 
-const TrainerProfile = () => {
-  const { id } = useParams();
-  const trainer = mockTrainers[id || "1"] || mockTrainers["1"];
+  useEffect(() => {
+    if (id && user?.id !== id) {
+      recordView.mutate(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
+  if (!trainer) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ProfileViewHeader />
+        <div className="container mx-auto px-4 pt-24 text-center">
+          <h1 className="font-display text-2xl uppercase">Trainer not found</h1>
+          <Button asChild variant="outline" className="mt-4"><Link to="/discover">Back to Discover</Link></Button>
+        </div>
+      </div>
+    );
+  }
+
+  const initials = (trainer.full_name || "T").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  const rate = trainer.hourly_min != null && trainer.hourly_max != null
+    ? `$${trainer.hourly_min} – $${trainer.hourly_max} CAD/hr`
+    : "Rate on request";
+
+  const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  const handleSubmit = async () => {
+    if (!name.trim()) return toast.error("Name is required");
+    if (!validEmail(email)) return toast.error("Enter a valid email");
+    if (message.trim().length < 5) return toast.error("Message is too short");
+    try {
+      await submitLead.mutateAsync({ name, email, phone, message });
+      toast.success("Inquiry sent! The trainer will get back to you.");
+      setOpen(false);
+      setName(""); setEmail(""); setPhone(""); setMessage("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to send inquiry");
+    }
+  };
+
+  const certList = trainer.certifications
+    ? trainer.certifications.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+    : [];
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
@@ -43,62 +84,108 @@ const TrainerProfile = () => {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            <motion.div className="rounded-xl border border-border bg-card p-8 shadow-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl bg-secondary text-4xl">💪</div>
+                <div className="h-24 w-24 shrink-0 rounded-2xl bg-secondary overflow-hidden flex items-center justify-center">
+                  {trainer.avatar_url ? (
+                    <img src={trainer.avatar_url} alt={trainer.full_name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="font-display text-2xl text-muted-foreground">{initials}</span>
+                  )}
+                </div>
                 <div className="flex-1">
-                  <h1 className="font-display text-3xl uppercase tracking-wider text-foreground">{trainer.name}</h1>
+                  <h1 className="font-display text-3xl uppercase tracking-wider text-foreground">{trainer.full_name}</h1>
+                  {trainer.username && <p className="text-sm text-primary">@{trainer.username}</p>}
                   <div className="mt-2 flex flex-wrap items-center gap-4">
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {trainer.location}</span>
-                    <span className="flex items-center gap-1 text-sm text-accent"><Star className="h-4 w-4 fill-current" /> {trainer.rating}</span>
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground"><Clock className="h-4 w-4" /> {trainer.experience}</span>
+                    {trainer.location && (
+                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" /> {trainer.location}
+                      </span>
+                    )}
+                    {trainer.years_experience != null && (
+                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" /> {trainer.years_experience}+ years
+                      </span>
+                    )}
                   </div>
-                  <div className="mt-3">
-                    <span className="inline-block rounded-md gradient-primary px-3 py-1 text-xs font-display uppercase tracking-wider text-primary-foreground">{trainer.specialty}</span>
-                    <span className="ml-2 font-display text-lg text-primary">{trainer.rate}</span>
-                  </div>
+                  <p className="mt-3 font-display text-lg text-primary">{rate}</p>
                 </div>
               </div>
             </motion.div>
 
-            <motion.div className="rounded-xl border border-border bg-card p-8 shadow-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">About</h2>
-              <p className="text-muted-foreground leading-relaxed">{trainer.bio}</p>
-            </motion.div>
+            {trainer.bio && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card">
+                <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">About</h2>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{trainer.bio}</p>
+              </motion.div>
+            )}
 
-            <motion.div className="rounded-xl border border-border bg-card p-8 shadow-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">
-                <Award className="inline h-5 w-5 mr-2 text-primary" /> Certifications
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {trainer.certifications.map((cert) => (
-                  <span key={cert} className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm text-foreground">{cert}</span>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div className="rounded-xl border border-border bg-card p-8 shadow-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">Gallery</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {trainer.gallery.map((item, i) => (
-                  <div key={i} className="flex h-32 items-center justify-center rounded-lg bg-secondary text-4xl">{item}</div>
-                ))}
-              </div>
-            </motion.div>
+            {certList.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card">
+                <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">
+                  <Award className="inline h-5 w-5 mr-2 text-primary" />
+                  Certifications & Education
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {certList.map((c, i) => (
+                    <span key={i} className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm text-foreground">{c}</span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
 
           <div className="space-y-6">
-            <motion.div className="sticky top-20 rounded-xl border border-border bg-card p-6 shadow-card" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="lg:sticky lg:top-20 rounded-2xl border border-border bg-card p-6 shadow-card">
               <h3 className="font-display text-lg uppercase tracking-wider text-foreground mb-4">Contact</h3>
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground"><Phone className="h-4 w-4 text-primary" /> {trainer.phone}</div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground"><Mail className="h-4 w-4 text-primary" /> {trainer.email}</div>
+                {trainer.phone && (
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Phone className="h-4 w-4 text-primary" /> {trainer.phone}
+                  </div>
+                )}
+                {trainer.email && (
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground break-all">
+                    <Mail className="h-4 w-4 text-primary" /> {trainer.email}
+                  </div>
+                )}
               </div>
-              <ConnectButton
-                targetType="trainer"
-                targetId={id || "1"}
-                targetName={trainer.name.split(" ")[0]}
-              />
+
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="hero" className="w-full" size="lg">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Connect with {trainer.full_name.split(" ")[0]}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-display uppercase tracking-wider">Send an Inquiry</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label>Name *</Label>
+                      <Input value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Email *</Label>
+                      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Phone</Label>
+                      <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Message *</Label>
+                      <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={500} />
+                    </div>
+                    <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={submitLead.isPending}>
+                      <Send className="h-4 w-4 mr-2" />
+                      {submitLead.isPending ? "Sending..." : "Send Inquiry"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </motion.div>
           </div>
         </div>
@@ -109,4 +196,4 @@ const TrainerProfile = () => {
   );
 };
 
-export default TrainerProfile;
+export default TrainerProfilePage;

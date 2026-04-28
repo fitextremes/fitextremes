@@ -146,6 +146,39 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          sender_id: string | null
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          sender_id?: string | null
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          sender_id?: string | null
+          trainer_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -211,45 +244,96 @@ export type Database = {
           },
         ]
       }
+      profile_views: {
+        Row: {
+          created_at: string
+          id: string
+          trainer_id: string
+          viewer_id: string | null
+          viewer_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trainer_id: string
+          viewer_id?: string | null
+          viewer_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trainer_id?: string
+          viewer_id?: string | null
+          viewer_ip?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
+          certifications: string | null
           created_at: string
           email: string | null
           full_name: string
+          hourly_max: number | null
+          hourly_min: number | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
+          phone: string | null
           profile_visibility: string
           role: string
+          subscription_status: string
+          trial_started_at: string | null
           updated_at: string
           username: string | null
+          years_experience: number | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
+          hourly_max?: number | null
+          hourly_min?: number | null
           id: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
+          phone?: string | null
           profile_visibility?: string
           role?: string
+          subscription_status?: string
+          trial_started_at?: string | null
           updated_at?: string
           username?: string | null
+          years_experience?: number | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
+          hourly_max?: number | null
+          hourly_min?: number | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
+          phone?: string | null
           profile_visibility?: string
           role?: string
+          subscription_status?: string
+          trial_started_at?: string | null
           updated_at?: string
           username?: string | null
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -297,6 +381,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_trainer_stats: { Args: { _trainer_id: string }; Returns: Json }
+      record_profile_view: { Args: { _trainer_id: string }; Returns: undefined }
       resolve_follow_request: {
         Args: { _accept: boolean; _request_id: string }
         Returns: Json

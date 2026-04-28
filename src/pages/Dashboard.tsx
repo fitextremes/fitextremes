@@ -1,15 +1,22 @@
+import { useEffect } from "react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import PostCard from "@/components/PostCard";
 import CreatePost from "@/components/CreatePost";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useFeedPosts } from "@/hooks/usePosts";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isTrainer, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { data: feedPosts, isLoading: feedLoading } = useFeedPosts();
+
+  useEffect(() => {
+    if (!roleLoading && isTrainer) navigate("/trainer-dashboard", { replace: true });
+  }, [roleLoading, isTrainer, navigate]);
 
   if (authLoading) {
     return (

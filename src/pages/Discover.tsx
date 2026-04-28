@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Star, Dumbbell, ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
+import { useTrainerList } from "@/hooks/useTrainer";
 
 type Tab = "gyms" | "supplements" | "trainers";
 
@@ -53,13 +54,31 @@ const Discover = () => {
   const [activeTab, setActiveTab] = useState<Tab>("gyms");
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("All Locations");
-  const [priceRange, setPriceRange] = useState(0); // index into priceRanges
+  const [priceRange, setPriceRange] = useState(0);
+  const { data: realTrainers } = useTrainerList();
+
+  // Merge live DB trainers (use real id) with mocks (use mock id) for trainers tab
+  const trainerItems = useMemo(() => {
+    const live = (realTrainers || []).map((t: any) => ({
+      id: t.id,
+      isReal: true,
+      name: t.full_name,
+      location: t.location || "Canada",
+      rating: 5.0,
+      specialty: t.bio ? t.bio.slice(0, 60) : "Personal Training",
+      priceMin: t.hourly_min ?? 0,
+      priceMax: t.hourly_max ?? 999,
+      image: "💪",
+      avatar_url: t.avatar_url,
+    }));
+    return [...live, ...mockTrainers.map(t => ({ ...t, isReal: false }))];
+  }, [realTrainers]);
 
   const getFilteredItems = () => {
     if (activeTab === "trainers") {
-      return mockTrainers.filter((t) => {
+      return trainerItems.filter((t) => {
         const matchSearch = !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.specialty.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchLocation = locationFilter === "All Locations" || t.location === locationFilter;
+        const matchLocation = locationFilter === "All Locations" || t.location?.includes(locationFilter.split(",")[0]);
         const range = priceRanges[priceRange];
         const matchPrice = t.priceMin <= range.max && t.priceMax >= range.min;
         return matchSearch && matchLocation && matchPrice;
@@ -144,8 +163,12 @@ const Discover = () => {
               key={item.id}
               className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:border-primary/30 hover:shadow-glow"
             >
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-2xl">
-                {item.image}
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-2xl overflow-hidden">
+                {item.avatar_url ? (
+                  <img src={item.avatar_url} alt={item.name} className="h-full w-full object-cover" />
+                ) : (
+                  item.image
+                )}
               </div>
               <h3 className="font-display text-lg uppercase tracking-wider text-foreground">{item.name}</h3>
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">

@@ -20,6 +20,8 @@ import FollowRequests from "./pages/FollowRequests";
 import Notifications from "./pages/Notifications";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessProfile from "./pages/BusinessProfile";
+import TrainerDashboard from "./pages/TrainerDashboard";
+import TrainerEditProfile from "./pages/TrainerEditProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/user/:identifier" element={<UserProfile />} />
             <Route path="/follow-requests" element={<FollowRequests />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/trainer-dashboard" element={<TrainerDashboard />} />
+            <Route path="/trainer/edit" element={<TrainerEditProfile />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
             <Route path="*" element={<NotFound />} />
