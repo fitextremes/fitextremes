@@ -376,6 +376,39 @@ export type Database = {
           },
         ]
       }
+      trainer_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_featured: boolean
+          sort_order: number
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_featured?: boolean
+          sort_order?: number
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_featured?: boolean
+          sort_order?: number
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
