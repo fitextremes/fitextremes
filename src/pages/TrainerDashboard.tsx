@@ -1,15 +1,15 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, Calendar, ImagePlus } from "lucide-react";
+import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
-import { useTrainerStats, useTrainerLeads, computeSubscriptionStatus } from "@/hooks/useTrainer";
+import { useTrainerStats, useTrainerLeads } from "@/hooks/useTrainer";
 
 const statusColor: Record<string, string> = {
   Active: "bg-primary/20 text-primary border-primary/40",
