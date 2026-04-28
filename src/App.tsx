@@ -23,6 +23,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerEditProfile from "./pages/TrainerEditProfile";
 import TrainerGallery from "./pages/TrainerGallery";
+import TrainerBilling from "./pages/TrainerBilling";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
