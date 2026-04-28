@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, Clock, Award, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
@@ -11,13 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTrainerProfile, useRecordProfileView, useSubmitLead } from "@/hooks/useTrainer";
+import { useTrainerGallery } from "@/hooks/useTrainerGallery";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const TrainerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const { data: trainer, isLoading } = useTrainerProfile(id);
+  const { data: gallery = [] } = useTrainerGallery(id);
   const recordView = useRecordProfileView();
   const submitLead = useSubmitLead(id || "");
   const [open, setOpen] = useState(false);
