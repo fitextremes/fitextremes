@@ -11,13 +11,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerStats, useTrainerLeads } from "@/hooks/useTrainer";
 
-const statusColor: Record<string, string> = {
-  Active: "bg-primary/20 text-primary border-primary/40",
-  Trial: "bg-primary/20 text-primary border-primary/40",
-  "Trial Ending Soon": "bg-accent/20 text-accent border-accent/40",
-  Expired: "bg-destructive/20 text-destructive border-destructive/40",
-  Cancelled: "bg-muted text-muted-foreground border-border",
-};
 
 const TrainerDashboard = () => {
   const { user, loading: authLoading } = useAuth();
