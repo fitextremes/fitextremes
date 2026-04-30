@@ -1,54 +1,22 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, CreditCard, Sparkles, RefreshCw, XCircle, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar, Sparkles, BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import {
-  useMySubscription, useCancelSubscription, useReactivateSubscription,
-  STATUS_META, daysBetween, formatPrice,
-} from "@/hooks/useSubscription";
+import { useMySubscription, daysBetween } from "@/hooks/useSubscription";
+
+const PLAN_NAME = "Personal Trainer Plan";
+const PLAN_PRICE = "$20/month";
 
 const SubscriptionCard = () => {
   const { data: sub, isLoading } = useMySubscription();
-  const cancel = useCancelSubscription();
-  const reactivate = useReactivateSubscription();
-  const { toast } = useToast();
 
   if (isLoading) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-card animate-pulse h-40" />
-    );
+    return <div className="rounded-2xl border border-border bg-card p-6 shadow-card animate-pulse h-40" />;
   }
   if (!sub) return null;
 
-  const meta = STATUS_META[sub.status];
-  const daysLeft = daysBetween(sub.end_date);
-  const isExpired = sub.status === "expired" || sub.status === "cancelled";
   const isTrial = sub.status === "trial" || sub.status === "trial_ending";
-
-  const onCancel = async () => {
-    if (!confirm("Cancel subscription? You'll keep access until your billing period ends.")) return;
-    try {
-      await cancel.mutateAsync();
-      toast({ title: "Cancellation scheduled", description: `Access ends ${new Date(sub.end_date!).toLocaleDateString()}` });
-    } catch (e: any) {
-      toast({ title: "Could not cancel", description: e.message, variant: "destructive" });
-    }
-  };
-
-  const onReactivate = async () => {
-    try {
-      const res = await reactivate.mutateAsync();
-      if ((res as any)?.reason === "choose_plan") {
-        toast({ title: "Choose a plan", description: "Pick a plan to reactivate." });
-      } else {
-        toast({ title: "Subscription reactivated" });
-      }
-    } catch (e: any) {
-      toast({ title: "Failed", description: e.message, variant: "destructive" });
-    }
-  };
+  const daysLeft = Math.max(0, daysBetween(sub.end_date));
+  const isExpired = sub.status === "expired" || sub.status === "cancelled";
 
   return (
     <motion.div
@@ -62,76 +30,52 @@ const SubscriptionCard = () => {
           <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
             <Sparkles className="h-3 w-3 text-primary" /> Subscription
           </p>
-          <h3 className="font-display text-2xl text-foreground mt-1">{sub.plan.name}</h3>
-          {sub.price_cents > 0 && (
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {formatPrice(sub.price_cents, sub.currency)} / {sub.billing_cycle === "annual" ? "year" : "month"}
-            </p>
-          )}
+          <h3 className="font-display text-2xl text-foreground mt-1">{PLAN_NAME}</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">{PLAN_PRICE}</p>
         </div>
-        <Badge className={`border ${meta.tone} flex items-center gap-1.5`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} animate-pulse`} />
-          {meta.label}
-        </Badge>
-      </div>
-
-      <div className="mt-5 grid grid-cols-2 gap-4 relative">
-        <div className="rounded-xl bg-secondary/40 border border-border p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-            <Calendar className="h-3 w-3" /> {sub.cancel_at_period_end ? "Access Ends" : "Next Billing"}
-          </p>
-          <p className="font-display text-base text-foreground mt-1">
-            {sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "—"}
-          </p>
-        </div>
-        <div className="rounded-xl bg-secondary/40 border border-border p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Days Remaining</p>
-          <p className="font-display text-base text-foreground mt-1">
-            {daysLeft > 0 ? `${daysLeft} days` : "0 days"}
-          </p>
-        </div>
-      </div>
-
-      {sub.cancel_at_period_end && !isExpired && (
-        <p className="mt-3 text-xs text-accent">
-          Cancellation scheduled — access ends {new Date(sub.end_date!).toLocaleDateString()}.
-        </p>
-      )}
-      {isTrial && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Your free month is active. Add a plan before it ends to keep receiving leads.
-        </p>
-      )}
-      {sub.status === "payment_due" && (
-        <p className="mt-3 text-xs text-accent">
-          We couldn't process your payment. Update billing to avoid interruption.
-        </p>
-      )}
-      {sub.status === "expired" && (
-        <p className="mt-3 text-xs text-destructive">
-          Your plan has expired. Renew now to continue receiving leads.
-        </p>
-      )}
-
-      <div className="mt-5 flex flex-wrap gap-2 relative">
-        <Button asChild size="sm" variant="hero">
-          <Link to="/trainer/billing">
-            {isExpired ? <RefreshCw className="h-3 w-3 mr-1" /> : <ArrowUpRight className="h-3 w-3 mr-1" />}
-            {isExpired ? "Renew Now" : isTrial ? "Choose Plan" : "Upgrade Plan"}
-          </Link>
-        </Button>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/trainer/billing"><CreditCard className="h-3 w-3 mr-1" /> Manage Billing</Link>
-        </Button>
-        {sub.status === "active" && !sub.cancel_at_period_end && (
-          <Button size="sm" variant="ghost" onClick={onCancel} disabled={cancel.isPending}>
-            <XCircle className="h-3 w-3 mr-1" /> Cancel
-          </Button>
+        {isTrial ? (
+          <Badge className="border bg-primary/15 text-primary border-primary/40 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            Free Trial
+          </Badge>
+        ) : isExpired ? (
+          <Badge className="border bg-destructive/15 text-destructive border-destructive/40">Expired</Badge>
+        ) : (
+          <Badge className="border bg-primary/15 text-primary border-primary/40 flex items-center gap-1.5">
+            <BadgeCheck className="h-3 w-3" /> Active Subscription
+          </Badge>
         )}
-        {sub.cancel_at_period_end && !isExpired && (
-          <Button size="sm" variant="ghost" onClick={onReactivate} disabled={reactivate.isPending}>
-            <RefreshCw className="h-3 w-3 mr-1" /> Resume
-          </Button>
+      </div>
+
+      <div className="mt-5 relative">
+        {isTrial ? (
+          <div className="rounded-xl bg-secondary/40 border border-border p-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Trial Status</p>
+            <p className="font-display text-xl text-foreground mt-1">
+              Free Trial — {daysLeft} {daysLeft === 1 ? "day" : "days"} remaining
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              You'll be charged {PLAN_PRICE} starting{" "}
+              {sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "soon"}.
+            </p>
+          </div>
+        ) : isExpired ? (
+          <div className="rounded-xl bg-secondary/40 border border-border p-4">
+            <p className="text-sm text-destructive">
+              Your plan has expired. Contact support to reactivate.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-secondary/40 border border-border p-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" /> Next Billing Date
+            </p>
+            <p className="font-display text-xl text-foreground mt-1">
+              {sub.next_billing_date || sub.end_date
+                ? new Date((sub.next_billing_date || sub.end_date)!).toLocaleDateString()
+                : "—"}
+            </p>
+          </div>
         )}
       </div>
     </motion.div>
