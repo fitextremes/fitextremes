@@ -244,8 +244,8 @@ const TrainerProfilePage = () => {
                       <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Phone</Label>
-                      <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                      <Label>Phone *</Label>
+                      <Input type="tel" inputMode="tel" placeholder="10–15 digits" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Message *</Label>
