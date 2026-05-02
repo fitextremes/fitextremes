@@ -72,6 +72,8 @@ const BusinessAuth = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showPayment, setShowPayment] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUnique, setCheckingUnique] = useState(false);
+  const [uniqueErrors, setUniqueErrors] = useState<{ username?: string; email?: string }>({});
 
   // Login state
   const [identifier, setIdentifier] = useState("");
