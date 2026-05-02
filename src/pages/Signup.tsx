@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BusinessPaymentModal from "@/components/BusinessPaymentModal";
 import logo from "@/assets/logo.png";
 
 const roles = [
@@ -85,6 +86,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -103,24 +105,37 @@ const Signup = () => {
 
   const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
+  const performSignup = async () => {
+    setLoading(true);
+    const extra = selectedRole === "business" ? { business_type: businessType } : undefined;
+    const { error } = await signUp(email, password, fullName.trim(), selectedRole, username, extra);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
+    toast.success("Welcome to FitExtremes!");
+    if (selectedRole === "trainer") navigate("/trainer-dashboard");
+    else if (selectedRole === "business") navigate("/business-dashboard");
+    else navigate("/profile");
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!isFormValid) return;
 
-    setLoading(true);
-    const { error } = await signUp(email, password, fullName.trim(), selectedRole, username);
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Welcome to FitExtremes!");
-      if (selectedRole === "trainer") {
-        navigate("/trainer-dashboard");
-      } else {
-        navigate("/profile");
-      }
+    if (selectedRole === "business") {
+      setPaymentOpen(true);
+      return;
     }
+    await performSignup();
+  };
+
+  const handlePaymentConfirm = async () => {
+    const ok = await performSignup();
+    if (ok) setPaymentOpen(false);
   };
 
   return (
@@ -286,7 +301,9 @@ const Signup = () => {
 
             {/* Submit */}
             <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !isFormValid}>
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading
+                ? (selectedRole === "business" ? "Starting Trial..." : "Creating Account...")
+                : (selectedRole === "business" ? "Start Your Free Trial" : "Create Account")}
             </Button>
 
             {selectedRole !== "user" && (
@@ -302,6 +319,13 @@ const Signup = () => {
           </form>
         </div>
       </div>
+
+      <BusinessPaymentModal
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+        onConfirm={handlePaymentConfirm}
+        loading={loading}
+      />
     </div>
   );
 };
