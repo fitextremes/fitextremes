@@ -58,7 +58,7 @@ const TrainerBilling = () => {
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Unlimited leads from clients</li>
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Public profile & photo gallery</li>
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Discover ranking & visibility</li>
-            <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> 30 days free, then $20/month</li>
+            <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> First month free, then $15 CAD/month</li>
           </ul>
         </motion.div>
 
