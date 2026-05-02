@@ -262,6 +262,29 @@ const TrainerProfilePage = () => {
       </div>
       <Footer hidePlatform={user?.id === id} hideForPros={user?.id === id} />
       <MobileTabBar />
+      {lightboxSrc && (
+        <div
+          id="imageLightbox"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => { if ((e.target as HTMLElement).id === "imageLightbox") setLightboxSrc(null); }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close"
+            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-background/20 hover:bg-background/40 text-foreground flex items-center justify-center transition"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={lightboxSrc}
+            alt="Workout gallery enlarged"
+            className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
+          />
+        </div>
+      )}
     </div>
   );
 };
