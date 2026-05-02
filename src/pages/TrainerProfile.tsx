@@ -72,6 +72,9 @@ const TrainerProfilePage = () => {
   const handleSubmit = async () => {
     if (!name.trim()) return toast.error("Name is required");
     if (!validEmail(email)) return toast.error("Enter a valid email");
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!phone.trim()) return toast.error("Phone is required");
+    if (!/^[0-9]{10,15}$/.test(phoneDigits)) return toast.error("Enter a valid phone number (10–15 digits)");
     if (message.trim().length < 5) return toast.error("Message is too short");
     try {
       await submitLead.mutateAsync({ name, email, phone, message });
@@ -241,8 +244,8 @@ const TrainerProfilePage = () => {
                       <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Phone</Label>
-                      <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                      <Label>Phone *</Label>
+                      <Input type="tel" inputMode="tel" placeholder="10–15 digits" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Message *</Label>
