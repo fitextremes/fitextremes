@@ -244,7 +244,7 @@ const TrainerProfilePage = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer hidePlatform={user?.id === id} hideForPros={user?.id === id} />
       <MobileTabBar />
     </div>
   );
