@@ -185,6 +185,25 @@ const TrainerProfilePage = () => {
                 )}
               </div>
 
+              {user?.id === id ? (
+                <>
+                  <Button
+                    variant="hero"
+                    className="w-full cursor-not-allowed"
+                    size="lg"
+                    disabled
+                    aria-disabled="true"
+                    title="You cannot connect with your own profile."
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Connect with {trainer.full_name.split(" ")[0]}
+                  </Button>
+                  <p className="mt-2 text-xs text-center text-muted-foreground">
+                    This is your public profile preview.
+                  </p>
+                </>
+              ) : (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button variant="hero" className="w-full" size="lg">
