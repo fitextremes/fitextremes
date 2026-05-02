@@ -161,6 +161,34 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Business Type (only for Business Owner) */}
+            {selectedRole === "business" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="businessType">Business Type <span className="text-red-500">*</span></Label>
+                <Select
+                  value={businessType}
+                  onValueChange={(v) => {
+                    setBusinessType(v);
+                    setTouched((prev) => ({ ...prev, businessType: true }));
+                  }}
+                >
+                  <SelectTrigger
+                    id="businessType"
+                    className={touched.businessType && businessTypeError ? "border-red-500 focus:ring-red-500" : ""}
+                  >
+                    <SelectValue placeholder="Select Business Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="supplement_store">Supplement Store</SelectItem>
+                    <SelectItem value="gym">Gym</SelectItem>
+                  </SelectContent>
+                </Select>
+                {touched.businessType && businessTypeError && (
+                  <p className="text-xs text-red-500">{businessTypeError}</p>
+                )}
+              </div>
+            )}
+
             {/* Full Name */}
             <div className="space-y-1.5">
               <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
