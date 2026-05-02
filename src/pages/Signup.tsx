@@ -301,7 +301,9 @@ const Signup = () => {
 
             {/* Submit */}
             <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !isFormValid}>
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading
+                ? (selectedRole === "business" ? "Starting Trial..." : "Creating Account...")
+                : (selectedRole === "business" ? "Start Your Free Trial" : "Create Account")}
             </Button>
 
             {selectedRole !== "user" && (
