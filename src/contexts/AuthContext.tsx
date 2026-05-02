@@ -6,7 +6,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: string, username?: string, extra?: Record<string, any>) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: string, username?: string, extra?: Record<string, any>) => Promise<{ error: any; session: Session | null; user: User | null }>;
   signIn: (emailOrUsername: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedUsername = username?.trim().toLowerCase() || undefined;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
       options: {
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: { full_name: fullName.trim(), role, username: normalizedUsername, ...(extra || {}) },
       },
     });
-    return { error };
+    return { error, session: data.session, user: data.user };
   };
 
   const signIn = async (emailOrUsername: string, password: string) => {

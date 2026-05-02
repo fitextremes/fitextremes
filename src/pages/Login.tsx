@@ -37,6 +37,8 @@ const Login = () => {
       toast.success("Welcome back!");
       if (roleParam === "trainer") {
         navigate("/trainer-dashboard");
+      } else if (roleParam === "business") {
+        navigate("/business-dashboard");
       } else {
         navigate("/profile");
       }

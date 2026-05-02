@@ -47,7 +47,7 @@ const BusinessEditProfile = () => {
   const [saving, setSaving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => { if (!authLoading && !user) navigate("/business"); }, [authLoading, user, navigate]);
+  useEffect(() => { if (!authLoading && !user) navigate("/login?role=business", { replace: true }); }, [authLoading, user, navigate]);
   useEffect(() => { if (!roleLoading && user && !isBusiness) navigate("/dashboard"); }, [roleLoading, isBusiness, user, navigate]);
 
   useEffect(() => {
