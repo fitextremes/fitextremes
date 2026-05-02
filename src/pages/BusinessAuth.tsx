@@ -186,13 +186,15 @@ const BusinessAuth = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Username <span className="text-destructive">*</span></Label>
-                  <Input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} onBlur={() => setTouched((t) => ({ ...t, username: true }))} placeholder="iron_paradise" />
+                  <Input value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase()); setUniqueErrors((p) => ({ ...p, username: undefined })); }} onBlur={() => setTouched((t) => ({ ...t, username: true }))} placeholder="iron_paradise" />
                   {touched.username && errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
+                  {uniqueErrors.username && <p className="text-xs text-destructive">{uniqueErrors.username}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Email <span className="text-destructive">*</span></Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, email: true }))} placeholder="you@business.com" />
+                  <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setUniqueErrors((p) => ({ ...p, email: undefined })); }} onBlur={() => setTouched((t) => ({ ...t, email: true }))} placeholder="you@business.com" />
                   {touched.email && errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                  {uniqueErrors.email && <p className="text-xs text-destructive">{uniqueErrors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Password <span className="text-destructive">*</span></Label>
