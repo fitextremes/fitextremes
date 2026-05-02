@@ -239,6 +239,7 @@ const TrainerProfilePage = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              )}
             </motion.div>
           </div>
         </div>
