@@ -319,6 +319,13 @@ const Signup = () => {
           </form>
         </div>
       </div>
+
+      <BusinessPaymentModal
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+        onConfirm={handlePaymentConfirm}
+        loading={loading}
+      />
     </div>
   );
 };
