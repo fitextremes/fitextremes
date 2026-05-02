@@ -124,16 +124,20 @@ const BusinessAuth = () => {
 
   const handleStartTrial = async () => {
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, "business", username, { business_type: businessType });
+    const { error, session } = await signUp(email, password, fullName, "business", username, { business_type: businessType });
     setLoading(false);
     setShowPayment(false);
     if (error) {
       toast.error(error.message || "Could not create account");
       return;
     }
-    toast.success("Your free trial has started successfully.");
-    // With email verification on, the session may be null until they confirm
-    navigate("/business-dashboard");
+    if (session) {
+      toast.success("Your free trial has started successfully.");
+      navigate("/business-dashboard");
+    } else {
+      toast.success("Account created. Check your email to confirm before logging in.");
+      navigate("/login?role=business");
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
