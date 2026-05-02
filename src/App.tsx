@@ -59,6 +59,9 @@ const App = () => (
             <Route path="/trainer/billing" element={<TrainerBilling />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business/:id" element={<BusinessProfile />} />
+            <Route path="/business-dashboard" element={<BusinessDashboard />} />
+            <Route path="/business/edit" element={<BusinessEditProfile />} />
+            <Route path="/business/gallery" element={<BusinessGallery />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
