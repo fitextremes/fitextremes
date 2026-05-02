@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BusinessPaymentModal from "@/components/BusinessPaymentModal";
 import logo from "@/assets/logo.png";
 
 const roles = [
