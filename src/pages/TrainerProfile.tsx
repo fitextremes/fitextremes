@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Clock, Award, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send } from "lucide-react";
+import { MapPin, Clock, Award, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send, X } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
@@ -28,6 +28,16 @@ const TrainerProfilePage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lightboxSrc) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxSrc(null); };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [lightboxSrc]);
 
   useEffect(() => {
     if (id && user?.id !== id) {
@@ -155,14 +165,20 @@ const TrainerProfilePage = () => {
                 <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">Workout Gallery</h2>
                 <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
                   {gallery.map((g) => (
-                    <div key={g.id} className="group rounded-xl overflow-hidden border border-border bg-secondary aspect-square">
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setLightboxSrc(g.image_url)}
+                      className="group rounded-xl overflow-hidden border border-border bg-secondary aspect-square focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label="Open image"
+                    >
                       <img
                         src={g.image_url}
                         alt={g.caption || `${trainer.full_name} gallery`}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-zoom-in"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               </motion.div>
@@ -246,6 +262,29 @@ const TrainerProfilePage = () => {
       </div>
       <Footer hidePlatform={user?.id === id} hideForPros={user?.id === id} />
       <MobileTabBar />
+      {lightboxSrc && (
+        <div
+          id="imageLightbox"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => { if ((e.target as HTMLElement).id === "imageLightbox") setLightboxSrc(null); }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close"
+            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-background/20 hover:bg-background/40 text-foreground flex items-center justify-center transition"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={lightboxSrc}
+            alt="Workout gallery enlarged"
+            className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
+          />
+        </div>
+      )}
     </div>
   );
 };
