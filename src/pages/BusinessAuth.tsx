@@ -91,6 +91,37 @@ const BusinessAuth = () => {
   const c = pwChecks(password);
   const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType;
 
+  const handleStartClick = async () => {
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
+    if (!formValid) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setCheckingUnique(true);
+    setUniqueErrors({});
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
+    try {
+      const [{ data: uRow }, { data: eRow }] = await Promise.all([
+        supabase.from("profiles").select("id").ilike("username", normalizedUsername).maybeSingle(),
+        supabase.from("profiles").select("id").eq("email", normalizedEmail).maybeSingle(),
+      ]);
+      const next: { username?: string; email?: string } = {};
+      if (uRow) next.username = "Username is already taken.";
+      if (eRow) next.email = "An account with this email already exists.";
+      if (next.username || next.email) {
+        setUniqueErrors(next);
+        toast.error(next.email || next.username!);
+        return;
+      }
+      setShowPayment(true);
+    } catch {
+      toast.error("Could not validate your details. Please try again.");
+    } finally {
+      setCheckingUnique(false);
+    }
+  };
+
   const handleStartTrial = async () => {
     setLoading(true);
     const { error } = await signUp(email, password, fullName, "business", username, { business_type: businessType });
