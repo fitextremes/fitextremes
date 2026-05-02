@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo.png";
 
 const roles = [
@@ -78,6 +79,7 @@ const Signup = () => {
   const [selectedRole, setSelectedRole] = useState(searchParams.get("role") || "user");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [businessType, setBusinessType] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -96,13 +98,14 @@ const Signup = () => {
   const pwChecks = useMemo(() => passwordChecks(password), [password]);
   const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username;
+  const businessTypeError = selectedRole === "business" && !businessType ? "Please select a business type" : "";
+  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username && !businessTypeError;
 
   const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ fullName: true, username: true, email: true, password: true });
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!isFormValid) return;
 
     setLoading(true);
@@ -157,6 +160,34 @@ const Signup = () => {
                 ))}
               </div>
             </div>
+
+            {/* Business Type (only for Business Owner) */}
+            {selectedRole === "business" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="businessType">Business Type <span className="text-red-500">*</span></Label>
+                <Select
+                  value={businessType}
+                  onValueChange={(v) => {
+                    setBusinessType(v);
+                    setTouched((prev) => ({ ...prev, businessType: true }));
+                  }}
+                >
+                  <SelectTrigger
+                    id="businessType"
+                    className={touched.businessType && businessTypeError ? "border-red-500 focus:ring-red-500" : ""}
+                  >
+                    <SelectValue placeholder="Select Business Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="supplement_store">Supplement Store</SelectItem>
+                    <SelectItem value="gym">Gym</SelectItem>
+                  </SelectContent>
+                </Select>
+                {touched.businessType && businessTypeError && (
+                  <p className="text-xs text-red-500">{businessTypeError}</p>
+                )}
+              </div>
+            )}
 
             {/* Full Name */}
             <div className="space-y-1.5">
