@@ -25,7 +25,7 @@ const BusinessDashboard = () => {
   const updateStatus = useUpdateLeadStatus(user?.id);
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/business");
+    if (!authLoading && !user) navigate("/login?role=business", { replace: true });
   }, [authLoading, user, navigate]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const BusinessDashboard = () => {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button asChild size="sm" variant="hero"><Link to="/business/edit"><Edit className="h-3 w-3 mr-1" /> Edit Profile</Link></Button>
                 <Button asChild size="sm" variant="outline"><Link to="/business/gallery"><ImagePlus className="h-3 w-3 mr-1" /> Manage Photos</Link></Button>
-                <Button asChild size="sm" variant="outline"><Link to={`/business-profile/${user?.id}?source=profile`}><ExternalLink className="h-3 w-3 mr-1" /> View Public Profile</Link></Button>
+                <Button asChild size="sm" variant="outline"><Link to={`/business/${user?.id}`}><ExternalLink className="h-3 w-3 mr-1" /> View Public Profile</Link></Button>
               </div>
             </div>
           </div>
