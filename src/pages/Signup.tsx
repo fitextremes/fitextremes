@@ -98,13 +98,14 @@ const Signup = () => {
   const pwChecks = useMemo(() => passwordChecks(password), [password]);
   const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username;
+  const businessTypeError = selectedRole === "business" && !businessType ? "Please select a business type" : "";
+  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username && !businessTypeError;
 
   const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ fullName: true, username: true, email: true, password: true });
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!isFormValid) return;
 
     setLoading(true);
