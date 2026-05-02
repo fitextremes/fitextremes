@@ -102,7 +102,7 @@ const BusinessProfile = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer hidePlatform hideForPros />
       <MobileTabBar />
     </div>
   );

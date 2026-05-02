@@ -219,7 +219,7 @@ const BusinessPublicProfile = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer hidePlatform hideForPros />
     </div>
   );
 };
