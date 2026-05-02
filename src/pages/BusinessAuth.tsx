@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Building2 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import BusinessPaymentModal from "@/components/BusinessPaymentModal";
+import { supabase } from "@/integrations/supabase/client";
 
 const validateFullName = (v: string) => {
   const t = v.trim();
@@ -71,6 +72,8 @@ const BusinessAuth = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showPayment, setShowPayment] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUnique, setCheckingUnique] = useState(false);
+  const [uniqueErrors, setUniqueErrors] = useState<{ username?: string; email?: string }>({});
 
   // Login state
   const [identifier, setIdentifier] = useState("");
@@ -87,6 +90,37 @@ const BusinessAuth = () => {
 
   const c = pwChecks(password);
   const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType;
+
+  const handleStartClick = async () => {
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
+    if (!formValid) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+    setCheckingUnique(true);
+    setUniqueErrors({});
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
+    try {
+      const [{ data: uRow }, { data: eRow }] = await Promise.all([
+        supabase.from("profiles").select("id").ilike("username", normalizedUsername).maybeSingle(),
+        supabase.from("profiles").select("id").eq("email", normalizedEmail).maybeSingle(),
+      ]);
+      const next: { username?: string; email?: string } = {};
+      if (uRow) next.username = "Username is already taken.";
+      if (eRow) next.email = "An account with this email already exists.";
+      if (next.username || next.email) {
+        setUniqueErrors(next);
+        toast.error(next.email || next.username!);
+        return;
+      }
+      setShowPayment(true);
+    } catch {
+      toast.error("Could not validate your details. Please try again.");
+    } finally {
+      setCheckingUnique(false);
+    }
+  };
 
   const handleStartTrial = async () => {
     setLoading(true);
@@ -152,13 +186,15 @@ const BusinessAuth = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Username <span className="text-destructive">*</span></Label>
-                  <Input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} onBlur={() => setTouched((t) => ({ ...t, username: true }))} placeholder="iron_paradise" />
+                  <Input value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase()); setUniqueErrors((p) => ({ ...p, username: undefined })); }} onBlur={() => setTouched((t) => ({ ...t, username: true }))} placeholder="iron_paradise" />
                   {touched.username && errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
+                  {uniqueErrors.username && <p className="text-xs text-destructive">{uniqueErrors.username}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Email <span className="text-destructive">*</span></Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, email: true }))} placeholder="you@business.com" />
+                  <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setUniqueErrors((p) => ({ ...p, email: undefined })); }} onBlur={() => setTouched((t) => ({ ...t, email: true }))} placeholder="you@business.com" />
                   {touched.email && errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                  {uniqueErrors.email && <p className="text-xs text-destructive">{uniqueErrors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Password <span className="text-destructive">*</span></Label>
@@ -187,8 +223,8 @@ const BusinessAuth = () => {
                   {touched.password && errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
 
-                <Button variant="hero" className="w-full" size="lg" disabled={!formValid} onClick={() => setShowPayment(true)}>
-                  Start Your Free Trial
+                <Button variant="hero" className="w-full" size="lg" disabled={checkingUnique} onClick={handleStartClick}>
+                  {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
                   1 month free. Then $30/month. Cancel anytime.
