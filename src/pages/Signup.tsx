@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BusinessPaymentModal from "@/components/BusinessPaymentModal";
 import logo from "@/assets/logo.png";
@@ -87,7 +87,9 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const { signUp } = useAuth();
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const { signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
 
   const errors = useMemo(() => ({
@@ -115,10 +117,16 @@ const Signup = () => {
       return false;
     }
     const hasSession = Boolean(session);
-    toast.success(hasSession ? "Welcome to FitExtremes!" : "Account created. Please check your email to confirm before logging in.");
-    if (selectedRole === "trainer") navigate(hasSession ? "/trainer-dashboard" : "/login?role=trainer");
-    else if (selectedRole === "business") navigate(hasSession ? "/business-dashboard" : "/login?role=business");
-    else navigate("/profile");
+    if (hasSession) {
+      toast.success("Welcome to FitExtremes!");
+      if (selectedRole === "trainer") navigate("/trainer-dashboard");
+      else if (selectedRole === "business") navigate("/business-dashboard");
+      else navigate("/profile");
+    } else {
+      // Email confirmation required — show pending screen instead of redirecting
+      setPendingEmail(email.trim().toLowerCase());
+      toast.success("Account created. Check your email to confirm.");
+    }
     return true;
   };
 
@@ -138,6 +146,53 @@ const Signup = () => {
     const ok = await performSignup();
     if (ok) setPaymentOpen(false);
   };
+
+  const handleResend = async () => {
+    if (!pendingEmail) return;
+    setResending(true);
+    const { error } = await resendConfirmation(pendingEmail);
+    setResending(false);
+    if (error) toast.error(error.message || "Could not resend email");
+    else toast.success("Confirmation email sent again. Check your inbox.");
+  };
+
+  if (pendingEmail) {
+    const loginRole = selectedRole;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar minimal />
+        <div className="flex min-h-screen items-center justify-center px-4 pt-20 pb-12">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-8">
+              <img src={logo} alt="FitExtremes" className="mx-auto h-16 w-16 object-contain mb-4" />
+              <h1 className="font-display text-3xl uppercase tracking-wider text-foreground">
+                Confirm Your Email
+              </h1>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-8 shadow-card text-center space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Mail className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                We've sent a confirmation link to{" "}
+                <span className="text-foreground font-medium">{pendingEmail}</span>.
+                Click the link in the email to activate your account before logging in.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Didn't get it? Check your spam folder, or resend below.
+              </p>
+              <Button variant="hero" className="w-full" onClick={handleResend} disabled={resending}>
+                {resending ? "Sending..." : "Resend Confirmation Email"}
+              </Button>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to={`/login?role=${loginRole}`}>Back to Login</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
