@@ -165,14 +165,20 @@ const TrainerProfilePage = () => {
                 <h2 className="font-display text-xl uppercase tracking-wider text-foreground mb-4">Workout Gallery</h2>
                 <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
                   {gallery.map((g) => (
-                    <div key={g.id} className="group rounded-xl overflow-hidden border border-border bg-secondary aspect-square">
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setLightboxSrc(g.image_url)}
+                      className="group rounded-xl overflow-hidden border border-border bg-secondary aspect-square focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label="Open image"
+                    >
                       <img
                         src={g.image_url}
                         alt={g.caption || `${trainer.full_name} gallery`}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-zoom-in"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               </motion.div>
