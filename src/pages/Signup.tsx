@@ -86,6 +86,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
