@@ -223,8 +223,8 @@ const BusinessAuth = () => {
                   {touched.password && errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
 
-                <Button variant="hero" className="w-full" size="lg" disabled={!formValid} onClick={() => setShowPayment(true)}>
-                  Start Your Free Trial
+                <Button variant="hero" className="w-full" size="lg" disabled={checkingUnique} onClick={handleStartClick}>
+                  {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
                   1 month free. Then $30/month. Cancel anytime.
