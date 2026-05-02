@@ -108,15 +108,16 @@ const Signup = () => {
   const performSignup = async () => {
     setLoading(true);
     const extra = selectedRole === "business" ? { business_type: businessType } : undefined;
-    const { error } = await signUp(email, password, fullName.trim(), selectedRole, username, extra);
+    const { error, session } = await signUp(email, password, fullName.trim(), selectedRole, username, extra);
     setLoading(false);
     if (error) {
       toast.error(error.message);
       return false;
     }
-    toast.success("Welcome to FitExtremes!");
-    if (selectedRole === "trainer") navigate("/trainer-dashboard");
-    else if (selectedRole === "business") navigate("/business-dashboard");
+    const hasSession = Boolean(session);
+    toast.success(hasSession ? "Welcome to FitExtremes!" : "Account created. Please check your email to confirm before logging in.");
+    if (selectedRole === "trainer") navigate(hasSession ? "/trainer-dashboard" : "/login?role=trainer");
+    else if (selectedRole === "business") navigate(hasSession ? "/business-dashboard" : "/login?role=business");
     else navigate("/profile");
     return true;
   };
