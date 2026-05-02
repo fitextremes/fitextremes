@@ -79,6 +79,7 @@ const Signup = () => {
   const [selectedRole, setSelectedRole] = useState(searchParams.get("role") || "user");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [businessType, setBusinessType] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
