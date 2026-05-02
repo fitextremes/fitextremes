@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Login = () => {
@@ -16,7 +16,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const { signIn, resendConfirmation } = useAuth();
   const navigate = useNavigate();
 
   const roleLabels: Record<string, string> = {
@@ -28,21 +30,35 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim() || !password) return;
+    setUnconfirmedEmail(null);
     setLoading(true);
     const { error } = await signIn(identifier.trim(), password);
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      const msg = (error.message || "").toLowerCase();
+      const code = (error as any).code || "";
+      if (code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("confirm your email")) {
+        const id = identifier.trim();
+        if (id.includes("@")) setUnconfirmedEmail(id.toLowerCase());
+        toast.error("Please confirm your email before logging in.");
+      } else {
+        toast.error(error.message || "Invalid email/username or password");
+      }
     } else {
       toast.success("Welcome back!");
-      if (roleParam === "trainer") {
-        navigate("/trainer-dashboard");
-      } else if (roleParam === "business") {
-        navigate("/business-dashboard");
-      } else {
-        navigate("/profile");
-      }
+      if (roleParam === "trainer") navigate("/trainer-dashboard");
+      else if (roleParam === "business") navigate("/business-dashboard");
+      else navigate("/profile");
     }
+  };
+
+  const handleResend = async () => {
+    if (!unconfirmedEmail) return;
+    setResending(true);
+    const { error } = await resendConfirmation(unconfirmedEmail);
+    setResending(false);
+    if (error) toast.error(error.message || "Could not resend confirmation email");
+    else toast.success("Confirmation email sent. Check your inbox.");
   };
 
   return (
@@ -93,6 +109,22 @@ const Login = () => {
                 </button>
               </div>
             </div>
+
+            {unconfirmedEmail && (
+              <div className="rounded-lg border border-accent/40 bg-accent/10 p-3 text-xs space-y-2">
+                <div className="flex items-start gap-2">
+                  <Mail className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                  <p className="text-foreground/90">
+                    Your email <span className="font-medium">{unconfirmedEmail}</span> hasn't been confirmed yet.
+                    Click the link we sent you, or resend it below.
+                  </p>
+                </div>
+                <Button type="button" variant="outline" size="sm" className="w-full" onClick={handleResend} disabled={resending}>
+                  {resending ? "Sending..." : "Resend Confirmation Email"}
+                </Button>
+              </div>
+            )}
+
             <div className="flex justify-end">
               <Link to="/forgot-password" className="text-xs text-primary hover:underline">
                 Forgot Password?
