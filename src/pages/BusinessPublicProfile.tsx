@@ -30,6 +30,8 @@ const BusinessPublicProfile = () => {
   const navigate = useNavigate();
   const isPreview = location.pathname === "/business/profile/public-preview";
   const id = isPreview ? user?.id : paramId;
+  const isSelfProfile = !!user && !!id && user.id === id;
+  const actionsDisabled = isPreview || isSelfProfile;
   const { data: business, isLoading } = useBusinessProfile(id);
   const { data: gallery = [] } = useBusinessGallery(id);
   const recordView = useRecordProfileView();
