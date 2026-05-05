@@ -126,7 +126,7 @@ const SubscriptionCard = () => {
                 Free Trial — {daysLeft} {daysLeft === 1 ? "day" : "days"} remaining
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Trial ends on {endDate}. Billing starts automatically at $15 CAD/month after trial.
+                Trial ends on {endDate}. Billing starts automatically at ${cfg.price} CAD/month after trial.
               </p>
             </div>
           ) : isCancelScheduled ? (
