@@ -92,13 +92,45 @@ const BusinessPublicProfile = () => {
   const hours = (business.business_hours || {}) as Record<string, string>;
   const hasHours = DAYS.some((d) => hours[d]);
 
+  const previewDisabled = (e: React.MouseEvent) => {
+    if (isPreview) {
+      e.preventDefault();
+      e.stopPropagation();
+      toast.info("Disabled in preview mode");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <ProfileViewHeader />
+      {isPreview ? (
+        <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+          <div className="container mx-auto flex h-14 items-center justify-between px-4">
+            <button
+              onClick={() => navigate("/business-dashboard")}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+              aria-label="Back to Business Dashboard"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <h1 className="font-display text-base sm:text-lg uppercase tracking-wider text-foreground">
+              Public Profile Preview
+            </h1>
+            <div className="w-16" />
+          </div>
+        </div>
+      ) : (
+        <ProfileViewHeader />
+      )}
       <div className="container mx-auto px-4 pt-20 pb-12">
-        <Link to={b.to} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-          <ArrowLeft className="h-4 w-4" /> {b.label}
-        </Link>
+        {isPreview ? (
+          <div className="mb-6 rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent">
+            Preview Mode — This is how users see your profile. Engagement actions are disabled.
+          </div>
+        ) : (
+          <Link to={b.to} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-4 w-4" /> {b.label}
+          </Link>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
