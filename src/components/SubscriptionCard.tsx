@@ -87,8 +87,8 @@ const SubscriptionCard = () => {
             <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <Sparkles className="h-3 w-3 text-primary" /> Subscription
             </p>
-            <h3 className="font-display text-2xl text-foreground mt-1">{PLAN_NAME}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">First Month Free · Then $15 CAD/month</p>
+            <h3 className="font-display text-2xl text-foreground mt-1">{cfg.name}</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">First Month Free · Then ${cfg.price} CAD/month</p>
           </div>
 
           <div className="flex flex-col items-end gap-1.5">
