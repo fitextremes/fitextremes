@@ -30,6 +30,8 @@ const BusinessPublicProfile = () => {
   const navigate = useNavigate();
   const isPreview = location.pathname === "/business/profile/public-preview";
   const id = isPreview ? user?.id : paramId;
+  const isSelfProfile = !!user && !!id && user.id === id;
+  const actionsDisabled = isPreview || isSelfProfile;
   const { data: business, isLoading } = useBusinessProfile(id);
   const { data: gallery = [] } = useBusinessGallery(id);
   const recordView = useRecordProfileView();
@@ -93,10 +95,10 @@ const BusinessPublicProfile = () => {
   const hasHours = DAYS.some((d) => hours[d]);
 
   const previewDisabled = (e: React.MouseEvent) => {
-    if (isPreview) {
+    if (actionsDisabled) {
       e.preventDefault();
       e.stopPropagation();
-      toast.info("Disabled in preview mode");
+      toast.info(isSelfProfile ? "This is your business profile" : "Disabled in preview mode");
     }
   };
 
@@ -217,10 +219,10 @@ const BusinessPublicProfile = () => {
                 )}
               </div>
 
-              <div className={`space-y-2 ${isPreview ? "opacity-60 pointer-events-none" : ""}`} aria-disabled={isPreview}>
+              <div className="space-y-2" aria-disabled={actionsDisabled}>
                 {business.whatsapp_number && (
-                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("whatsapp_click")}>
-                    {isPreview ? (
+                  <Button asChild={!actionsDisabled} variant="outline" className={`w-full ${actionsDisabled ? "opacity-50 cursor-not-allowed" : ""}`} disabled={actionsDisabled} onClick={actionsDisabled ? previewDisabled : () => trackClick("whatsapp_click")} title={isSelfProfile ? "You cannot connect with your own business profile" : undefined}>
+                    {actionsDisabled ? (
                       <span>WhatsApp</span>
                     ) : (
                       <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
@@ -228,8 +230,8 @@ const BusinessPublicProfile = () => {
                   </Button>
                 )}
                 {business.phone && (
-                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("call_click")}>
-                    {isPreview ? (
+                  <Button asChild={!actionsDisabled} variant="outline" className={`w-full ${actionsDisabled ? "opacity-50 cursor-not-allowed" : ""}`} disabled={actionsDisabled} onClick={actionsDisabled ? previewDisabled : () => trackClick("call_click")} title={isSelfProfile ? "You cannot connect with your own business profile" : undefined}>
+                    {actionsDisabled ? (
                       <span className="inline-flex items-center"><Phone className="h-4 w-4 mr-2" /> Call</span>
                     ) : (
                       <a href={`tel:${business.phone}`}><Phone className="h-4 w-4 mr-2" /> Call</a>
@@ -237,15 +239,22 @@ const BusinessPublicProfile = () => {
                   </Button>
                 )}
 
-                {isPreview ? (
-                  <Button variant="hero" className="w-full" size="lg" disabled>
-                    <MessageSquare className="h-4 w-4 mr-2" /> Connect
+                {actionsDisabled ? (
+                  <Button
+                    variant="hero"
+                    className="w-full opacity-50 cursor-not-allowed"
+                    size="lg"
+                    disabled
+                    title={isSelfProfile ? "You cannot connect with your own business profile" : "Disabled in preview mode"}
+                    aria-label={`Connect with ${business.full_name} (disabled)`}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" /> Connect with {business.full_name}
                   </Button>
                 ) : (
                   <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                       <Button variant="hero" className="w-full" size="lg">
-                        <MessageSquare className="h-4 w-4 mr-2" /> Connect
+                        <MessageSquare className="h-4 w-4 mr-2" /> Connect with {business.full_name}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
