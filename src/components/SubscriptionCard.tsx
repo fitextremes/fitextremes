@@ -10,10 +10,14 @@ import {
 import {
   useMySubscription, daysBetween, useCancelSubscription, useReactivateSubscription, useSubscribeToPlan,
 } from "@/hooks/useSubscription";
+import { useUserRole } from "@/hooks/useUserRole";
 import UpdatePaymentDialog from "@/components/UpdatePaymentDialog";
 import { toast } from "sonner";
 
-const PLAN_NAME = "Personal Trainer Plan";
+const PLAN_CONFIG = {
+  business: { name: "Business Plan", price: 30 },
+  trainer: { name: "Personal Trainer Plan", price: 15 },
+} as const;
 
 const formatDate = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
