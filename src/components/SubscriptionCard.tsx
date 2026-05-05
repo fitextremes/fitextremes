@@ -24,6 +24,8 @@ const formatDate = (iso?: string | null) =>
 
 const SubscriptionCard = () => {
   const { data: sub, isLoading } = useMySubscription();
+  const { isBusiness } = useUserRole();
+  const cfg = isBusiness ? PLAN_CONFIG.business : PLAN_CONFIG.trainer;
   const cancelMut = useCancelSubscription();
   const reactivateMut = useReactivateSubscription();
   const subscribeMut = useSubscribeToPlan();
