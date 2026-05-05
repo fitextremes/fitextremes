@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { useTrainerList } from "@/hooks/useTrainer";
+import { useBusinessList } from "@/hooks/useBusiness";
 
 type Tab = "gyms" | "supplements" | "trainers";
 
