@@ -112,10 +112,10 @@ const Discover = () => {
       });
     }
 
-    const items = activeTab === "gyms" ? mockGyms : mockSupplements;
-    return items.filter((item) => {
+    const items = activeTab === "gyms" ? gymItems : supplementItems;
+    return items.filter((item: any) => {
       const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchLocation = locationFilter === "All Locations" || item.location === locationFilter;
+      const matchLocation = locationFilter === "All Locations" || item.location?.includes(locationFilter.split(",")[0]);
       return matchSearch && matchLocation;
     });
   };
