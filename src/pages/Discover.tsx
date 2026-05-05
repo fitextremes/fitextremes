@@ -57,6 +57,7 @@ const Discover = () => {
   const [locationFilter, setLocationFilter] = useState("All Locations");
   const [priceRange, setPriceRange] = useState(0);
   const { data: realTrainers } = useTrainerList();
+  const { data: realBusinesses } = useBusinessList();
 
   // Merge live DB trainers (use real id) with mocks (use mock id) for trainers tab
   const trainerItems = useMemo(() => {
@@ -74,6 +75,31 @@ const Discover = () => {
     }));
     return [...live, ...mockTrainers.map(t => ({ ...t, isReal: false }))];
   }, [realTrainers]);
+
+  const mapBusiness = (b: any, fallbackImage: string, fallbackType: string) => ({
+    id: b.id,
+    isReal: true,
+    name: b.full_name,
+    location: b.location || "Canada",
+    rating: 5.0,
+    type: b.bio ? b.bio.slice(0, 60) : fallbackType,
+    image: fallbackImage,
+    avatar_url: b.avatar_url,
+  });
+
+  const gymItems = useMemo(() => {
+    const live = (realBusinesses || [])
+      .filter((b: any) => b.business_type === "gym")
+      .map((b: any) => mapBusiness(b, "🏋️", "Gym"));
+    return [...live, ...mockGyms.map(g => ({ ...g, isReal: false }))];
+  }, [realBusinesses]);
+
+  const supplementItems = useMemo(() => {
+    const live = (realBusinesses || [])
+      .filter((b: any) => b.business_type === "supplement_store" || b.business_type === "supplements")
+      .map((b: any) => mapBusiness(b, "💊", "Supplement Store"));
+    return [...live, ...mockSupplements.map(s => ({ ...s, isReal: false }))];
+  }, [realBusinesses]);
 
   const getFilteredItems = () => {
     if (activeTab === "trainers") {
