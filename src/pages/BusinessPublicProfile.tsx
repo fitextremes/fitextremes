@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send, Globe, Instagram, Truck, Clock, Building2 } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
@@ -23,9 +23,13 @@ const deliveryLabel = (t?: string | null) =>
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const BusinessPublicProfile = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isPreview = location.pathname === "/business/profile/public-preview";
+  const id = isPreview ? user?.id : paramId;
   const { data: business, isLoading } = useBusinessProfile(id);
   const { data: gallery = [] } = useBusinessGallery(id);
   const recordView = useRecordProfileView();
@@ -38,9 +42,9 @@ const BusinessPublicProfile = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (id && user?.id !== id) recordView.mutate(id);
+    if (!isPreview && id && user?.id !== id) recordView.mutate(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, isPreview]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
