@@ -217,39 +217,53 @@ const BusinessPublicProfile = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className={`space-y-2 ${isPreview ? "opacity-60 pointer-events-none" : ""}`} aria-disabled={isPreview}>
                 {business.whatsapp_number && (
-                  <Button asChild variant="outline" className="w-full" onClick={() => trackClick("whatsapp_click")}>
-                    <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("whatsapp_click")}>
+                    {isPreview ? (
+                      <span>WhatsApp</span>
+                    ) : (
+                      <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                    )}
                   </Button>
                 )}
                 {business.phone && (
-                  <Button asChild variant="outline" className="w-full" onClick={() => trackClick("call_click")}>
-                    <a href={`tel:${business.phone}`}><Phone className="h-4 w-4 mr-2" /> Call</a>
+                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("call_click")}>
+                    {isPreview ? (
+                      <span className="inline-flex items-center"><Phone className="h-4 w-4 mr-2" /> Call</span>
+                    ) : (
+                      <a href={`tel:${business.phone}`}><Phone className="h-4 w-4 mr-2" /> Call</a>
+                    )}
                   </Button>
                 )}
 
-                <Dialog open={open} onOpenChange={setOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="hero" className="w-full" size="lg">
-                      <MessageSquare className="h-4 w-4 mr-2" /> Connect
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="font-display uppercase tracking-wider">Contact {business.full_name}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-1.5"><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Message *</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={500} /></div>
-                      <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={submitLead.isPending}>
-                        <Send className="h-4 w-4 mr-2" /> {submitLead.isPending ? "Sending..." : "Send Inquiry"}
+                {isPreview ? (
+                  <Button variant="hero" className="w-full" size="lg" disabled>
+                    <MessageSquare className="h-4 w-4 mr-2" /> Connect
+                  </Button>
+                ) : (
+                  <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="hero" className="w-full" size="lg">
+                        <MessageSquare className="h-4 w-4 mr-2" /> Connect
                       </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle className="font-display uppercase tracking-wider">Contact {business.full_name}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-1.5"><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Message *</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={500} /></div>
+                        <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={submitLead.isPending}>
+                          <Send className="h-4 w-4 mr-2" /> {submitLead.isPending ? "Sending..." : "Send Inquiry"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </motion.div>
           </div>
