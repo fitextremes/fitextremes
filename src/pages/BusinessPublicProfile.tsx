@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send, Globe, Instagram, Truck, Clock, Building2 } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
@@ -23,9 +23,13 @@ const deliveryLabel = (t?: string | null) =>
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const BusinessPublicProfile = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: paramId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isPreview = location.pathname === "/business/profile/public-preview";
+  const id = isPreview ? user?.id : paramId;
   const { data: business, isLoading } = useBusinessProfile(id);
   const { data: gallery = [] } = useBusinessGallery(id);
   const recordView = useRecordProfileView();
@@ -38,9 +42,9 @@ const BusinessPublicProfile = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (id && user?.id !== id) recordView.mutate(id);
+    if (!isPreview && id && user?.id !== id) recordView.mutate(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, isPreview]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -88,13 +92,45 @@ const BusinessPublicProfile = () => {
   const hours = (business.business_hours || {}) as Record<string, string>;
   const hasHours = DAYS.some((d) => hours[d]);
 
+  const previewDisabled = (e: React.MouseEvent) => {
+    if (isPreview) {
+      e.preventDefault();
+      e.stopPropagation();
+      toast.info("Disabled in preview mode");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <ProfileViewHeader />
+      {isPreview ? (
+        <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+          <div className="container mx-auto flex h-14 items-center justify-between px-4">
+            <button
+              onClick={() => navigate("/business-dashboard")}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+              aria-label="Back to Business Dashboard"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <h1 className="font-display text-base sm:text-lg uppercase tracking-wider text-foreground">
+              Public Profile Preview
+            </h1>
+            <div className="w-16" />
+          </div>
+        </div>
+      ) : (
+        <ProfileViewHeader />
+      )}
       <div className="container mx-auto px-4 pt-20 pb-12">
-        <Link to={b.to} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-          <ArrowLeft className="h-4 w-4" /> {b.label}
-        </Link>
+        {isPreview ? (
+          <div className="mb-6 rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent">
+            Preview Mode — This is how users see your profile. Engagement actions are disabled.
+          </div>
+        ) : (
+          <Link to={b.to} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+            <ArrowLeft className="h-4 w-4" /> {b.label}
+          </Link>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
@@ -181,39 +217,53 @@ const BusinessPublicProfile = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className={`space-y-2 ${isPreview ? "opacity-60 pointer-events-none" : ""}`} aria-disabled={isPreview}>
                 {business.whatsapp_number && (
-                  <Button asChild variant="outline" className="w-full" onClick={() => trackClick("whatsapp_click")}>
-                    <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("whatsapp_click")}>
+                    {isPreview ? (
+                      <span>WhatsApp</span>
+                    ) : (
+                      <a href={`https://wa.me/${business.whatsapp_number.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                    )}
                   </Button>
                 )}
                 {business.phone && (
-                  <Button asChild variant="outline" className="w-full" onClick={() => trackClick("call_click")}>
-                    <a href={`tel:${business.phone}`}><Phone className="h-4 w-4 mr-2" /> Call</a>
+                  <Button asChild={!isPreview} variant="outline" className="w-full" disabled={isPreview} onClick={isPreview ? previewDisabled : () => trackClick("call_click")}>
+                    {isPreview ? (
+                      <span className="inline-flex items-center"><Phone className="h-4 w-4 mr-2" /> Call</span>
+                    ) : (
+                      <a href={`tel:${business.phone}`}><Phone className="h-4 w-4 mr-2" /> Call</a>
+                    )}
                   </Button>
                 )}
 
-                <Dialog open={open} onOpenChange={setOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="hero" className="w-full" size="lg">
-                      <MessageSquare className="h-4 w-4 mr-2" /> Connect
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="font-display uppercase tracking-wider">Contact {business.full_name}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-1.5"><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-                      <div className="space-y-1.5"><Label>Message *</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={500} /></div>
-                      <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={submitLead.isPending}>
-                        <Send className="h-4 w-4 mr-2" /> {submitLead.isPending ? "Sending..." : "Send Inquiry"}
+                {isPreview ? (
+                  <Button variant="hero" className="w-full" size="lg" disabled>
+                    <MessageSquare className="h-4 w-4 mr-2" /> Connect
+                  </Button>
+                ) : (
+                  <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="hero" className="w-full" size="lg">
+                        <MessageSquare className="h-4 w-4 mr-2" /> Connect
                       </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle className="font-display uppercase tracking-wider">Contact {business.full_name}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-1.5"><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+                        <div className="space-y-1.5"><Label>Message *</Label><Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={500} /></div>
+                        <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={submitLead.isPending}>
+                          <Send className="h-4 w-4 mr-2" /> {submitLead.isPending ? "Sending..." : "Send Inquiry"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </motion.div>
           </div>
