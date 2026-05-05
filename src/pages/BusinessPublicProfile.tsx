@@ -95,10 +95,10 @@ const BusinessPublicProfile = () => {
   const hasHours = DAYS.some((d) => hours[d]);
 
   const previewDisabled = (e: React.MouseEvent) => {
-    if (isPreview) {
+    if (actionsDisabled) {
       e.preventDefault();
       e.stopPropagation();
-      toast.info("Disabled in preview mode");
+      toast.info(isSelfProfile ? "This is your business profile" : "Disabled in preview mode");
     }
   };
 
