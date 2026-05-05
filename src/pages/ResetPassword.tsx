@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
+import { cameFromRecoveryLink } from "@/lib/recoveryDetection";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -25,27 +26,55 @@ const PasswordCheck = ({ met, label }: { met: boolean; label: string }) => (
   </div>
 );
 
+type RecoveryState = "checking" | "valid" | "invalid";
+
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isRecovery, setIsRecovery] = useState(false);
+  const [recoveryState, setRecoveryState] = useState<RecoveryState>("checking");
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for PASSWORD_RECOVERY event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    let resolved = false;
+
+    const markValid = () => {
+      if (resolved) return;
+      resolved = true;
+      setRecoveryState("valid");
+    };
+
+    // 1. If we captured a recovery indicator from the URL at app boot, trust it.
+    if (cameFromRecoveryLink) {
+      markValid();
+    }
+
+    // 2. Listen for PASSWORD_RECOVERY event (fires when Supabase processes the link).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
-        setIsRecovery(true);
+        markValid();
+      } else if (event === "SIGNED_IN" && cameFromRecoveryLink) {
+        // Some flows fire SIGNED_IN instead of PASSWORD_RECOVERY after token exchange.
+        markValid();
       }
     });
 
-    // Also check URL hash for recovery type
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setIsRecovery(true);
-    }
+    // 3. As a fallback, check existing session. If there's an active session AND
+    //    the user came directly to /reset-password from a recovery link, treat as valid.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && cameFromRecoveryLink) {
+        markValid();
+      } else if (!resolved) {
+        // Give the auth state a brief window to settle (e.g. PKCE code exchange)
+        // before declaring the link invalid.
+        setTimeout(() => {
+          if (!resolved) {
+            setRecoveryState("invalid");
+          }
+        }, 1500);
+      }
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -61,17 +90,35 @@ const ResetPassword = () => {
 
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      toast.success("Your password has been reset successfully. Please log in with your new password.");
-      navigate("/login");
+      return;
     }
+
+    // Sign out so the user must log in fresh with their new password.
+    await supabase.auth.signOut();
+    setLoading(false);
+    toast.success("Your password has been reset successfully. Please log in with your new password.");
+    navigate("/login");
   };
 
-  if (!isRecovery) {
+  if (recoveryState === "checking") {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar minimal />
+        <div className="flex min-h-screen items-center justify-center px-4 pt-16">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
+            <p className="mt-4 text-sm text-muted-foreground">Verifying reset link…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (recoveryState === "invalid") {
     return (
       <div className="min-h-screen bg-background">
         <Navbar minimal />
