@@ -10,16 +10,22 @@ import {
 import {
   useMySubscription, daysBetween, useCancelSubscription, useReactivateSubscription, useSubscribeToPlan,
 } from "@/hooks/useSubscription";
+import { useUserRole } from "@/hooks/useUserRole";
 import UpdatePaymentDialog from "@/components/UpdatePaymentDialog";
 import { toast } from "sonner";
 
-const PLAN_NAME = "Personal Trainer Plan";
+const PLAN_CONFIG = {
+  business: { name: "Business Plan", price: 30 },
+  trainer: { name: "Personal Trainer Plan", price: 15 },
+} as const;
 
 const formatDate = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
 
 const SubscriptionCard = () => {
   const { data: sub, isLoading } = useMySubscription();
+  const { isBusiness } = useUserRole();
+  const cfg = isBusiness ? PLAN_CONFIG.business : PLAN_CONFIG.trainer;
   const cancelMut = useCancelSubscription();
   const reactivateMut = useReactivateSubscription();
   const subscribeMut = useSubscribeToPlan();
@@ -81,8 +87,8 @@ const SubscriptionCard = () => {
             <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <Sparkles className="h-3 w-3 text-primary" /> Subscription
             </p>
-            <h3 className="font-display text-2xl text-foreground mt-1">{PLAN_NAME}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">First Month Free · Then $15 CAD/month</p>
+            <h3 className="font-display text-2xl text-foreground mt-1">{cfg.name}</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">First Month Free · Then ${cfg.price} CAD/month</p>
           </div>
 
           <div className="flex flex-col items-end gap-1.5">
@@ -120,7 +126,7 @@ const SubscriptionCard = () => {
                 Free Trial — {daysLeft} {daysLeft === 1 ? "day" : "days"} remaining
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Trial ends on {endDate}. Billing starts automatically at $15 CAD/month after trial.
+                Trial ends on {endDate}. Billing starts automatically at ${cfg.price} CAD/month after trial.
               </p>
             </div>
           ) : isCancelScheduled ? (
