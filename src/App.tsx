@@ -19,7 +19,7 @@ import UserProfile from "./pages/UserProfile";
 import FollowRequests from "./pages/FollowRequests";
 import Notifications from "./pages/Notifications";
 import TrainerProfile from "./pages/TrainerProfile";
-import BusinessProfile from "./pages/BusinessProfile";
+import BusinessPublicProfile from "./pages/BusinessPublicProfile";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerEditProfile from "./pages/TrainerEditProfile";
 import TrainerGallery from "./pages/TrainerGallery";
@@ -59,7 +59,8 @@ const App = () => (
             <Route path="/trainer/billing" element={<TrainerBilling />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business" element={<Navigate to="/login?role=business" replace />} />
-            <Route path="/business/:id" element={<BusinessProfile />} />
+            <Route path="/business/profile/public-preview" element={<BusinessPublicProfile />} />
+            <Route path="/business/:id" element={<BusinessPublicProfile />} />
             <Route path="/business-dashboard" element={<BusinessDashboard />} />
             <Route path="/business/edit" element={<BusinessEditProfile />} />
             <Route path="/business/gallery" element={<BusinessGallery />} />
