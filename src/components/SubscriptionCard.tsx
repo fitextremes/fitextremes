@@ -29,10 +29,9 @@ const SubscriptionCard = () => {
   const { isBusiness } = useUserRole();
   const cfg = isBusiness ? PLAN_CONFIG.business : PLAN_CONFIG.trainer;
   const cancelMut = useCancelSubscription();
-  const reactivateMut = useReactivateSubscription();
-  const subscribeMut = useSubscribeToPlan();
   const [payOpen, setPayOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   if (isLoading) {
     return <div className="rounded-2xl border border-border bg-card p-6 shadow-card animate-pulse h-40" />;
@@ -60,19 +59,8 @@ const SubscriptionCard = () => {
     }
   };
 
-  const handleReactivate = async () => {
-    try {
-      if (isExpired || isCancelled) {
-        const res = await subscribeMut.mutateAsync("monthly");
-        if (!res?.ok) throw new Error();
-        toast.success("Subscription reactivated.");
-      } else {
-        await reactivateMut.mutateAsync();
-        toast.success("Auto-renew restored.");
-      }
-    } catch {
-      toast.error("Could not reactivate. Please try again.");
-    }
+  const handleReactivate = () => {
+    setCheckoutOpen(true);
   };
 
   return (
