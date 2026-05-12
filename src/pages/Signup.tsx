@@ -134,17 +134,7 @@ const Signup = () => {
     e.preventDefault();
     setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!isFormValid) return;
-
-    if (selectedRole === "business") {
-      setPaymentOpen(true);
-      return;
-    }
     await performSignup();
-  };
-
-  const handlePaymentConfirm = async () => {
-    const ok = await performSignup();
-    if (ok) setPaymentOpen(false);
   };
 
   const handleResend = async () => {
