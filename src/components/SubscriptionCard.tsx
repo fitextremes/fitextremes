@@ -189,6 +189,22 @@ const SubscriptionCard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase tracking-wider">
+              Subscribe to {cfg.name} — ${cfg.price} CAD/month
+            </DialogTitle>
+          </DialogHeader>
+          {checkoutOpen && (
+            <StripeEmbeddedCheckout
+              priceId={cfg.priceId}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
