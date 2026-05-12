@@ -1,19 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Sparkles, BadgeCheck, AlertTriangle, CreditCard, X, RotateCcw, Loader2 } from "lucide-react";
+import { Calendar, Sparkles, BadgeCheck, AlertTriangle, CreditCard, X, RotateCcw, Loader2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  useMySubscription, daysBetween, useCancelSubscription,
-} from "@/hooks/useSubscription";
+import { useMySubscription, daysBetween } from "@/hooks/useSubscription";
 import { useUserRole } from "@/hooks/useUserRole";
-import UpdatePaymentDialog from "@/components/UpdatePaymentDialog";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "sonner";
 
 const PLAN_CONFIG = {
