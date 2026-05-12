@@ -115,11 +115,31 @@ const Signup = () => {
 
   const performSignup = async () => {
     setLoading(true);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Pre-check: ensure email isn't already registered under any role
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+    if (existing?.role) {
+      setLoading(false);
+      const label = ROLE_LABEL[existing.role] || "another account type";
+      toast.error(`This email is already registered as a ${label}.`);
+      return false;
+    }
+
     const extra = selectedRole === "business" ? { business_type: businessType } : undefined;
     const { error, session } = await signUp(email, password, fullName.trim(), selectedRole, username, extra);
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      const msg = (error.message || "").toLowerCase();
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        toast.error("This email is already registered. Please log in with the correct portal for your account type.");
+      } else {
+        toast.error(error.message);
+      }
       return false;
     }
     const hasSession = Boolean(session);
@@ -130,7 +150,7 @@ const Signup = () => {
       else navigate("/profile");
     } else {
       // Email confirmation required — show pending screen instead of redirecting
-      setPendingEmail(email.trim().toLowerCase());
+      setPendingEmail(normalizedEmail);
       toast.success("Account created. Check your email to confirm.");
     }
     return true;
