@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface FooterProps {
   hidePlatform?: boolean;
@@ -7,6 +9,9 @@ interface FooterProps {
 }
 
 const Footer = ({ hidePlatform = false, hideForPros = false }: FooterProps) => {
+  const { user } = useAuth();
+  const { isSocial } = useUserRole();
+  const showDiscover = !!user && isSocial;
   const minimal = hidePlatform && hideForPros;
   return (
     <footer className={`border-t border-border bg-background py-12 ${minimal ? "minimal-footer" : ""}`}>
