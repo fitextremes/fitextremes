@@ -90,6 +90,17 @@ const BusinessAuth = () => {
   const c = pwChecks(password);
   const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType;
 
+  const ROLE_LABEL: Record<string, string> = {
+    user: "Social User",
+    trainer: "Personal Trainer",
+    business: "Business User",
+  };
+  const PORTAL_PATH: Record<string, string> = {
+    user: "/login?role=user",
+    trainer: "/login?role=trainer",
+    business: "/business-auth?tab=login",
+  };
+
   const handleStartClick = async () => {
     setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!formValid) {
@@ -103,11 +114,14 @@ const BusinessAuth = () => {
     try {
       const [{ data: uRow }, { data: eRow }] = await Promise.all([
         supabase.from("profiles").select("id").ilike("username", normalizedUsername).maybeSingle(),
-        supabase.from("profiles").select("id").eq("email", normalizedEmail).maybeSingle(),
+        supabase.from("profiles").select("id, role").eq("email", normalizedEmail).maybeSingle(),
       ]);
       const next: { username?: string; email?: string } = {};
       if (uRow) next.username = "Username is already taken.";
-      if (eRow) next.email = "An account with this email already exists.";
+      if (eRow) {
+        const label = ROLE_LABEL[(eRow as any).role] || "another account type";
+        next.email = `This email is already registered as a ${label}.`;
+      }
       if (next.username || next.email) {
         setUniqueErrors(next);
         toast.error(next.email || next.username!);
