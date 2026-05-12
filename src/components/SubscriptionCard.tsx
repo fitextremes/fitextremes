@@ -150,46 +150,26 @@ const SubscriptionCard = () => {
 
         {/* Action buttons */}
         <div className="mt-5 flex flex-col sm:flex-row gap-2 relative">
-          {!isExpired && !isCancelled && (
-            <Button variant="outline" className="flex-1" onClick={() => setPayOpen(true)}>
-              <CreditCard className="h-4 w-4 mr-2" /> Update Payment Information
+          {isStripeManaged && !isExpired && !isCancelled && (
+            <Button variant="outline" className="flex-1" onClick={openPortal} disabled={portalLoading}>
+              {portalLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
+              Manage Billing <ExternalLink className="h-3 w-3 ml-2 opacity-60" />
             </Button>
           )}
 
-          {isTrial || isCancelScheduled || isExpired || isCancelled || isPaymentDue ? (
+          {isTrial || isCancelScheduled || isExpired || isCancelled || isPaymentDue || !isStripeManaged ? (
             <Button className="flex-1" onClick={handleReactivate}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              {isTrial ? "Subscribe Now" : "Reactivate Subscription"}
+              {isStripeManaged && (isCancelScheduled || isExpired || isCancelled || isPaymentDue) ? "Reactivate Subscription" : "Subscribe Now"}
             </Button>
           ) : (
-            <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>
-              <X className="h-4 w-4 mr-2" /> Cancel Subscription
+            <Button variant="destructive" className="flex-1" onClick={openPortal} disabled={portalLoading}>
+              {portalLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <X className="h-4 w-4 mr-2" />}
+              Cancel Subscription
             </Button>
           )}
         </div>
       </motion.div>
-
-      <UpdatePaymentDialog open={payOpen} onOpenChange={setPayOpen} />
-
-      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your subscription will remain active until the end of your current billing cycle. You will not be charged again.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleCancel(); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {cancelMut.isPending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Cancelling</> : "Confirm Cancel"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
