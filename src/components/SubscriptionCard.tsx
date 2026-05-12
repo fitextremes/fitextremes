@@ -7,16 +7,18 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  useMySubscription, daysBetween, useCancelSubscription, useReactivateSubscription, useSubscribeToPlan,
+  useMySubscription, daysBetween, useCancelSubscription,
 } from "@/hooks/useSubscription";
 import { useUserRole } from "@/hooks/useUserRole";
 import UpdatePaymentDialog from "@/components/UpdatePaymentDialog";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { toast } from "sonner";
 
 const PLAN_CONFIG = {
-  business: { name: "Business Plan", price: 30 },
-  trainer: { name: "Personal Trainer Plan", price: 15 },
+  business: { name: "Business Plan", price: 30, priceId: "business_monthly" },
+  trainer: { name: "Personal Trainer Plan", price: 15, priceId: "trainer_monthly" },
 } as const;
 
 const formatDate = (iso?: string | null) =>
@@ -27,10 +29,9 @@ const SubscriptionCard = () => {
   const { isBusiness } = useUserRole();
   const cfg = isBusiness ? PLAN_CONFIG.business : PLAN_CONFIG.trainer;
   const cancelMut = useCancelSubscription();
-  const reactivateMut = useReactivateSubscription();
-  const subscribeMut = useSubscribeToPlan();
   const [payOpen, setPayOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   if (isLoading) {
     return <div className="rounded-2xl border border-border bg-card p-6 shadow-card animate-pulse h-40" />;
@@ -58,19 +59,8 @@ const SubscriptionCard = () => {
     }
   };
 
-  const handleReactivate = async () => {
-    try {
-      if (isExpired || isCancelled) {
-        const res = await subscribeMut.mutateAsync("monthly");
-        if (!res?.ok) throw new Error();
-        toast.success("Subscription reactivated.");
-      } else {
-        await reactivateMut.mutateAsync();
-        toast.success("Auto-renew restored.");
-      }
-    } catch {
-      toast.error("Could not reactivate. Please try again.");
-    }
+  const handleReactivate = () => {
+    setCheckoutOpen(true);
   };
 
   return (
@@ -165,17 +155,10 @@ const SubscriptionCard = () => {
             </Button>
           )}
 
-          {isCancelScheduled || isExpired || isCancelled || isPaymentDue ? (
-            <Button
-              className="flex-1"
-              onClick={handleReactivate}
-              disabled={reactivateMut.isPending || subscribeMut.isPending}
-            >
-              {(reactivateMut.isPending || subscribeMut.isPending) ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Working…</>
-              ) : (
-                <><RotateCcw className="h-4 w-4 mr-2" /> Reactivate Subscription</>
-              )}
+          {isTrial || isCancelScheduled || isExpired || isCancelled || isPaymentDue ? (
+            <Button className="flex-1" onClick={handleReactivate}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              {isTrial ? "Subscribe Now" : "Reactivate Subscription"}
             </Button>
           ) : (
             <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>
@@ -206,6 +189,22 @@ const SubscriptionCard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase tracking-wider">
+              Subscribe to {cfg.name} — ${cfg.price} CAD/month
+            </DialogTitle>
+          </DialogHeader>
+          {checkoutOpen && (
+            <StripeEmbeddedCheckout
+              priceId={cfg.priceId}
+              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

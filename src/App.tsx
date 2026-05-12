@@ -28,6 +28,8 @@ import BusinessDashboard from "./pages/BusinessDashboard";
 import BusinessEditProfile from "./pages/BusinessEditProfile";
 import BusinessGallery from "./pages/BusinessGallery";
 import NotFound from "./pages/NotFound";
+import CheckoutReturn from "./pages/CheckoutReturn";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PaymentTestModeBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -64,6 +67,7 @@ const App = () => (
             <Route path="/business-dashboard" element={<BusinessDashboard />} />
             <Route path="/business/edit" element={<BusinessEditProfile />} />
             <Route path="/business/gallery" element={<BusinessGallery />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

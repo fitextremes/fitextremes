@@ -556,6 +556,7 @@ export type Database = {
           created_at: string
           currency: string
           end_date: string | null
+          environment: string
           id: string
           next_billing_date: string | null
           payment_provider: string
@@ -564,6 +565,7 @@ export type Database = {
           start_date: string
           status: string
           stripe_customer_id: string | null
+          stripe_price_id: string | null
           stripe_subscription_id: string | null
           trainer_id: string
           trial_used: boolean
@@ -575,6 +577,7 @@ export type Database = {
           created_at?: string
           currency?: string
           end_date?: string | null
+          environment?: string
           id?: string
           next_billing_date?: string | null
           payment_provider?: string
@@ -583,6 +586,7 @@ export type Database = {
           start_date?: string
           status: string
           stripe_customer_id?: string | null
+          stripe_price_id?: string | null
           stripe_subscription_id?: string | null
           trainer_id: string
           trial_used?: boolean
@@ -594,6 +598,7 @@ export type Database = {
           created_at?: string
           currency?: string
           end_date?: string | null
+          environment?: string
           id?: string
           next_billing_date?: string | null
           payment_provider?: string
@@ -602,6 +607,7 @@ export type Database = {
           start_date?: string
           status?: string
           stripe_customer_id?: string | null
+          stripe_price_id?: string | null
           stripe_subscription_id?: string | null
           trainer_id?: string
           trial_used?: boolean
