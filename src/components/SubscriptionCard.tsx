@@ -23,10 +23,8 @@ const SubscriptionCard = () => {
   const { data: sub, isLoading } = useMySubscription();
   const { isBusiness } = useUserRole();
   const cfg = isBusiness ? PLAN_CONFIG.business : PLAN_CONFIG.trainer;
-  const cancelMut = useCancelSubscription();
-  const [payOpen, setPayOpen] = useState(false);
-  const [cancelOpen, setCancelOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   if (isLoading) {
     return <div className="rounded-2xl border border-border bg-card p-6 shadow-card animate-pulse h-40" />;
@@ -39,24 +37,32 @@ const SubscriptionCard = () => {
   const isExpired = sub.status === "expired";
   const isCancelScheduled = sub.cancel_at_period_end && !isExpired;
   const isCancelled = sub.status === "cancelled";
+  const isStripeManaged = !!(sub as any).stripe_subscription_id || (sub as any).payment_provider === "stripe";
   const daysLeft = Math.max(0, daysBetween(sub.end_date));
   const endDate = formatDate(sub.end_date);
   const nextBilling = formatDate(sub.next_billing_date || sub.end_date);
 
-  const handleCancel = async () => {
+  const openPortal = async () => {
+    setPortalLoading(true);
     try {
-      await cancelMut.mutateAsync();
-      toast.success("Subscription cancelled. Access continues until your billing period ends.");
-    } catch {
-      toast.error("Could not cancel subscription. Please try again.");
+      const { data, error } = await supabase.functions.invoke("customer-portal", {
+        body: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/trainer-billing`,
+        },
+      });
+      if (error || !data?.url) throw new Error(error?.message || data?.error || "No portal URL");
+      window.open(data.url, "_blank", "noopener");
+    } catch (e: any) {
+      toast.error(e?.message?.includes("No Stripe customer")
+        ? "Subscribe first to manage billing."
+        : "Could not open billing portal. Please try again.");
     } finally {
-      setCancelOpen(false);
+      setPortalLoading(false);
     }
   };
 
-  const handleReactivate = () => {
-    setCheckoutOpen(true);
-  };
+  const handleReactivate = () => setCheckoutOpen(true);
 
   return (
     <>
