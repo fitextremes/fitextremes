@@ -90,6 +90,17 @@ const BusinessAuth = () => {
   const c = pwChecks(password);
   const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType;
 
+  const ROLE_LABEL: Record<string, string> = {
+    user: "Social User",
+    trainer: "Personal Trainer",
+    business: "Business User",
+  };
+  const PORTAL_PATH: Record<string, string> = {
+    user: "/login?role=user",
+    trainer: "/login?role=trainer",
+    business: "/business-auth?tab=login",
+  };
+
   const handleStartClick = async () => {
     setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!formValid) {
@@ -103,11 +114,14 @@ const BusinessAuth = () => {
     try {
       const [{ data: uRow }, { data: eRow }] = await Promise.all([
         supabase.from("profiles").select("id").ilike("username", normalizedUsername).maybeSingle(),
-        supabase.from("profiles").select("id").eq("email", normalizedEmail).maybeSingle(),
+        supabase.from("profiles").select("id, role").eq("email", normalizedEmail).maybeSingle(),
       ]);
       const next: { username?: string; email?: string } = {};
       if (uRow) next.username = "Username is already taken.";
-      if (eRow) next.email = "An account with this email already exists.";
+      if (eRow) {
+        const label = ROLE_LABEL[(eRow as any).role] || "another account type";
+        next.email = `This email is already registered as a ${label}.`;
+      }
       if (next.username || next.email) {
         setUniqueErrors(next);
         toast.error(next.email || next.username!);
@@ -144,8 +158,26 @@ const BusinessAuth = () => {
     if (!identifier.trim() || !loginPw) return;
     setLoginLoading(true);
     const { error } = await signIn(identifier.trim(), loginPw);
+    if (error) {
+      setLoginLoading(false);
+      toast.error("Invalid email/username or password");
+      return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    let actualRole: string | null = null;
+    if (user) {
+      const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      actualRole = prof?.role ?? null;
+    }
+    if (actualRole && actualRole !== "business") {
+      await supabase.auth.signOut();
+      setLoginLoading(false);
+      const label = ROLE_LABEL[actualRole] || "another account type";
+      toast.error(`This email is registered as a ${label}. Please use the ${label} login.`);
+      navigate(PORTAL_PATH[actualRole] || "/login");
+      return;
+    }
     setLoginLoading(false);
-    if (error) { toast.error("Invalid email/username or password"); return; }
     toast.success("Welcome back!");
     navigate("/business-dashboard");
   };
