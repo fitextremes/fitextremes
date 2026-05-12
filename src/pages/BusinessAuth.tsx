@@ -10,7 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Building2 } from "lucide-react";
 import logo from "@/assets/logo.png";
-import BusinessPaymentModal from "@/components/BusinessPaymentModal";
 import { supabase } from "@/integrations/supabase/client";
 
 const validateFullName = (v: string) => {
@@ -114,7 +113,7 @@ const BusinessAuth = () => {
         toast.error(next.email || next.username!);
         return;
       }
-      setShowPayment(true);
+      await handleStartTrial();
     } catch {
       toast.error("Could not validate your details. Please try again.");
     } finally {
@@ -258,12 +257,6 @@ const BusinessAuth = () => {
         </div>
       </div>
 
-      <BusinessPaymentModal
-        open={showPayment}
-        onOpenChange={setShowPayment}
-        onConfirm={handleStartTrial}
-        loading={loading}
-      />
     </div>
   );
 };

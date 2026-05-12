@@ -10,21 +10,24 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-// Map our internal lookup keys to FitExtremes plan codes in subscription_plans.code
+// Map Stripe price lookup keys to local subscription_plans.code values
 const PRICE_TO_PLAN_CODE: Record<string, string> = {
-  trainer_monthly: "monthly",   // existing trainer monthly plan code
-  business_monthly: "monthly",  // shared monthly cycle; differentiation is via price
+  trainer_monthly: "monthly",
+  business_monthly: "business_monthly",
 };
 
-async function findPlanIdForPrice(_priceLookup: string): Promise<string | null> {
-  // Best-effort: pick the active monthly plan; if the project has multiple, prefer one matching by code.
+async function findPlanIdForPrice(priceLookup: string): Promise<string | null> {
+  const code = PRICE_TO_PLAN_CODE[priceLookup] ?? "monthly";
   const { data } = await supabase
     .from("subscription_plans")
     .select("id, code")
-    .eq("is_active", true);
-  if (!data?.length) return null;
-  const code = PRICE_TO_PLAN_CODE[_priceLookup] ?? "monthly";
-  return (data.find((p) => p.code === code) ?? data[0]).id;
+    .eq("code", code)
+    .maybeSingle();
+  if (data) return data.id;
+  // Fallback to any active plan if mapping fails
+  const { data: any } = await supabase
+    .from("subscription_plans").select("id").eq("is_active", true).limit(1).maybeSingle();
+  return any?.id ?? null;
 }
 
 async function upsertSubscriptionFromStripe(args: {

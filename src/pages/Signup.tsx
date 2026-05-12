@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import BusinessPaymentModal from "@/components/BusinessPaymentModal";
 import logo from "@/assets/logo.png";
 
 const roles = [
@@ -134,17 +133,7 @@ const Signup = () => {
     e.preventDefault();
     setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
     if (!isFormValid) return;
-
-    if (selectedRole === "business") {
-      setPaymentOpen(true);
-      return;
-    }
     await performSignup();
-  };
-
-  const handlePaymentConfirm = async () => {
-    const ok = await performSignup();
-    if (ok) setPaymentOpen(false);
   };
 
   const handleResend = async () => {
@@ -376,12 +365,6 @@ const Signup = () => {
         </div>
       </div>
 
-      <BusinessPaymentModal
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-        onConfirm={handlePaymentConfirm}
-        loading={loading}
-      />
     </div>
   );
 };
