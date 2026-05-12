@@ -9,6 +9,13 @@ import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo.png";
+import { supabase } from "@/integrations/supabase/client";
+
+const ROLE_LABEL: Record<string, string> = {
+  user: "Social User",
+  trainer: "Personal Trainer",
+  business: "Business User",
+};
 
 const roles = [
   { value: "user", label: "Social User", description: "Explore gyms, trainers & connect", price: "Free" },
