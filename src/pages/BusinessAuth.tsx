@@ -114,7 +114,7 @@ const BusinessAuth = () => {
         toast.error(next.email || next.username!);
         return;
       }
-      setShowPayment(true);
+      await handleStartTrial();
     } catch {
       toast.error("Could not validate your details. Please try again.");
     } finally {
