@@ -258,12 +258,6 @@ const BusinessAuth = () => {
         </div>
       </div>
 
-      <BusinessPaymentModal
-        open={showPayment}
-        onOpenChange={setShowPayment}
-        onConfirm={handleStartTrial}
-        loading={loading}
-      />
     </div>
   );
 };
