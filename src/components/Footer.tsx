@@ -32,7 +32,9 @@ const Footer = ({ hidePlatform = false, hideForPros = false }: FooterProps) => {
             <div>
               <h4 className="font-display uppercase tracking-wider text-foreground mb-3">Platform</h4>
               <div className="flex flex-col gap-2">
-                <Link to="/discover" className="text-sm text-muted-foreground hover:text-primary">Discover</Link>
+                {showDiscover && (
+                  <Link to="/discover" className="text-sm text-muted-foreground hover:text-primary">Discover</Link>
+                )}
                 <Link to="/about" className="text-sm text-muted-foreground hover:text-primary">About</Link>
                 <Link to="/signup" className="text-sm text-muted-foreground hover:text-primary">Join Now</Link>
               </div>
