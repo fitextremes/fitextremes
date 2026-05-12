@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
       },
       ...(isRecurring && {
         subscription_data: {
+          trial_period_days: 30,
           metadata: { userId: user.id, priceId },
         },
       }),
