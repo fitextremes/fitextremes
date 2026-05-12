@@ -158,8 +158,26 @@ const BusinessAuth = () => {
     if (!identifier.trim() || !loginPw) return;
     setLoginLoading(true);
     const { error } = await signIn(identifier.trim(), loginPw);
+    if (error) {
+      setLoginLoading(false);
+      toast.error("Invalid email/username or password");
+      return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    let actualRole: string | null = null;
+    if (user) {
+      const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      actualRole = prof?.role ?? null;
+    }
+    if (actualRole && actualRole !== "business") {
+      await supabase.auth.signOut();
+      setLoginLoading(false);
+      const label = ROLE_LABEL[actualRole] || "another account type";
+      toast.error(`This email is registered as a ${label}. Please use the ${label} login.`);
+      navigate(PORTAL_PATH[actualRole] || "/login");
+      return;
+    }
     setLoginLoading(false);
-    if (error) { toast.error("Invalid email/username or password"); return; }
     toast.success("Welcome back!");
     navigate("/business-dashboard");
   };
