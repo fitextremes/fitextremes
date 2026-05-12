@@ -155,17 +155,10 @@ const SubscriptionCard = () => {
             </Button>
           )}
 
-          {isCancelScheduled || isExpired || isCancelled || isPaymentDue ? (
-            <Button
-              className="flex-1"
-              onClick={handleReactivate}
-              disabled={reactivateMut.isPending || subscribeMut.isPending}
-            >
-              {(reactivateMut.isPending || subscribeMut.isPending) ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Working…</>
-              ) : (
-                <><RotateCcw className="h-4 w-4 mr-2" /> Reactivate Subscription</>
-              )}
+          {isTrial || isCancelScheduled || isExpired || isCancelled || isPaymentDue ? (
+            <Button className="flex-1" onClick={handleReactivate}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              {isTrial ? "Subscribe Now" : "Reactivate Subscription"}
             </Button>
           ) : (
             <Button variant="destructive" className="flex-1" onClick={() => setCancelOpen(true)}>
