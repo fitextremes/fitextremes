@@ -50,8 +50,8 @@ const Login = () => {
     setUnconfirmedEmail(null);
     setLoading(true);
     const { error } = await signIn(identifier.trim(), password);
-    setLoading(false);
     if (error) {
+      setLoading(false);
       const msg = (error.message || "").toLowerCase();
       const code = (error as any).code || "";
       if (code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("confirm your email")) {
@@ -61,12 +61,37 @@ const Login = () => {
       } else {
         toast.error(error.message || "Invalid email/username or password");
       }
-    } else {
-      toast.success("Welcome back!");
-      if (roleParam === "trainer") navigate("/trainer-dashboard");
-      else if (roleParam === "business") navigate("/business-dashboard");
-      else navigate("/profile");
+      return;
     }
+
+    // Verify the authenticated user's role matches the selected portal
+    const { data: { user } } = await supabase.auth.getUser();
+    const expectedRole = PORTAL_ROLE[roleParam] || "user";
+    let actualRole: string | null = null;
+    if (user) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      actualRole = prof?.role ?? null;
+    }
+
+    if (actualRole && actualRole !== expectedRole) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      const label = ROLE_LABEL[actualRole] || "another account type";
+      const portalLabel = ROLE_LABEL[actualRole] || "correct";
+      toast.error(`This email is registered as a ${label}. Please use the ${portalLabel} login.`);
+      navigate(PORTAL_PATH[actualRole] || "/login");
+      return;
+    }
+
+    setLoading(false);
+    toast.success("Welcome back!");
+    if (roleParam === "trainer") navigate("/trainer-dashboard");
+    else if (roleParam === "business") navigate("/business-dashboard");
+    else navigate("/profile");
   };
 
   const handleResend = async () => {
