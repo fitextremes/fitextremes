@@ -8,6 +8,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { supabase } from "@/integrations/supabase/client";
+
+const PORTAL_ROLE: Record<string, string> = {
+  user: "user",
+  trainer: "trainer",
+  business: "business",
+};
+const ROLE_LABEL: Record<string, string> = {
+  user: "Social User",
+  trainer: "Personal Trainer",
+  business: "Business User",
+};
+const PORTAL_PATH: Record<string, string> = {
+  user: "/login?role=user",
+  trainer: "/login?role=trainer",
+  business: "/business-auth?tab=login",
+};
 
 const Login = () => {
   const [searchParams] = useSearchParams();
