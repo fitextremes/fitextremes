@@ -7,16 +7,18 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  useMySubscription, daysBetween, useCancelSubscription, useReactivateSubscription, useSubscribeToPlan,
+  useMySubscription, daysBetween, useCancelSubscription,
 } from "@/hooks/useSubscription";
 import { useUserRole } from "@/hooks/useUserRole";
 import UpdatePaymentDialog from "@/components/UpdatePaymentDialog";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { toast } from "sonner";
 
 const PLAN_CONFIG = {
-  business: { name: "Business Plan", price: 30 },
-  trainer: { name: "Personal Trainer Plan", price: 15 },
+  business: { name: "Business Plan", price: 30, priceId: "business_monthly" },
+  trainer: { name: "Personal Trainer Plan", price: 15, priceId: "trainer_monthly" },
 } as const;
 
 const formatDate = (iso?: string | null) =>
