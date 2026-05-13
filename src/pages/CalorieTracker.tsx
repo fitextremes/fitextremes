@@ -137,7 +137,7 @@ const CalorieTracker = () => {
           .from("food_logs")
           .select("*")
           .eq("user_id", user.id)
-          .eq("logged_date", todayISO())
+          .eq("logged_date", dateToISO(selectedDate))
           .order("created_at", { ascending: true }),
         supabase.from("nutrition_goals").select("*").eq("user_id", user.id).maybeSingle(),
       ]);
