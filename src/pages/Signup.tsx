@@ -18,9 +18,9 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 const roles = [
-  { value: "user", label: "Social User", description: "Explore gyms, trainers & connect", price: "Free" },
+  { value: "user", label: "Social User", description: "Explore fitness centres, trainers & connect", price: "Free" },
   { value: "trainer", label: "Personal Trainer", description: "Showcase services & receive leads", price: "$15/mo" },
-  { value: "business", label: "Business Owner", description: "List your gym, studio or store", price: "$30/mo" },
+  { value: "business", label: "Business Owner", description: "List your fitness centre or supplement store", price: "$30/mo" },
 ];
 
 // --- Validation helpers ---
@@ -267,7 +267,7 @@ const Signup = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="supplement_store">Supplement Store</SelectItem>
-                    <SelectItem value="gym">Gym</SelectItem>
+                    <SelectItem value="gym">Fitness Centre</SelectItem>
                   </SelectContent>
                 </Select>
                 {touched.businessType && businessTypeError && (

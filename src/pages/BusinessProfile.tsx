@@ -13,7 +13,7 @@ const mockBusinesses: Record<string, {
   targetType: "gym" | "supplement";
 }> = {
   "1": {
-    name: "Iron Paradise Gym", type: "Full Gym", location: "Toronto, ON", rating: 4.8,
+    name: "Iron Paradise Fitness Centre", type: "Full Fitness Centre", location: "Toronto, ON", rating: 4.8,
     services: ["Weight Training", "Cardio Zone", "Group Classes", "Personal Training", "Sauna"],
     pricing: "$45/month", bio: "Toronto's premier strength training facility with state-of-the-art equipment and expert trainers.",
     phone: "(416) 555-0789", email: "info@ironparadise.ca", hours: "24/7",

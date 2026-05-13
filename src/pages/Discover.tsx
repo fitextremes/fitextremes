@@ -12,17 +12,17 @@ import { useBusinessList } from "@/hooks/useBusiness";
 type Tab = "gyms" | "supplements" | "trainers";
 
 const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
-  { key: "gyms", label: "Gyms", icon: Dumbbell },
+  { key: "gyms", label: "Fitness Centres", icon: Dumbbell },
   { key: "supplements", label: "Supplement Stores", icon: ShoppingBag },
   { key: "trainers", label: "Personal Trainers", icon: Star },
 ];
 
 const mockGyms = [
-  { id: 1, name: "Iron Paradise Gym", location: "Toronto, ON", rating: 4.8, type: "Full Gym", image: "🏋️" },
+  { id: 1, name: "Iron Paradise Fitness Centre", location: "Toronto, ON", rating: 4.8, type: "Full Fitness Centre", image: "🏋️" },
   { id: 2, name: "CrossFit Thunder", location: "Vancouver, BC", rating: 4.6, type: "CrossFit Box", image: "⚡" },
   { id: 3, name: "Zen Fitness Studio", location: "Montreal, QC", rating: 4.9, type: "Boutique Studio", image: "🧘" },
   { id: 4, name: "PowerLift Arena", location: "Calgary, AB", rating: 4.7, type: "Powerlifting", image: "💪" },
-  { id: 5, name: "FlexZone", location: "Ottawa, ON", rating: 4.5, type: "24/7 Gym", image: "🔥" },
+  { id: 5, name: "FlexZone", location: "Ottawa, ON", rating: 4.5, type: "24/7 Fitness Centre", image: "🔥" },
   { id: 6, name: "Peak Performance", location: "Edmonton, AB", rating: 4.8, type: "Athletic Training", image: "🏔️" },
 ];
 
@@ -90,7 +90,7 @@ const Discover = () => {
   const gymItems = useMemo(() => {
     const live = (realBusinesses || [])
       .filter((b: any) => b.business_type === "gym")
-      .map((b: any) => mapBusiness(b, "🏋️", "Gym"));
+      .map((b: any) => mapBusiness(b, "🏋️", "Fitness Centre"));
     return [...live, ...mockGyms.map(g => ({ ...g, isReal: false }))];
   }, [realBusinesses]);
 
@@ -126,7 +126,7 @@ const Discover = () => {
     <div className="min-h-screen bg-background pb-20">
       <SocialTopBar title="Discover" />
       <div className="container mx-auto px-4 pt-20 pb-12">
-        <p className="text-muted-foreground">Find gyms, supplement stores, and personal trainers near you</p>
+        <p className="text-muted-foreground">Find fitness centres, supplement stores, and personal trainers near you</p>
 
         {/* Tabs */}
         <div className="mt-8 flex flex-wrap gap-2">

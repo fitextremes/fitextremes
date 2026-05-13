@@ -13,7 +13,7 @@ import { useBusinessStats, useBusinessLeads, useUpdateLeadStatus } from "@/hooks
 import { toast } from "sonner";
 
 const businessLabel = (t?: string | null) =>
-  t === "gym" ? "Gym / Fitness Centre" : t === "supplement_store" ? "Supplement Store" : "Business";
+  t === "gym" ? "Fitness Centre" : t === "supplement_store" ? "Supplement Store" : "Business";
 
 const BusinessDashboard = () => {
   const { user, loading: authLoading } = useAuth();

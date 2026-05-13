@@ -208,7 +208,7 @@ const BusinessAuth = () => {
                   <SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="supplement_store">Supplement Store</SelectItem>
-                    <SelectItem value="gym">Gym / Fitness Centre</SelectItem>
+                    <SelectItem value="gym">Fitness Centre</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

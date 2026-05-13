@@ -34,7 +34,7 @@ const About = () => {
 
             <div className="grid gap-4 md:grid-cols-2">
               {[
-                { icon: MapPin, title: "Nearby Services", desc: "Discover gyms, studios, and trainers based on your location." },
+                { icon: MapPin, title: "Nearby Services", desc: "Discover fitness centres and trainers based on your location." },
                 { icon: Dumbbell, title: "Supplement Stores", desc: "Find trusted supplement stores for health and performance." },
                 { icon: Users, title: "Social Community", desc: "Share progress, follow enthusiasts, and stay motivated." },
                 { icon: Target, title: "Fitness Tracker", desc: "Coming soon — log workouts, track calories, monitor progress." },
