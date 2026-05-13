@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Trash2, Loader2, Settings, Apple } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Settings, Apple, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
+import { format, addDays, isSameDay, startOfDay } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { Button } from "@/components/ui/button";
@@ -78,7 +82,8 @@ const MEAL_LABELS: Record<MealType, string> = {
   snacks: "Snacks",
 };
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+// Local-time YYYY-MM-DD (avoid UTC offset shifting the day)
+const dateToISO = (d: Date) => format(d, "yyyy-MM-dd");
 
 // Parse "2 eggs" / "100g chicken" / "1 cup rice" -> { qty, unit, term }
 function parseQuery(raw: string): { quantity: number; term: string } {
@@ -95,6 +100,8 @@ const CalorieTracker = () => {
   const { isSocial, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [logs, setLogs] = useState<FoodLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
@@ -130,7 +137,7 @@ const CalorieTracker = () => {
           .from("food_logs")
           .select("*")
           .eq("user_id", user.id)
-          .eq("logged_date", todayISO())
+          .eq("logged_date", dateToISO(selectedDate))
           .order("created_at", { ascending: true }),
         supabase.from("nutrition_goals").select("*").eq("user_id", user.id).maybeSingle(),
       ]);
@@ -219,7 +226,7 @@ const CalorieTracker = () => {
         meal_type: mealType,
         source_api: food.source,
         source_id: food.id,
-        logged_date: todayISO(),
+        logged_date: dateToISO(selectedDate),
       })
       .select()
       .single();
@@ -282,14 +289,62 @@ const CalorieTracker = () => {
       <div className="container mx-auto max-w-2xl px-4 pt-20 pb-8 space-y-6">
         {/* Daily Summary */}
         <Card className="sticky top-16 z-30 border-primary/30 bg-card/95 backdrop-blur">
-          <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
-            <CardTitle className="font-display uppercase tracking-wider text-base flex items-center gap-2">
-              <Apple className="h-5 w-5 text-primary" />
-              Today
-            </CardTitle>
-            <Button variant="ghost" size="sm" onClick={openGoals}>
-              <Settings className="h-4 w-4" />
-            </Button>
+          <CardHeader className="pb-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-display uppercase tracking-wider text-base flex items-center gap-2">
+                <Apple className="h-5 w-5 text-primary" />
+                Daily Summary
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={openGoals} aria-label="Edit goals">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => setSelectedDate((d) => addDays(d, -1))}
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1 justify-center font-normal">
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    {isSameDay(selectedDate, new Date())
+                      ? `Today · ${format(selectedDate, "MMM d")}`
+                      : format(selectedDate, "EEE, MMM d, yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => {
+                      if (d) {
+                        setSelectedDate(startOfDay(d));
+                        setDatePickerOpen(false);
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => setSelectedDate((d) => addDays(d, 1))}
+                disabled={isSameDay(selectedDate, new Date())}
+                aria-label="Next day"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-end justify-between">
