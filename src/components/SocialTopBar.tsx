@@ -7,7 +7,7 @@ import NotificationBell from "@/components/NotificationBell";
 import logo from "@/assets/logo.png";
 
 interface SocialTopBarProps {
-  title: "Feed" | "Explore" | "Discover" | "Profile" | "Business";
+  title: "Feed" | "Explore" | "Discover" | "Profile" | "Business" | "Calorie Tracker";
 }
 
 const SocialTopBar = ({ title }: SocialTopBarProps) => {

@@ -206,6 +206,63 @@ export type Database = {
           },
         ]
       }
+      food_logs: {
+        Row: {
+          brand: string | null
+          calories: number
+          carbs: number
+          created_at: string
+          fat: number
+          food_name: string
+          id: string
+          logged_date: string
+          meal_type: string
+          protein: number
+          quantity: number
+          serving_size: string | null
+          source_api: string | null
+          source_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          food_name: string
+          id?: string
+          logged_date?: string
+          meal_type: string
+          protein?: number
+          quantity?: number
+          serving_size?: string | null
+          source_api?: string | null
+          source_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          food_name?: string
+          id?: string
+          logged_date?: string
+          meal_type?: string
+          protein?: number
+          quantity?: number
+          serving_size?: string | null
+          source_api?: string | null
+          source_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
@@ -269,6 +326,36 @@ export type Database = {
           read?: boolean
           recipient_id?: string
           type?: string
+        }
+        Relationships: []
+      }
+      nutrition_goals: {
+        Row: {
+          calorie_goal: number
+          carb_goal: number
+          created_at: string
+          fat_goal: number
+          protein_goal: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calorie_goal?: number
+          carb_goal?: number
+          created_at?: string
+          fat_goal?: number
+          protein_goal?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calorie_goal?: number
+          carb_goal?: number
+          created_at?: string
+          fat_goal?: number
+          protein_goal?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
