@@ -289,14 +289,62 @@ const CalorieTracker = () => {
       <div className="container mx-auto max-w-2xl px-4 pt-20 pb-8 space-y-6">
         {/* Daily Summary */}
         <Card className="sticky top-16 z-30 border-primary/30 bg-card/95 backdrop-blur">
-          <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
-            <CardTitle className="font-display uppercase tracking-wider text-base flex items-center gap-2">
-              <Apple className="h-5 w-5 text-primary" />
-              Today
-            </CardTitle>
-            <Button variant="ghost" size="sm" onClick={openGoals}>
-              <Settings className="h-4 w-4" />
-            </Button>
+          <CardHeader className="pb-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-display uppercase tracking-wider text-base flex items-center gap-2">
+                <Apple className="h-5 w-5 text-primary" />
+                Daily Summary
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={openGoals} aria-label="Edit goals">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => setSelectedDate((d) => addDays(d, -1))}
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex-1 justify-center font-normal">
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    {isSameDay(selectedDate, new Date())
+                      ? `Today · ${format(selectedDate, "MMM d")}`
+                      : format(selectedDate, "EEE, MMM d, yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => {
+                      if (d) {
+                        setSelectedDate(startOfDay(d));
+                        setDatePickerOpen(false);
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => setSelectedDate((d) => addDays(d, 1))}
+                disabled={isSameDay(selectedDate, new Date())}
+                aria-label="Next day"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-end justify-between">
