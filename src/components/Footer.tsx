@@ -25,7 +25,7 @@ const Footer = ({ hidePlatform = false, hideForPros = false }: FooterProps) => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              The all-in-one fitness ecosystem. Discover gyms, trainers, and supplements near you.
+              The all-in-one fitness ecosystem. Discover fitness centres, trainers, and supplements near you.
             </p>
           </div>
           {!hidePlatform && (

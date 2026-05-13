@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const businessLabel = (t?: string | null) =>
-  t === "gym" ? "Gym / Fitness Centre" : t === "supplement_store" ? "Supplement Store" : "Business";
+  t === "gym" ? "Fitness Centre" : t === "supplement_store" ? "Supplement Store" : "Business";
 
 const deliveryLabel = (t?: string | null) =>
   t === "yes" ? "Available" : t === "no" ? "Not available" : t === "local" ? "Local only" : t === "canada_wide" ? "Canada wide" : null;

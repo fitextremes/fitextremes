@@ -17,14 +17,14 @@ const fadeUp = {
 };
 
 const features = [
-  { icon: Search, title: "Find Gyms & Studios", description: "Discover top-rated gyms and training studios in your area with real reviews and pricing." },
+  { icon: Search, title: "Find Fitness Centres", description: "Discover top-rated fitness centres in your area with real reviews and pricing." },
   { icon: Dumbbell, title: "Connect with Trainers", description: "Browse certified personal trainers, view their experience, and send connection requests." },
   { icon: MapPin, title: "Supplement Stores", description: "Locate trusted supplement stores nearby for all your nutrition and performance needs." },
   { icon: Users, title: "Social Community", description: "Share your fitness journey, follow other enthusiasts, and stay motivated together." },
 ];
 
 const stats = [
-  { value: "500+", label: "Gyms Listed", icon: Dumbbell },
+  { value: "500+", label: "Fitness Centres Listed", icon: Dumbbell },
   { value: "1,200+", label: "Trainers", icon: Users },
   { value: "50K+", label: "Active Users", icon: TrendingUp },
   { value: "100+", label: "Cities", icon: MapPin },
@@ -70,7 +70,7 @@ const Index = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
           >
-            Discover gyms, connect with trainers, find supplements, and join a thriving fitness community — all in one place.
+            Discover fitness centres, connect with trainers, find supplements, and join a thriving fitness community — all in one place.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
@@ -209,7 +209,7 @@ const Index = () => {
               </div>
               <h3 className="font-display text-2xl uppercase tracking-wider text-foreground">Business Owners</h3>
               <p className="mt-2 text-muted-foreground">
-                List your gym, studio, or supplement store and connect with potential customers. First month free, then $30/month.
+                List your fitness centre or supplement store and connect with potential customers. First month free, then $30/month.
               </p>
               <Button variant="accent" className="mt-6" asChild>
                 <Link to="/signup?role=business">
