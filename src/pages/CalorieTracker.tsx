@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Trash2, Loader2, Settings, Apple } from "lucide-react";
+import { Search, Plus, Trash2, Loader2, Settings, Apple, ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
+import { format, addDays, isSameDay, startOfDay } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { Button } from "@/components/ui/button";
@@ -78,7 +82,8 @@ const MEAL_LABELS: Record<MealType, string> = {
   snacks: "Snacks",
 };
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+// Local-time YYYY-MM-DD (avoid UTC offset shifting the day)
+const dateToISO = (d: Date) => format(d, "yyyy-MM-dd");
 
 // Parse "2 eggs" / "100g chicken" / "1 cup rice" -> { qty, unit, term }
 function parseQuery(raw: string): { quantity: number; term: string } {
@@ -95,6 +100,8 @@ const CalorieTracker = () => {
   const { isSocial, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [logs, setLogs] = useState<FoodLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
@@ -219,7 +226,7 @@ const CalorieTracker = () => {
         meal_type: mealType,
         source_api: food.source,
         source_id: food.id,
-        logged_date: todayISO(),
+        logged_date: dateToISO(selectedDate),
       })
       .select()
       .single();
