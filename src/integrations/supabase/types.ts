@@ -743,6 +743,39 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_logs: {
+        Row: {
+          created_at: string
+          exercise_name: string
+          id: string
+          reps: number
+          sets: number
+          user_id: string
+          weight: number
+          weight_unit: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_name: string
+          id?: string
+          reps: number
+          sets: number
+          user_id: string
+          weight?: number
+          weight_unit?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_name?: string
+          id?: string
+          reps?: number
+          sets?: number
+          user_id?: string
+          weight?: number
+          weight_unit?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
