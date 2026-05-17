@@ -36,6 +36,7 @@ const Footer = ({ hidePlatform = false, hideForPros = false }: FooterProps) => {
                   <>
                     <Link to="/discover" className="text-sm text-muted-foreground hover:text-primary">Discover</Link>
                     <Link to="/calorie-tracker" className="text-sm text-muted-foreground hover:text-primary">Calorie Tracker</Link>
+                    <Link to="/workout-log" className="text-sm text-muted-foreground hover:text-primary">Workout Log</Link>
                   </>
                 )}
                 <Link to="/about" className="text-sm text-muted-foreground hover:text-primary">About</Link>

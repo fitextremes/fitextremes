@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, User, Compass, Apple } from "lucide-react";
+import { Home, User, Compass, Apple, Dumbbell } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 
 const tabs = [
   { to: "/dashboard", icon: Home, label: "Feed" },
-  { to: "/explore", icon: Users, label: "Explore" },
   { to: "/discover", icon: Compass, label: "Discover" },
   { to: "/calorie-tracker", icon: Apple, label: "Calories" },
+  { to: "/workout-log", icon: Dumbbell, label: "Workouts" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 

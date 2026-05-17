@@ -30,6 +30,7 @@ import BusinessGallery from "./pages/BusinessGallery";
 import NotFound from "./pages/NotFound";
 import CheckoutReturn from "./pages/CheckoutReturn";
 import CalorieTracker from "./pages/CalorieTracker";
+import WorkoutLog from "./pages/WorkoutLog";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/business/gallery" element={<BusinessGallery />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/calorie-tracker" element={<CalorieTracker />} />
+            <Route path="/workout-log" element={<WorkoutLog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
