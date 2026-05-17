@@ -202,15 +202,14 @@ const BusinessPublicProfile = () => {
                     <Mail className="h-4 w-4 text-primary" /> {business.email}
                   </div>
                 )}
-                {business.website_url && (
+                {business.website_url ? (
                   <a href={business.website_url} target="_blank" rel="noreferrer" onClick={() => trackClick("website_click")} className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary break-all">
-                    <Globe className="h-4 w-4 text-primary" /> Website
+                    <Globe className="h-4 w-4 text-primary" /> {business.website_url}
                   </a>
-                )}
-                {business.instagram_url && (
-                  <a href={business.instagram_url} target="_blank" rel="noreferrer" onClick={() => trackClick("instagram_click")} className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary">
-                    <Instagram className="h-4 w-4 text-primary" /> Instagram
-                  </a>
+                ) : (
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Globe className="h-4 w-4 text-primary" /> No website available
+                  </div>
                 )}
                 {business.home_delivery && deliveryLabel(business.home_delivery) && (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
