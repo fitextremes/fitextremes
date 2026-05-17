@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send, Globe, Instagram, Truck, Clock, Building2 } from "lucide-react";
+import { MapPin, Phone, Mail, ArrowLeft, Loader2, MessageSquare, Send, Globe, Truck, Clock, Building2 } from "lucide-react";
 import ProfileViewHeader from "@/components/ProfileViewHeader";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
