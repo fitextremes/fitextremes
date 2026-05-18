@@ -263,7 +263,7 @@ const BusinessAuth = () => {
                   {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
-                  1 month free. Then $30/month. Cancel anytime.
+                  3 months free. Then $30/month. Cancel anytime.
                 </p>
               </TabsContent>
 
