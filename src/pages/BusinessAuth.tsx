@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Eye, EyeOff, CheckCircle2, XCircle, Building2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, XCircle, Building2, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -127,7 +128,7 @@ const BusinessAuth = () => {
         toast.error(next.email || next.username!);
         return;
       }
-      await handleStartTrial();
+      setShowPayment(true);
     } catch {
       toast.error("Could not validate your details. Please try again.");
     } finally {
@@ -262,7 +263,7 @@ const BusinessAuth = () => {
                   {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
-                  1 month free. Then $30/month. Cancel anytime.
+                  3 months free. Then $30/month. Cancel anytime.
                 </p>
               </TabsContent>
 
@@ -289,6 +290,29 @@ const BusinessAuth = () => {
         </div>
       </div>
 
+      <Dialog open={showPayment} onOpenChange={(o) => !loading && setShowPayment(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase tracking-wider flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> 3-Month Free Trial
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-left">
+              You get a 3-month free trial. Your account will be created now and you can add a payment method any time before the trial ends. Billing starts automatically after the trial unless cancelled.
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="text-xs text-muted-foreground space-y-1.5 pl-1">
+            <li className="flex gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" /> Full access to your Fitness Centre dashboard</li>
+            <li className="flex gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" /> Public profile, leads & analytics</li>
+            <li className="flex gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" /> No charge during trial — cancel any time</li>
+          </ul>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" disabled={loading} onClick={() => setShowPayment(false)}>Cancel</Button>
+            <Button variant="hero" disabled={loading} onClick={handleStartTrial}>
+              {loading ? "Activating..." : "Start Free Trial"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
