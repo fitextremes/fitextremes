@@ -10,6 +10,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useBusinessStats, useBusinessLeads, useUpdateLeadStatus } from "@/hooks/useBusiness";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const businessLabel = (t?: string | null) =>
@@ -32,7 +34,29 @@ const BusinessDashboard = () => {
     if (!roleLoading && user && !isBusiness) navigate("/dashboard");
   }, [roleLoading, isBusiness, user, navigate]);
 
-  if (authLoading || roleLoading) {
+  // Gate: require a Stripe-managed subscription (card on file) to access dashboard
+  const { data: subGate, isLoading: subLoading } = useQuery({
+    queryKey: ["business-sub-gate", user?.id],
+    enabled: !!user?.id && isBusiness,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("stripe_subscription_id")
+        .eq("trainer_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (!authLoading && !roleLoading && !subLoading && user && isBusiness && !subGate?.stripe_subscription_id) {
+      navigate("/business-checkout", { replace: true });
+    }
+  }, [authLoading, roleLoading, subLoading, user, isBusiness, subGate, navigate]);
+
+  if (authLoading || roleLoading || subLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
   }
 
