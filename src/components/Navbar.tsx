@@ -10,7 +10,8 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { isSocial } = useUserRole();
+  const { isSocial, isTrainer, isBusiness } = useUserRole();
+  const dashboardPath = isBusiness ? "/business-dashboard" : isTrainer ? "/trainer-dashboard" : "/dashboard";
   const showDiscover = !minimal && !!user && isSocial;
   const navigate = useNavigate();
 
