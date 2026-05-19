@@ -263,7 +263,7 @@ const BusinessAuth = () => {
                   {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
-                  3 months free. Then $30/month. Cancel anytime.
+                  1 month free. Then $30/month. Cancel anytime.
                 </p>
               </TabsContent>
 
@@ -294,10 +294,10 @@ const BusinessAuth = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display uppercase tracking-wider flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" /> 3-Month Free Trial
+              <ShieldCheck className="h-5 w-5 text-primary" /> 1-Month Free Trial
             </DialogTitle>
             <DialogDescription className="pt-2 text-left">
-              You get a 3-month free trial. Your account will be created now and you can add a payment method any time before the trial ends. Billing starts automatically after the trial unless cancelled.
+              You get a 1-month free trial. Your account will be created now and you can add a payment method any time before the trial ends. Billing starts automatically after the trial unless cancelled.
             </DialogDescription>
           </DialogHeader>
           <ul className="text-xs text-muted-foreground space-y-1.5 pl-1">
