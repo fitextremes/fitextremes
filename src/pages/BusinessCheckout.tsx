@@ -65,6 +65,8 @@ const BusinessCheckout = () => {
             </p>
           </div>
 
+          <StripeTestCardsHelper />
+
           <div className="rounded-2xl border border-border bg-card p-4 md:p-6 shadow-card">
             <StripeEmbeddedCheckout
               priceId="business_monthly"
