@@ -10,13 +10,15 @@ import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isTrainer, loading: roleLoading } = useUserRole();
+  const { isTrainer, isBusiness, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { data: feedPosts, isLoading: feedLoading } = useFeedPosts();
 
   useEffect(() => {
-    if (!roleLoading && isTrainer) navigate("/trainer-dashboard", { replace: true });
-  }, [roleLoading, isTrainer, navigate]);
+    if (roleLoading) return;
+    if (isTrainer) navigate("/trainer-dashboard", { replace: true });
+    else if (isBusiness) navigate("/business-dashboard", { replace: true });
+  }, [roleLoading, isTrainer, isBusiness, navigate]);
 
   if (authLoading) {
     return (

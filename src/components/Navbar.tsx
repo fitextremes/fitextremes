@@ -10,7 +10,8 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { isSocial } = useUserRole();
+  const { isSocial, isTrainer, isBusiness } = useUserRole();
+  const dashboardPath = isBusiness ? "/business-dashboard" : isTrainer ? "/trainer-dashboard" : "/dashboard";
   const showDiscover = !minimal && !!user && isSocial;
   const navigate = useNavigate();
 
@@ -47,7 +48,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
 
           {!minimal && user ? (
             <>
-              <Link to="/dashboard" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              <Link to={dashboardPath} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Dashboard
               </Link>
               <button
@@ -100,7 +101,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
             )}
             {!minimal && user ? (
               <>
-                <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                <Link to={dashboardPath} className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-sm text-muted-foreground text-left">Sign Out</button>
               </>
             ) : !minimal ? (
