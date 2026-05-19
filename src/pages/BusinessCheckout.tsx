@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { StripeTestCardsHelper } from "@/components/StripeTestCardsHelper";
 import { useQuery } from "@tanstack/react-query";
 
 const BusinessCheckout = () => {
@@ -64,6 +65,8 @@ const BusinessCheckout = () => {
               Add a payment method to start your 1-month free trial. You won't be charged today — billing begins automatically after 30 days unless you cancel.
             </p>
           </div>
+
+          <StripeTestCardsHelper />
 
           <div className="rounded-2xl border border-border bg-card p-4 md:p-6 shadow-card">
             <StripeEmbeddedCheckout
