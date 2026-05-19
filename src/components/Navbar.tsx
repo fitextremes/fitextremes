@@ -101,7 +101,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
             )}
             {!minimal && user ? (
               <>
-                <Link to="/dashboard" className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                <Link to={dashboardPath} className="text-sm text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
                 <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="text-sm text-muted-foreground text-left">Sign Out</button>
               </>
             ) : !minimal ? (
