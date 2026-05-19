@@ -47,7 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: { full_name: fullName.trim(), role, username: normalizedUsername, ...(extra || {}) },
       },
     });
-    return { error, session: data.session, user: data.user };
+    // Force email verification: never keep an auto-created session from signUp().
+    // User must confirm email and explicitly sign in.
+    if (data.session) {
+      await supabase.auth.signOut();
+    }
+    return { error, session: null, user: data.user };
   };
 
   const signIn = async (emailOrUsername: string, password: string) => {
