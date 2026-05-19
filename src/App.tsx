@@ -29,6 +29,7 @@ import BusinessEditProfile from "./pages/BusinessEditProfile";
 import BusinessGallery from "./pages/BusinessGallery";
 import NotFound from "./pages/NotFound";
 import CheckoutReturn from "./pages/CheckoutReturn";
+import BusinessCheckout from "./pages/BusinessCheckout";
 import CalorieTracker from "./pages/CalorieTracker";
 import WorkoutLog from "./pages/WorkoutLog";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/business/edit" element={<BusinessEditProfile />} />
             <Route path="/business/gallery" element={<BusinessGallery />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
+            <Route path="/business-checkout" element={<BusinessCheckout />} />
             <Route path="/calorie-tracker" element={<CalorieTracker />} />
             <Route path="/workout-log" element={<WorkoutLog />} />
             <Route path="*" element={<NotFound />} />

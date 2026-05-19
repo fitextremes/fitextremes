@@ -146,11 +146,11 @@ const BusinessAuth = () => {
       return;
     }
     if (session) {
-      toast.success("Your free trial has started successfully.");
-      navigate("/business-dashboard");
+      toast.success("Account created. Add a payment method to activate your trial.");
+      navigate("/business-checkout");
     } else {
-      toast.success("Account created. Check your email to confirm before logging in.");
-      navigate("/login?role=business");
+      toast.success("Account created. Check your email to confirm, then log in to add payment.");
+      navigate("/business-auth?tab=login");
     }
   };
 
