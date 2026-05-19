@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { StripeTestCardsHelper } from "@/components/StripeTestCardsHelper";
 import { useQuery } from "@tanstack/react-query";
 
 const BusinessCheckout = () => {
