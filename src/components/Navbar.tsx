@@ -48,7 +48,7 @@ const Navbar = ({ minimal = false }: { minimal?: boolean }) => {
 
           {!minimal && user ? (
             <>
-              <Link to="/dashboard" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+              <Link to={dashboardPath} className="text-sm text-muted-foreground transition-colors hover:text-primary">
                 Dashboard
               </Link>
               <button
