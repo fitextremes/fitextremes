@@ -271,7 +271,13 @@ const BusinessAuth = () => {
                   {touched.password && errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
 
-                <Button variant="hero" className="w-full" size="lg" disabled={checkingUnique} onClick={handleStartClick}>
+                <LegalConsentCheckbox
+                  checked={legalAccepted}
+                  onChange={setLegalAccepted}
+                  error={touched.legal && legalError ? legalError : undefined}
+                />
+
+                <Button variant="hero" className="w-full" size="lg" disabled={checkingUnique || !legalAccepted} onClick={handleStartClick}>
                   {checkingUnique ? "Validating..." : "Start Your Free Trial"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
