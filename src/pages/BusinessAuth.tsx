@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, CheckCircle2, XCircle, Building2, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { LegalConsentCheckbox, LEGAL_CONSENT_VERSION } from "@/components/LegalConsentCheckbox";
 
 const validateFullName = (v: string) => {
   const t = v.trim();
@@ -74,6 +75,7 @@ const BusinessAuth = () => {
   const [loading, setLoading] = useState(false);
   const [checkingUnique, setCheckingUnique] = useState(false);
   const [uniqueErrors, setUniqueErrors] = useState<{ username?: string; email?: string }>({});
+  const [legalAccepted, setLegalAccepted] = useState(false);
 
   // Login state
   const [identifier, setIdentifier] = useState("");
@@ -88,8 +90,10 @@ const BusinessAuth = () => {
     businessType: businessType ? "" : "Please choose a business type",
   }), [fullName, username, email, password, businessType]);
 
+  const legalError = !legalAccepted ? "You must agree to the Terms & Privacy Policy to continue." : "";
+
   const c = pwChecks(password);
-  const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType;
+  const formValid = !errors.fullName && !errors.username && !errors.email && !errors.password && !errors.businessType && legalAccepted;
 
   const ROLE_LABEL: Record<string, string> = {
     user: "Social User",
@@ -103,9 +107,10 @@ const BusinessAuth = () => {
   };
 
   const handleStartClick = async () => {
-    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true, legal: true });
     if (!formValid) {
-      toast.error("Please fix the errors in the form");
+      if (!legalAccepted) toast.error("You must agree to the Terms & Privacy Policy to continue.");
+      else toast.error("Please fix the errors in the form");
       return;
     }
     setCheckingUnique(true);
@@ -138,7 +143,14 @@ const BusinessAuth = () => {
 
   const handleStartTrial = async () => {
     setLoading(true);
-    const { error, session } = await signUp(email, password, fullName, "business", username, { business_type: businessType });
+    const signupType = businessType === "gym" ? "fitness_centre" : "supplement_store";
+    const { error, session } = await signUp(email, password, fullName, "business", username, {
+      business_type: businessType,
+      terms_accepted: true,
+      privacy_accepted: true,
+      legal_consent_version: LEGAL_CONSENT_VERSION,
+      signup_user_type: signupType,
+    });
     setLoading(false);
     setShowPayment(false);
     if (error) {
