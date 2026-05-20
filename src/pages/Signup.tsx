@@ -394,6 +394,12 @@ const Signup = () => {
               )}
             </div>
 
+            <LegalConsentCheckbox
+              checked={legalAccepted}
+              onChange={setLegalAccepted}
+              error={touched.legal && !legalAccepted ? "You must agree to the Terms & Privacy Policy to continue." : undefined}
+            />
+
             {/* Submit */}
             <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !isFormValid}>
               {loading
