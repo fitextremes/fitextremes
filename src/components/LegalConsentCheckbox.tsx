@@ -23,12 +23,8 @@ export const LegalConsentCheckbox = ({ checked, onChange, error, id = "legal-con
       />
       <span className="text-xs text-muted-foreground leading-relaxed">
         I agree to the{" "}
-        <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-          Terms &amp; Conditions
-        </Link>{" "}
-        and{" "}
-        <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-          Privacy Policy
+        <Link to="/legal" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          Terms Conditions &amp; Privacy Policies
         </Link>
         .
       </span>
