@@ -24,6 +24,7 @@ const TrainerEditProfile = () => {
   const updateProfile = useUpdateProfile();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
