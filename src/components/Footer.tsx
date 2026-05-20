@@ -57,7 +57,7 @@ const Footer = ({ hidePlatform = false, hideForPros = false }: FooterProps) => {
             <h4 className="font-display uppercase tracking-wider text-foreground mb-3">Legal</h4>
             <div className="flex flex-col gap-2">
               <Link to="/legal" className="text-sm text-muted-foreground hover:text-primary">Terms Conditions &amp; Privacy Policies</Link>
-              <a href="mailto:info@fitextremes.com" className="text-sm text-muted-foreground hover:text-primary">Contact Us</a>
+              <Link to="/contact-us" className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link>
             </div>
           </div>
         </div>
