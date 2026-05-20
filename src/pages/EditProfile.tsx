@@ -56,6 +56,7 @@ const EditProfile = () => {
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationSelected, setLocationSelected] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
