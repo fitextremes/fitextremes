@@ -29,7 +29,7 @@ const BusinessEditProfile = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
-  const [instagram, setInstagram] = useState("");
+  
   const [delivery, setDelivery] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [hours, setHours] = useState<Record<string, string>>(Object.fromEntries(DAYS.map((d) => [d, ""])));
@@ -58,7 +58,7 @@ const BusinessEditProfile = () => {
       setPhone(p.phone || "");
       setWebsite(p.website_url || "");
       setWhatsapp(p.whatsapp_number || "");
-      setInstagram(p.instagram_url || "");
+      
       setDelivery(p.home_delivery || "");
       setBusinessType(p.business_type || "");
       setLocation(p.location || "");
@@ -108,7 +108,7 @@ const BusinessEditProfile = () => {
     if (!delivery) return "Select a home delivery option";
     if (!avatarPreview) return "Profile picture is required";
     if (website && !/^https?:\/\/.+\..+/i.test(website)) return "Website must start with http(s)://";
-    if (instagram && !/^https?:\/\/.+\..+/i.test(instagram)) return "Instagram link must start with http(s)://";
+    
     if (whatsapp && !/^\+?[0-9\s\-()]{6,20}$/.test(whatsapp)) return "Enter a valid WhatsApp number";
     return null;
   };
@@ -138,7 +138,7 @@ const BusinessEditProfile = () => {
           business_type: businessType,
           website_url: website.trim() || null,
           whatsapp_number: whatsapp.trim() || null,
-          instagram_url: instagram.trim() || null,
+          instagram_url: null,
           home_delivery: delivery,
           business_hours: hours,
           avatar_url,
@@ -246,10 +246,6 @@ const BusinessEditProfile = () => {
             <div className="space-y-1.5">
               <Label>Website URL</Label>
               <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourbusiness.com" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Instagram Link</Label>
-              <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/yourhandle" />
             </div>
           </div>
 
