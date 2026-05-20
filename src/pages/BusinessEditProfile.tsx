@@ -29,7 +29,7 @@ const BusinessEditProfile = () => {
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
-  const [instagram, setInstagram] = useState("");
+  
   const [delivery, setDelivery] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [hours, setHours] = useState<Record<string, string>>(Object.fromEntries(DAYS.map((d) => [d, ""])));
