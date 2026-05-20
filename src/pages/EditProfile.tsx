@@ -360,6 +360,7 @@ const EditProfile = () => {
       </div>
 
       <MobileTabBar />
+      <DeleteAccountDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
     </div>
   );
 };
