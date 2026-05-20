@@ -11,6 +11,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import MobileTabBar from "@/components/MobileTabBar";
+import DeleteAccountDialog from "@/components/DeleteAccountDialog";
 
 const ACCEPTED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX = 5 * 1024 * 1024;
