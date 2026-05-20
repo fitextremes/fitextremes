@@ -58,7 +58,7 @@ const BusinessEditProfile = () => {
       setPhone(p.phone || "");
       setWebsite(p.website_url || "");
       setWhatsapp(p.whatsapp_number || "");
-      setInstagram(p.instagram_url || "");
+      
       setDelivery(p.home_delivery || "");
       setBusinessType(p.business_type || "");
       setLocation(p.location || "");
