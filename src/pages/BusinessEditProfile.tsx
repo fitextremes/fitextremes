@@ -138,7 +138,7 @@ const BusinessEditProfile = () => {
           business_type: businessType,
           website_url: website.trim() || null,
           whatsapp_number: whatsapp.trim() || null,
-          instagram_url: instagram.trim() || null,
+          instagram_url: null,
           home_delivery: delivery,
           business_hours: hours,
           avatar_url,
