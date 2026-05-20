@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import MobileTabBar from "@/components/MobileTabBar";
+import DeleteAccountDialog from "@/components/DeleteAccountDialog";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -55,6 +56,7 @@ const EditProfile = () => {
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationSelected, setLocationSelected] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -341,10 +343,24 @@ const EditProfile = () => {
               "Save Changes"
             )}
           </Button>
+
+          {/* Account Management */}
+          <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+            <div>
+              <h3 className="font-display uppercase tracking-wider text-sm text-destructive">Account Management</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+            </div>
+            <Button variant="destructive" className="w-full sm:w-auto" onClick={() => setDeleteOpen(true)}>
+              Delete Account
+            </Button>
+          </div>
         </div>
       </div>
 
       <MobileTabBar />
+      <DeleteAccountDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
     </div>
   );
 };
