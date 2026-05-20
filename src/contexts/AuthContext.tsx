@@ -20,13 +20,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Rely solely on onAuthStateChange. It fires an INITIAL_SESSION event
+    // after Supabase has attempted to refresh any stored token, so we avoid
+    // the race where getSession() returns a stale session that is then
+    // invalidated by a failed refresh — which caused the UI to flicker
+    // between authenticated and signed-out states.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
