@@ -108,7 +108,7 @@ const BusinessEditProfile = () => {
     if (!delivery) return "Select a home delivery option";
     if (!avatarPreview) return "Profile picture is required";
     if (website && !/^https?:\/\/.+\..+/i.test(website)) return "Website must start with http(s)://";
-    if (instagram && !/^https?:\/\/.+\..+/i.test(instagram)) return "Instagram link must start with http(s)://";
+    
     if (whatsapp && !/^\+?[0-9\s\-()]{6,20}$/.test(whatsapp)) return "Enter a valid WhatsApp number";
     return null;
   };
