@@ -272,10 +272,23 @@ const TrainerEditProfile = () => {
           <Button variant="hero" className="w-full" onClick={handleSave} disabled={updateProfile.isPending}>
             {updateProfile.isPending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</> : "Save Changes"}
           </Button>
+
+          <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+            <div>
+              <h3 className="font-display uppercase tracking-wider text-sm text-destructive">Account Management</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Permanently delete your trainer account and all associated data. This action cannot be undone.
+              </p>
+            </div>
+            <Button variant="destructive" className="w-full sm:w-auto" onClick={() => setDeleteOpen(true)}>
+              Delete Account
+            </Button>
+          </div>
         </div>
       </div>
 
       <MobileTabBar />
+      <DeleteAccountDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
     </div>
   );
 };
