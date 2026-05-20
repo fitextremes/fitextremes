@@ -27,6 +27,7 @@ const BusinessEditProfile = () => {
 
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
