@@ -247,10 +247,6 @@ const BusinessEditProfile = () => {
               <Label>Website URL</Label>
               <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourbusiness.com" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Instagram Link</Label>
-              <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/yourhandle" />
-            </div>
           </div>
 
           <div className="space-y-1.5">
