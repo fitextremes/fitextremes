@@ -10,6 +10,14 @@ import { Eye, EyeOff, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { LegalConsentCheckbox, LEGAL_CONSENT_VERSION } from "@/components/LegalConsentCheckbox";
+
+const SIGNUP_TYPE_MAP: Record<string, string> = {
+  user: "social_user",
+  trainer: "personal_trainer",
+  business_supplement_store: "supplement_store",
+  business_gym: "fitness_centre",
+};
 
 const ROLE_LABEL: Record<string, string> = {
   user: "Social User",
@@ -95,6 +103,7 @@ const Signup = () => {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const { signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
 
@@ -109,7 +118,7 @@ const Signup = () => {
   const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
   const businessTypeError = selectedRole === "business" && !businessType ? "Please select a business type" : "";
-  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username && !businessTypeError;
+  const isFormValid = !errors.fullName && !errors.email && !errors.password && !errors.username && !businessTypeError && legalAccepted;
 
   const handleBlur = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -130,7 +139,18 @@ const Signup = () => {
       return false;
     }
 
-    const extra = selectedRole === "business" ? { business_type: businessType } : undefined;
+    const signupUserType = selectedRole === "business"
+      ? SIGNUP_TYPE_MAP[`business_${businessType}`] || "supplement_store"
+      : SIGNUP_TYPE_MAP[selectedRole] || "social_user";
+    const consentExtra = {
+      terms_accepted: true,
+      privacy_accepted: true,
+      legal_consent_version: LEGAL_CONSENT_VERSION,
+      signup_user_type: signupUserType,
+    };
+    const extra = selectedRole === "business"
+      ? { business_type: businessType, ...consentExtra }
+      : consentExtra;
     const { error, session } = await signUp(email, password, fullName.trim(), selectedRole, username, extra);
     setLoading(false);
     if (error) {
@@ -158,8 +178,11 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true });
-    if (!isFormValid) return;
+    setTouched({ fullName: true, username: true, email: true, password: true, businessType: true, legal: true });
+    if (!isFormValid) {
+      if (!legalAccepted) toast.error("You must agree to the Terms & Privacy Policy to continue.");
+      return;
+    }
     await performSignup();
   };
 
@@ -370,6 +393,12 @@ const Signup = () => {
                 </div>
               )}
             </div>
+
+            <LegalConsentCheckbox
+              checked={legalAccepted}
+              onChange={setLegalAccepted}
+              error={touched.legal && !legalAccepted ? "You must agree to the Terms & Privacy Policy to continue." : undefined}
+            />
 
             {/* Submit */}
             <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !isFormValid}>

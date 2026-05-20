@@ -435,12 +435,17 @@ export type Database = {
           instagram_url: string | null
           is_suspended: boolean
           latitude: number | null
+          legal_consent_at: string | null
+          legal_consent_version: string | null
           location: string | null
           longitude: number | null
           phone: string | null
+          privacy_accepted: boolean
           profile_visibility: string
           role: string
+          signup_user_type: string | null
           subscription_status: string
+          terms_accepted: boolean
           trial_started_at: string | null
           updated_at: string
           username: string | null
@@ -464,12 +469,17 @@ export type Database = {
           instagram_url?: string | null
           is_suspended?: boolean
           latitude?: number | null
+          legal_consent_at?: string | null
+          legal_consent_version?: string | null
           location?: string | null
           longitude?: number | null
           phone?: string | null
+          privacy_accepted?: boolean
           profile_visibility?: string
           role?: string
+          signup_user_type?: string | null
           subscription_status?: string
+          terms_accepted?: boolean
           trial_started_at?: string | null
           updated_at?: string
           username?: string | null
@@ -493,12 +503,17 @@ export type Database = {
           instagram_url?: string | null
           is_suspended?: boolean
           latitude?: number | null
+          legal_consent_at?: string | null
+          legal_consent_version?: string | null
           location?: string | null
           longitude?: number | null
           phone?: string | null
+          privacy_accepted?: boolean
           profile_visibility?: string
           role?: string
+          signup_user_type?: string | null
           subscription_status?: string
+          terms_accepted?: boolean
           trial_started_at?: string | null
           updated_at?: string
           username?: string | null
