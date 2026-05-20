@@ -35,6 +35,7 @@ import WorkoutLog from "./pages/WorkoutLog";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Legal from "./pages/Legal";
+import ContactUs from "./pages/ContactUs";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,7 @@ const App = () => (
             <Route path="/calorie-tracker" element={<CalorieTracker />} />
             <Route path="/workout-log" element={<WorkoutLog />} />
             <Route path="/legal" element={<Legal />} />
+            <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/terms" element={<Navigate to="/legal#terms" replace />} />
             <Route path="/privacy" element={<Navigate to="/legal#privacy" replace />} />
             <Route path="*" element={<NotFound />} />
