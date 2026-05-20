@@ -341,6 +341,19 @@ const EditProfile = () => {
               "Save Changes"
             )}
           </Button>
+
+          {/* Account Management */}
+          <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+            <div>
+              <h3 className="font-display uppercase tracking-wider text-sm text-destructive">Account Management</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+            </div>
+            <Button variant="destructive" className="w-full sm:w-auto" onClick={() => setDeleteOpen(true)}>
+              Delete Account
+            </Button>
+          </div>
         </div>
       </div>
 
