@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       priceId?: string; returnUrl?: string; environment?: StripeEnv;
     };
     if (!priceId || !/^[a-zA-Z0-9_-]+$/.test(priceId)) throw new Error("Invalid priceId");
-    if (!returnUrl) throw new Error("Missing returnUrl");
+    if (!returnUrl || !isAllowedReturnUrl(returnUrl)) throw new Error("Invalid returnUrl");
     if (environment !== "sandbox" && environment !== "live") throw new Error("Invalid environment");
 
     // Auth — required: subscriptions are tied to a user
