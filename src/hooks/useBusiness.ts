@@ -40,8 +40,8 @@ export const useBusinessProfile = (id?: string) =>
     queryKey: ["business-profile", id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from("profiles")
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .eq("id", id)
         .eq("role", "business")
