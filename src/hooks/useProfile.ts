@@ -9,17 +9,15 @@ export const useProfile = (userId?: string) => {
 
   return useQuery({
     queryKey: ["profile", targetId, isOwn],
-    queryFn: async () => {
+    queryFn: async (): Promise<any> => {
       if (!targetId) return null;
       if (isOwn) {
-        // Owner: read full row (including sensitive fields) via SECURITY DEFINER RPC.
-        const { data, error } = await supabase.rpc("get_my_full_profile");
+        const { data, error } = await supabase.rpc("get_my_full_profile" as any);
         if (error) throw error;
         return data;
       }
-      // Other users: read public-safe view (sensitive fields hidden for social users).
-      const { data, error } = await supabase
-        .from("profiles_public" as any)
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .eq("id", targetId)
         .single();
