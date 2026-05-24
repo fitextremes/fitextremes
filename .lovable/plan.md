@@ -1,40 +1,40 @@
-## Why "Kahma Supplements" doesn't appear
+## Remove All Lovable Branding & Debug Tools from Production
 
-The Discover page (`src/pages/Discover.tsx`) currently shows **hardcoded mock data** for the Gyms and Supplement Stores tabs:
+### 1. Hide the "Edit with Lovable" badge on published deployments
+- Call `publish_settings--set_badge_visibility` with `hide_badge: true`
+- This removes the floating "Edit with Lovable" button from the live site
 
-- `mockGyms` — static array
-- `mockSupplements` — static array (NutriMax, Protein Planet, Vitality Health, MuscleFuel)
-- Only the Trainers tab fetches real data (via `useTrainerList`)
+### 2. Clean up `index.html` (white-label meta tags)
+- Remove `meta name="author" content="Lovable"`
+- Remove `twitter:site="@Lovable"`
+- Remove TODO comments
+- Keep all other meta tags (og:title, og:description, og:image, twitter tags without Lovable references)
 
-Kahma Supplements **is** in the database:
-- `role = "business"`, `business_type = "supplement_store"`, `is_suspended = false`
-- It just has no code path that loads it into the Supplement Stores tab.
+### 3. Remove Lovable docs links from production components
+- **PaymentTestModeBanner.tsx**: Replace the `docs.lovable.dev` link with an internal or generic explanation, or remove the external link entirely
+- **StripeTestCardsHelper.tsx**: Already links to `docs.stripe.com` — no Lovable branding, keep as-is
 
-## Plan
+### 4. Update Capacitor mobile config for custom domain
+- **capacitor.config.ts**: Change `server.url` from `https://87825c93-ae86-464c-a3a1-cc5c52812560.lovableproject.com?forceHideBadge=true` to `https://fitextremes.com?forceHideBadge=true`
+- This ensures Android/iOS webviews load the white-labeled custom domain instead of the Lovable project URL
 
-### 1. Use the existing `useBusinessList` hook
+### 5. Ensure `lovable-tagger` never runs in production
+- **vite.config.ts**: Already gated by `mode === "development"` — verify the conditional is correct (it is). No code change needed unless the user wants the dependency fully removed.
 
-`src/hooks/useBusiness.ts` already exposes `useBusinessList()` which fetches all non-suspended business profiles, including `business_type`. No new hook needed.
+### 6. Update `.env` / environment variables if needed
+- Check if `VITE_SUPABASE_URL` or other env vars reference Lovable URLs — they should already be correct
 
-### 2. Update `src/pages/Discover.tsx`
+### 7. Publish after cleanup
+- Republish the project so the badge removal and `index.html` changes go live
 
-- Import and call `useBusinessList()`.
-- Build two derived arrays merging real businesses (filtered by `business_type`) with the existing mocks, mirroring the pattern already used for trainers:
-  - **Gyms tab**: real businesses where `business_type === "gym"` + `mockGyms`
-  - **Supplements tab**: real businesses where `business_type` is `"supplement_store"` (and tolerate variants like `"supplements"`) + `mockSupplements`
-- Each real item maps to: `{ id, isReal: true, name: full_name, location: location || "Canada", rating: 5.0, type: bio?.slice(0,60) || default label, image: emoji, avatar_url }`.
-- Keep the search + location filter logic identical; just run it over the merged list.
-- "View Profile" link: for real businesses, route to `/business/{id}` (already supported by `BusinessPublicProfile`); mocks keep current behavior.
+### 8. Validate
+- Verify badge is hidden on `https://fitextremes.com`
+- Verify no Lovable references in page source (view-source)
+- Confirm mobile webviews load `fitextremes.com`
 
-### 3. Verification
-
-- Switch to Supplement Stores tab on `/discover` → "Kahma Supplements" appears alongside the mocks, with its avatar (if set) and Toronto/etc location.
-- Click "View Profile" on Kahma → opens its public business profile.
-- Gyms tab also shows any business with `business_type = "gym"`.
-- Search/location filters still work on the merged list.
-
-### Files to edit
-
-- `src/pages/Discover.tsx` (only file)
-
-No DB changes, no new hooks, no schema migration.
+### What stays untouched
+- Authentication flows (AuthContext, Supabase client)
+- Stripe checkout and payment integrations
+- All dashboard pages (business, trainer, social)
+- All business logic, hooks, and API calls
+- `forceHideBadge=true` query param (still needed to suppress badge in capacitor webview)
