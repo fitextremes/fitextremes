@@ -913,8 +913,52 @@ export type Database = {
     Functions: {
       cancel_subscription: { Args: never; Returns: Json }
       get_business_stats: { Args: { _business_id: string }; Returns: Json }
+      get_my_full_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          business_hours: Json | null
+          business_type: string | null
+          certifications: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          home_delivery: string | null
+          hourly_max: number | null
+          hourly_min: number | null
+          id: string
+          instagram_url: string | null
+          is_suspended: boolean
+          latitude: number | null
+          legal_consent_at: string | null
+          legal_consent_version: string | null
+          location: string | null
+          longitude: number | null
+          phone: string | null
+          privacy_accepted: boolean
+          profile_visibility: string
+          role: string
+          signup_user_type: string | null
+          subscription_status: string
+          terms_accepted: boolean
+          trial_started_at: string | null
+          updated_at: string
+          username: string | null
+          website_url: string | null
+          whatsapp_number: string | null
+          years_experience: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_my_subscription: { Args: never; Returns: Json }
       get_trainer_stats: { Args: { _trainer_id: string }; Returns: Json }
+      lookup_email_by_username: { Args: { _username: string }; Returns: string }
       lookup_email_role: { Args: { _email: string }; Returns: string }
       lookup_username_taken: { Args: { _username: string }; Returns: boolean }
       reactivate_subscription: { Args: never; Returns: Json }
