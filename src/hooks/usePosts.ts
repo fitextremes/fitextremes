@@ -26,7 +26,7 @@ export const useFeedPosts = () => {
         .not("id", "in", `(${[user.id, ...followedIds].join(",")})`)
         .limit(20);
 
-      const publicIds = publicProfiles?.map((p) => p.id) || [];
+      const publicIds = (publicProfiles as any[] | null)?.map((p) => p.id) || [];
       const feedUserIds = [user.id, ...followedIds, ...publicIds];
 
       const { data, error } = await supabase
