@@ -111,6 +111,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       connection_requests: {
@@ -198,10 +205,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -392,6 +413,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profile_views: {
@@ -558,6 +586,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -793,13 +828,95 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          business_hours: Json | null
+          business_type: string | null
+          certifications: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          home_delivery: string | null
+          hourly_max: number | null
+          hourly_min: number | null
+          id: string | null
+          instagram_url: string | null
+          is_suspended: boolean | null
+          location: string | null
+          phone: string | null
+          profile_visibility: string | null
+          role: string | null
+          signup_user_type: string | null
+          updated_at: string | null
+          username: string | null
+          website_url: string | null
+          whatsapp_number: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          business_hours?: Json | null
+          business_type?: string | null
+          certifications?: string | null
+          created_at?: string | null
+          email?: never
+          full_name?: string | null
+          home_delivery?: string | null
+          hourly_max?: number | null
+          hourly_min?: number | null
+          id?: string | null
+          instagram_url?: string | null
+          is_suspended?: boolean | null
+          location?: string | null
+          phone?: never
+          profile_visibility?: string | null
+          role?: string | null
+          signup_user_type?: string | null
+          updated_at?: string | null
+          username?: string | null
+          website_url?: string | null
+          whatsapp_number?: never
+          years_experience?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          business_hours?: Json | null
+          business_type?: string | null
+          certifications?: string | null
+          created_at?: string | null
+          email?: never
+          full_name?: string | null
+          home_delivery?: string | null
+          hourly_max?: number | null
+          hourly_min?: number | null
+          id?: string | null
+          instagram_url?: string | null
+          is_suspended?: boolean | null
+          location?: string | null
+          phone?: never
+          profile_visibility?: string | null
+          role?: string | null
+          signup_user_type?: string | null
+          updated_at?: string | null
+          username?: string | null
+          website_url?: string | null
+          whatsapp_number?: never
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cancel_subscription: { Args: never; Returns: Json }
       get_business_stats: { Args: { _business_id: string }; Returns: Json }
       get_my_subscription: { Args: never; Returns: Json }
       get_trainer_stats: { Args: { _trainer_id: string }; Returns: Json }
+      lookup_email_role: { Args: { _email: string }; Returns: string }
+      lookup_username_taken: { Args: { _username: string }; Returns: boolean }
       reactivate_subscription: { Args: never; Returns: Json }
       recompute_subscription_status: {
         Args: { _trainer_id?: string }
