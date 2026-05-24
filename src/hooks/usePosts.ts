@@ -20,13 +20,13 @@ export const useFeedPosts = () => {
 
       // Get public profiles (not followed but public)
       const { data: publicProfiles } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("id")
         .eq("profile_visibility", "public")
         .not("id", "in", `(${[user.id, ...followedIds].join(",")})`)
         .limit(20);
 
-      const publicIds = publicProfiles?.map((p) => p.id) || [];
+      const publicIds = (publicProfiles as any[] | null)?.map((p) => p.id) || [];
       const feedUserIds = [user.id, ...followedIds, ...publicIds];
 
       const { data, error } = await supabase

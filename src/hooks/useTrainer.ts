@@ -84,8 +84,8 @@ export const useTrainerProfile = (id?: string) => {
     queryKey: ["trainer-profile", id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from("profiles")
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .eq("id", id)
         .eq("role", "trainer")

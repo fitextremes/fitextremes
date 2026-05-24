@@ -196,8 +196,8 @@ export const useExploreUsers = (searchQuery?: string) => {
   return useQuery({
     queryKey: ["explore-users", searchQuery],
     queryFn: async () => {
-      let query = supabase
-        .from("profiles")
+      let query = (supabase as any)
+        .from("profiles_public")
         .select("*")
         .eq("role", "user")
         .order("created_at", { ascending: false })

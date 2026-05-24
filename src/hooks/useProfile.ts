@@ -5,13 +5,19 @@ import { useAuth } from "@/contexts/AuthContext";
 export const useProfile = (userId?: string) => {
   const { user } = useAuth();
   const targetId = userId || user?.id;
+  const isOwn = !!user && !!targetId && user.id === targetId;
 
   return useQuery({
-    queryKey: ["profile", targetId],
-    queryFn: async () => {
+    queryKey: ["profile", targetId, isOwn],
+    queryFn: async (): Promise<any> => {
       if (!targetId) return null;
-      const { data, error } = await supabase
-        .from("profiles")
+      if (isOwn) {
+        const { data, error } = await supabase.rpc("get_my_full_profile" as any);
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .eq("id", targetId)
         .single();
@@ -53,9 +59,9 @@ export const useUpdateProfile = () => {
 export const useProfileByUsername = (username: string) => {
   return useQuery({
     queryKey: ["profile", "username", username],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
+    queryFn: async (): Promise<any> => {
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .ilike("username", username)
         .single();
