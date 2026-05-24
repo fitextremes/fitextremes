@@ -11,6 +11,27 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const ALLOWED_RETURN_ORIGINS = new Set([
+  "https://fitextremes.com",
+  "https://www.fitextremes.com",
+  "https://fitextremes.lovable.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+]);
+
+function isAllowedReturnUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (ALLOWED_RETURN_ORIGINS.has(u.origin)) return true;
+    // Allow Lovable preview subdomains for this project
+    if (u.origin.endsWith(".lovable.app") || u.origin.endsWith(".lovableproject.com")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
   options: { email?: string; userId?: string },
