@@ -127,14 +127,13 @@ const Signup = () => {
     const normalizedEmail = email.trim().toLowerCase();
 
     // Pre-check: ensure email isn't already registered under any role
-    const { data: existing } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("email", normalizedEmail)
-      .maybeSingle();
-    if (existing?.role) {
+    const { data: existingRole } = await supabase.rpc(
+      "lookup_email_role" as any,
+      { _email: normalizedEmail } as any
+    );
+    if (existingRole) {
       setLoading(false);
-      const label = ROLE_LABEL[existing.role] || "another account type";
+      const label = ROLE_LABEL[existingRole as string] || "another account type";
       toast.error(`This email is already registered as a ${label}.`);
       return false;
     }
