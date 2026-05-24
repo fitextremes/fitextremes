@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       returnUrl?: string; environment?: StripeEnv;
     };
     if (environment !== "sandbox" && environment !== "live") throw new Error("Invalid environment");
-    if (!returnUrl) throw new Error("Missing returnUrl");
+    if (!returnUrl || !isAllowedReturnUrl(returnUrl)) throw new Error("Invalid returnUrl");
 
     const token = req.headers.get("Authorization")?.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
