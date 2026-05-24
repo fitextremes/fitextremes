@@ -60,16 +60,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!identifier.includes("@")) {
       const normalizedUsername = identifier.toLowerCase();
-      const { data, error: lookupError } = await supabase
-        .from("profiles")
-        .select("email")
-        .ilike("username", normalizedUsername)
-        .maybeSingle();
+      const { data, error: lookupError } = await supabase.rpc(
+        "lookup_email_by_username" as any,
+        { _username: normalizedUsername } as any
+      );
 
-      if (lookupError || !data?.email) {
+      if (lookupError || !data) {
         return { error: { message: "No account found with that username" } };
       }
-      email = data.email.toLowerCase();
+      email = String(data).toLowerCase();
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
