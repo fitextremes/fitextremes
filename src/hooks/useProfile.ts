@@ -5,13 +5,21 @@ import { useAuth } from "@/contexts/AuthContext";
 export const useProfile = (userId?: string) => {
   const { user } = useAuth();
   const targetId = userId || user?.id;
+  const isOwn = !!user && !!targetId && user.id === targetId;
 
   return useQuery({
-    queryKey: ["profile", targetId],
+    queryKey: ["profile", targetId, isOwn],
     queryFn: async () => {
       if (!targetId) return null;
+      if (isOwn) {
+        // Owner: read full row (including sensitive fields) via SECURITY DEFINER RPC.
+        const { data, error } = await supabase.rpc("get_my_full_profile");
+        if (error) throw error;
+        return data;
+      }
+      // Other users: read public-safe view (sensitive fields hidden for social users).
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("*")
         .eq("id", targetId)
         .single();
@@ -55,7 +63,7 @@ export const useProfileByUsername = (username: string) => {
     queryKey: ["profile", "username", username],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("*")
         .ilike("username", username)
         .single();
