@@ -82,7 +82,7 @@ export const useNotifications = () => {
       let profiles: Record<string, any> = {};
       if (actorIds.length) {
         const { data: pr } = await supabase
-          .from("profiles")
+          .from("profiles_public" as any)
           .select("id, username, full_name, avatar_url")
           .in("id", actorIds);
         (pr ?? []).forEach((p: any) => (profiles[p.id] = p));
