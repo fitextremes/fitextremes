@@ -118,12 +118,12 @@ const BusinessAuth = () => {
     const normalizedUsername = username.trim().toLowerCase();
     const normalizedEmail = email.trim().toLowerCase();
     try {
-      const [{ data: uRow }, { data: emailRole }] = await Promise.all([
-        supabase.from("profiles").select("id").ilike("username", normalizedUsername).maybeSingle(),
+      const [{ data: usernameTaken }, { data: emailRole }] = await Promise.all([
+        supabase.rpc("lookup_username_taken" as any, { _username: normalizedUsername } as any),
         supabase.rpc("lookup_email_role" as any, { _email: normalizedEmail } as any),
       ]);
       const next: { username?: string; email?: string } = {};
-      if (uRow) next.username = "Username is already taken.";
+      if (usernameTaken) next.username = "Username is already taken.";
       if (emailRole) {
         const label = ROLE_LABEL[emailRole as string] || "another account type";
         next.email = `This email is already registered as a ${label}.`;

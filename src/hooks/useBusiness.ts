@@ -185,7 +185,7 @@ export const useBusinessList = () =>
     queryKey: ["business-list"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("id, full_name, username, avatar_url, location, business_type, bio")
         .eq("role", "business")
         .eq("is_suspended", false)
