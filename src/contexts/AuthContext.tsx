@@ -56,21 +56,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (emailOrUsername: string, password: string) => {
     const identifier = emailOrUsername.trim();
-    let email = identifier.toLowerCase();
 
     if (!identifier.includes("@")) {
-      const normalizedUsername = identifier.toLowerCase();
-      const { data, error: lookupError } = await supabase.rpc(
-        "lookup_email_by_username" as any,
-        { _username: normalizedUsername } as any
-      );
-
-      if (lookupError || !data) {
-        return { error: { message: "No account found with that username" } };
+      // Username login: resolve email and sign in server-side to avoid
+      // leaking emails to anonymous callers.
+      const { data, error: fnError } = await supabase.functions.invoke("username-signin", {
+        body: { username: identifier, password },
+      });
+      if (fnError || !data?.session) {
+        return { error: { message: "Invalid username or password" } };
       }
-      email = String(data).toLowerCase();
+      const { error } = await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+      return { error };
     }
 
+    const email = identifier.toLowerCase();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };

@@ -11,6 +11,26 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const ALLOWED_RETURN_ORIGINS = new Set([
+  "https://fitextremes.com",
+  "https://www.fitextremes.com",
+  "https://fitextremes.lovable.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+]);
+
+function isAllowedReturnUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (ALLOWED_RETURN_ORIGINS.has(u.origin)) return true;
+    if (u.origin.endsWith(".lovable.app") || u.origin.endsWith(".lovableproject.com")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
@@ -24,7 +44,7 @@ Deno.serve(async (req) => {
       returnUrl?: string; environment?: StripeEnv;
     };
     if (environment !== "sandbox" && environment !== "live") throw new Error("Invalid environment");
-    if (!returnUrl) throw new Error("Missing returnUrl");
+    if (!returnUrl || !isAllowedReturnUrl(returnUrl)) throw new Error("Invalid returnUrl");
 
     const token = req.headers.get("Authorization")?.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);

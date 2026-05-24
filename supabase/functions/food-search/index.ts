@@ -1,4 +1,10 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+const supabaseAuth = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_ANON_KEY')!,
+);
 
 interface FoodResult {
   id: string;
@@ -71,17 +77,33 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    // Require authentication — protects the server-side USDA API key from
+    // anonymous abuse and quota exhaustion.
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { query } = await req.json();
     if (!query || typeof query !== 'string' || query.trim().length < 2) {
       return new Response(JSON.stringify({ results: [] }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    const safeQuery = query.trim().slice(0, 100);
 
-    const usda = await searchUSDA(query.trim());
+    const usda = await searchUSDA(safeQuery);
     let results = usda;
     if (usda.length < 5) {
-      const off = await searchOFF(query.trim());
+      const off = await searchOFF(safeQuery);
       results = [...usda, ...off].slice(0, 25);
     }
 
