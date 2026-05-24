@@ -59,9 +59,9 @@ export const useUpdateProfile = () => {
 export const useProfileByUsername = (username: string) => {
   return useQuery({
     queryKey: ["profile", "username", username],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles_public" as any)
+    queryFn: async (): Promise<any> => {
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("*")
         .ilike("username", username)
         .single();
