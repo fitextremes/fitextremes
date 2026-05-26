@@ -32,6 +32,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
+  const isDeleteConfirmed = typed.trim().toUpperCase() === "DELETE";
 
   const reset = () => {
     setStep("warn");
@@ -72,7 +73,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   };
 
   const handleDelete = async () => {
-    if (typed !== "DELETE" || loading) return;
+    if (!isDeleteConfirmed || loading) return;
     setLoading(true);
     try {
       const {
@@ -91,18 +92,24 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("delete-account", {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
         },
-        body: { feedback: feedback || null },
+        body: JSON.stringify({ feedback: feedback || null }),
       });
-      if (error || (data as any)?.error) {
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || (data as any)?.error) {
         const msg =
           (data as any)?.error ||
-          error?.message ||
+          response.statusText ||
           "Unable to delete account. Please try again.";
-        console.error("[DeleteAccount] failed:", error, data);
+        console.error("[DeleteAccount] failed:", response.status, data);
 
         if (/unauthorized|jwt|session/i.test(msg)) {
           setStep("verify");
@@ -220,10 +227,17 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
             <div className="space-y-3">
               <Input
                 value={typed}
-                onChange={(e) => setTyped(e.target.value)}
+                onChange={(e) => setTyped(e.target.value.toUpperCase())}
                 placeholder="Type DELETE"
                 autoFocus
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                onKeyDown={(e) => e.key === "Enter" && handleDelete()}
               />
+              <p className="text-xs text-muted-foreground">
+                Confirmation is not case-sensitive, and extra spaces are ignored.
+              </p>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Why are you leaving? (optional)
@@ -241,7 +255,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={typed !== "DELETE" || loading}
+                disabled={!isDeleteConfirmed || loading}
               >
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Permanently Delete My Account

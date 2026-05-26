@@ -3,16 +3,11 @@
 // via supabase.auth.signInWithPassword) immediately before invoking this fn.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ["trial", "trial_ending", "active", "payment_due", "grace", "past_due"];
 
@@ -77,12 +72,14 @@ Deno.serve(async (req) => {
       return json({ error: "Unauthorized" }, 401);
     }
 
-    const authClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: { user }, error: userErr } = await authClient.auth.getUser(token);
-    if (userErr || !user) {
-      console.error("[delete-account] auth.getUser failed", userErr);
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    const uid = claimsData?.claims?.sub;
+    if (claimsError || !uid) {
+      console.error("[delete-account] auth.getClaims failed", claimsError);
       return json({ error: "Unauthorized" }, 401);
     }
 
@@ -95,7 +92,6 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const uid = user.id;
     console.log(`[delete-account] starting deletion for uid=${uid}`);
 
     await cancelStripeSubscriptionIfNeeded(admin, uid);
