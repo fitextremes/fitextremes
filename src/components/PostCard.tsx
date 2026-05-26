@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
+import ImageLightbox from "@/components/ImageLightbox";
 
 const REACTION_EMOJIS = ["💪", "✊", "🔥", "🔩"];
 
@@ -29,6 +30,7 @@ const PostCard = ({ post }: PostCardProps) => {
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const toggleReaction = useToggleReaction();
   const addComment = useAddComment();
@@ -106,7 +108,27 @@ const PostCard = ({ post }: PostCardProps) => {
       {/* Content */}
       <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
       {post.image_url && (
-        <img src={post.image_url} alt="Post image" className="mt-3 rounded-lg max-h-96 w-full object-cover" />
+        <>
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="mt-3 block w-full overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Expand image"
+          >
+            <img
+              src={post.image_url}
+              alt="Post image"
+              loading="lazy"
+              className="max-h-96 w-full object-cover transition-transform hover:scale-[1.02] cursor-zoom-in"
+            />
+          </button>
+          <ImageLightbox
+            open={lightboxOpen}
+            src={post.image_url}
+            alt="Post image"
+            onClose={() => setLightboxOpen(false)}
+          />
+        </>
       )}
 
       {/* Reaction counts */}
