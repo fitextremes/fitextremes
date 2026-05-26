@@ -33,15 +33,26 @@ const PostCard = ({ post }: PostCardProps) => {
   const toggleReaction = useToggleReaction();
   const addComment = useAddComment();
   const deletePost = useDeletePost();
-  const { data: comments } = usePostComments(showComments ? post.id : undefined);
+  const { data: comments } = usePostComments(showComments ? post?.id : undefined);
+
+  if (!post) return null;
+
+  const profile = post.profiles ?? { id: post.user_id, username: null, full_name: "FitExtremes User", avatar_url: null };
+  const reactions = Array.isArray(post.reactions) ? post.reactions : [];
+  const postComments = Array.isArray(post.comments) ? post.comments : [];
 
   const isOwn = user?.id === post.user_id;
-  const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
+  let timeAgo = "";
+  try {
+    timeAgo = post.created_at ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : "";
+  } catch {
+    timeAgo = "";
+  }
 
-  const userReactions = post.reactions.filter((r) => r.user_id === user?.id).map((r) => r.emoji);
+  const userReactions = reactions.filter((r) => r.user_id === user?.id).map((r) => r.emoji);
 
-  // Group reactions by emoji
-  const reactionCounts = post.reactions.reduce((acc, r) => {
+  const reactionCounts = reactions.reduce((acc, r) => {
+    if (!r?.emoji) return acc;
     acc[r.emoji] = (acc[r.emoji] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -64,18 +75,18 @@ const PostCard = ({ post }: PostCardProps) => {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <Link to={`/user/${post.profiles.username || post.profiles.id}`} className="flex items-center gap-3">
+        <Link to={`/user/${profile.username || profile.id}`} className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-lg overflow-hidden">
-            {post.profiles.avatar_url ? (
-              <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
               "🏋️"
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">{post.profiles.full_name}</p>
+            <p className="text-sm font-medium text-foreground">{profile.full_name || "FitExtremes User"}</p>
             <p className="text-xs text-muted-foreground">
-              {post.profiles.username ? `@${post.profiles.username}` : ""} · {timeAgo}
+              {profile.username ? `@${profile.username}` : ""} · {timeAgo}
             </p>
           </div>
         </Link>
@@ -155,7 +166,7 @@ const PostCard = ({ post }: PostCardProps) => {
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          <MessageCircle className="h-4 w-4" /> {post.comments.length}
+          <MessageCircle className="h-4 w-4" /> {postComments.length}
         </button>
       </div>
 
