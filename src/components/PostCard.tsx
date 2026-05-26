@@ -75,18 +75,18 @@ const PostCard = ({ post }: PostCardProps) => {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <Link to={`/user/${post.profiles.username || post.profiles.id}`} className="flex items-center gap-3">
+        <Link to={`/user/${profile.username || profile.id}`} className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-lg overflow-hidden">
-            {post.profiles.avatar_url ? (
-              <img src={post.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
               "🏋️"
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">{post.profiles.full_name}</p>
+            <p className="text-sm font-medium text-foreground">{profile.full_name || "FitExtremes User"}</p>
             <p className="text-xs text-muted-foreground">
-              {post.profiles.username ? `@${post.profiles.username}` : ""} · {timeAgo}
+              {profile.username ? `@${profile.username}` : ""} · {timeAgo}
             </p>
           </div>
         </Link>
