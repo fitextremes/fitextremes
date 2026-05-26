@@ -3,13 +3,12 @@ import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import PostCard from "@/components/PostCard";
 import CreatePost from "@/components/CreatePost";
-import { useAuth } from "@/contexts/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useFeedPosts } from "@/hooks/usePosts";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const { user, loading: authLoading } = useAuth();
   const { isTrainer, isBusiness, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { data: feedPosts, isLoading: feedLoading } = useFeedPosts();
@@ -20,17 +19,8 @@ const Dashboard = () => {
     else if (isBusiness) navigate("/business-dashboard", { replace: true });
   }, [roleLoading, isTrainer, isBusiness, navigate]);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    navigate("/login");
-    return null;
+  if (roleLoading) {
+    return <LoadingScreen message="Loading your feed..." />;
   }
 
   return (
