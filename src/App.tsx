@@ -95,11 +95,13 @@ const App = () => (
             <Route path="/terms" element={<Navigate to="/legal#terms" replace />} />
             <Route path="/privacy" element={<Navigate to="/legal#privacy" replace />} />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
+
 
 export default App;
