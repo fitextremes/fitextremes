@@ -20,19 +20,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Rely solely on onAuthStateChange. It fires an INITIAL_SESSION event
-    // after Supabase has attempted to refresh any stored token, so we avoid
-    // the race where getSession() returns a stale session that is then
-    // invalidated by a failed refresh — which caused the UI to flicker
-    // between authenticated and signed-out states.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Subscribe first so we don't miss any auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[Auth] state change:", event, !!session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Explicitly restore any persisted session on mount (critical for mobile/Capacitor cold launch)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[Auth] initial getSession:", !!session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((err) => {
+      console.error("[Auth] getSession failed:", err);
+      setLoading(false);
+    });
+
+    // Safety net: never stay in loading state forever
+    const timeout = setTimeout(() => setLoading(false), 5000);
+
+    // Refresh session when app returns to foreground (mobile)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
+
 
   const signUp = async (email: string, password: string, fullName: string, role: string, username?: string, extra?: Record<string, any>) => {
     const normalizedEmail = email.trim().toLowerCase();
