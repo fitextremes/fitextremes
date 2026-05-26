@@ -37,6 +37,9 @@ import Privacy from "./pages/Privacy";
 import Legal from "./pages/Legal";
 import ContactUs from "./pages/ContactUs";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
 
 const queryClient = new QueryClient();
 
