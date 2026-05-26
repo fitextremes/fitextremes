@@ -92,18 +92,24 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("delete-account", {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
         },
-        body: { feedback: feedback || null },
+        body: JSON.stringify({ feedback: feedback || null }),
       });
-      if (error || (data as any)?.error) {
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || (data as any)?.error) {
         const msg =
           (data as any)?.error ||
-          error?.message ||
+          response.statusText ||
           "Unable to delete account. Please try again.";
-        console.error("[DeleteAccount] failed:", error, data);
+        console.error("[DeleteAccount] failed:", response.status, data);
 
         if (/unauthorized|jwt|session/i.test(msg)) {
           setStep("verify");
