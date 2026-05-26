@@ -2,6 +2,7 @@
 // Requires the caller to have re-authenticated client-side (password verified
 // via supabase.auth.signInWithPassword) immediately before invoking this fn.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,52 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+const ACTIVE_SUBSCRIPTION_STATUSES = ["trial", "trial_ending", "active", "payment_due", "grace", "past_due"];
+
+async function deleteRows(admin: ReturnType<typeof createClient>, table: string, column: string, userId: string) {
+  const { error } = await admin.from(table).delete().eq(column, userId);
+  if (error) {
+    console.warn(`[delete-account] delete ${table}.${column} failed:`, error.message);
+  }
+}
+
+async function cancelStripeSubscriptionIfNeeded(admin: ReturnType<typeof createClient>, userId: string) {
+  const { data: sub, error } = await admin
+    .from("subscriptions")
+    .select("id, status, payment_provider, stripe_subscription_id, cancel_at_period_end, environment")
+    .eq("trainer_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[delete-account] failed to inspect subscription:", error.message);
+    throw new Error("Unable to verify subscription status before deletion.");
+  }
+
+  if (!sub || sub.payment_provider !== "stripe" || !sub.stripe_subscription_id) {
+    return;
+  }
+
+  if (!ACTIVE_SUBSCRIPTION_STATUSES.includes(sub.status)) {
+    return;
+  }
+
+  const env = (sub.environment === "live" ? "live" : "sandbox") as StripeEnv;
+  console.log(`[delete-account] cancelling stripe subscription ${sub.stripe_subscription_id} in ${env}`);
+  try {
+    const stripe = createStripeClient(env);
+    await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+    await admin
+      .from("subscriptions")
+      .update({ status: "cancelled", cancel_at_period_end: false })
+      .eq("id", sub.id);
+  } catch (stripeError) {
+    console.error("[delete-account] stripe cancellation failed:", stripeError);
+    throw new Error("We couldn't cancel your active subscription automatically. Please try again in a moment.");
+  }
+}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -31,10 +77,10 @@ Deno.serve(async (req) => {
       return json({ error: "Unauthorized" }, 401);
     }
 
-    const userClient = createClient(SUPABASE_URL, ANON, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+    const authClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: { user }, error: userErr } = await userClient.auth.getUser();
+    const { data: { user }, error: userErr } = await authClient.auth.getUser(token);
     if (userErr || !user) {
       console.error("[delete-account] auth.getUser failed", userErr);
       return json({ error: "Unauthorized" }, 401);
@@ -52,25 +98,7 @@ Deno.serve(async (req) => {
     const uid = user.id;
     console.log(`[delete-account] starting deletion for uid=${uid}`);
 
-    // Guard: block deletion if active paid Stripe subscription exists
-    const { data: sub } = await admin
-      .from("subscriptions")
-      .select("status, payment_provider, stripe_subscription_id, cancel_at_period_end")
-      .eq("trainer_id", uid)
-      .maybeSingle();
-
-    if (
-      sub &&
-      sub.payment_provider === "stripe" &&
-      sub.stripe_subscription_id &&
-      ["active", "trialing", "past_due", "payment_due"].includes(sub.status) &&
-      !sub.cancel_at_period_end
-    ) {
-      return json({
-        error:
-          "You have an active paid subscription. Please cancel it from the billing portal before deleting your account.",
-      }, 409);
-    }
+    await cancelStripeSubscriptionIfNeeded(admin, uid);
 
     // Best-effort delete of user-owned rows. Each failure is logged but does
     // not abort — so a single missing table/column never strands the auth user.
@@ -100,11 +128,10 @@ Deno.serve(async (req) => {
       { table: "profiles", col: "id" },
     ];
     for (const { table, col } of tables) {
-      const { error } = await admin.from(table).delete().eq(col, uid);
-      if (error) {
-        console.warn(`[delete-account] delete ${table}.${col} failed:`, error.message);
-      }
+      await deleteRows(admin, table, col, uid);
     }
+
+    await deleteRows(admin, "connection_requests", "target_id", uid);
 
     // Best-effort: remove uploaded storage assets in user-scoped folders.
     for (const bucket of ["avatars", "post-images", "trainer-gallery", "business-gallery"]) {
