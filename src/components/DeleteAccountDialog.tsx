@@ -32,6 +32,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
+  const isDeleteConfirmed = typed.trim().toUpperCase() === "DELETE";
 
   const reset = () => {
     setStep("warn");
@@ -72,7 +73,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   };
 
   const handleDelete = async () => {
-    if (typed !== "DELETE" || loading) return;
+    if (!isDeleteConfirmed || loading) return;
     setLoading(true);
     try {
       const {
@@ -220,10 +221,17 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
             <div className="space-y-3">
               <Input
                 value={typed}
-                onChange={(e) => setTyped(e.target.value)}
+                onChange={(e) => setTyped(e.target.value.toUpperCase())}
                 placeholder="Type DELETE"
                 autoFocus
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                onKeyDown={(e) => e.key === "Enter" && handleDelete()}
               />
+              <p className="text-xs text-muted-foreground">
+                Confirmation is not case-sensitive, and extra spaces are ignored.
+              </p>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Why are you leaving? (optional)
@@ -241,7 +249,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={typed !== "DELETE" || loading}
+                disabled={!isDeleteConfirmed || loading}
               >
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Permanently Delete My Account
