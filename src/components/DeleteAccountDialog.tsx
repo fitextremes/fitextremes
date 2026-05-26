@@ -61,29 +61,47 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   };
 
   const handleDelete = async () => {
-    if (typed !== "DELETE") return;
+    if (typed !== "DELETE" || loading) return;
     setLoading(true);
-    const { data, error } = await supabase.functions.invoke("delete-account", {
-      body: { feedback: feedback || null },
-    });
-    setLoading(false);
-    if (error || (data as any)?.error) {
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", {
+        body: { feedback: feedback || null },
+      });
+      if (error || (data as any)?.error) {
+        const msg =
+          (data as any)?.error ||
+          error?.message ||
+          "Unable to delete account. Please try again.";
+        console.error("[DeleteAccount] failed:", error, data);
+        toast({ title: "Unable to delete account", description: msg, variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      toast({
+        title: "Account deleted",
+        description: "Your account has been permanently deleted.",
+      });
+      // Best-effort signOut + always clear local session
+      try { await signOut(); } catch (_) { /* ignore */ }
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch (_) { /* ignore */ }
+      reset();
+      onOpenChange(false);
+      navigate("/", { replace: true });
+    } catch (e: any) {
+      console.error("[DeleteAccount] exception:", e);
       toast({
         title: "Unable to delete account",
-        description: (data as any)?.error || error?.message || "Please try again.",
+        description: e?.message || "Unexpected error. Please try again.",
         variant: "destructive",
       });
-      return;
+      setLoading(false);
     }
-    toast({
-      title: "Account deleted",
-      description: "Your account has been permanently removed. We're sorry to see you go.",
-    });
-    await signOut();
-    reset();
-    onOpenChange(false);
-    navigate("/", { replace: true });
   };
+
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
