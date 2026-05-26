@@ -44,23 +44,32 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <PaymentTestModeBanner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <PaymentTestModeBanner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/about" element={<About />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["user", "trainer", "business"]}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+
             <Route path="/profile" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/user/:identifier" element={<UserProfile />} />
