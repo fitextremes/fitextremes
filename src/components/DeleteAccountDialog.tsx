@@ -31,12 +31,14 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   const [typed, setTyped] = useState("");
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
 
   const reset = () => {
     setStep("warn");
     setPassword("");
     setTyped("");
     setFeedback("");
+    setVerifiedToken(null);
     setLoading(false);
   };
 
@@ -48,7 +50,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   const verifyPassword = async () => {
     if (!user?.email || !password) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: user.email,
       password,
     });
@@ -57,6 +59,15 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
       toast({ title: "Incorrect password", description: error.message, variant: "destructive" });
       return;
     }
+    if (!data.session?.access_token) {
+      toast({
+        title: "Verification failed",
+        description: "Your session could not be refreshed. Please log in again and retry.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setVerifiedToken(data.session.access_token);
     setStep("confirm");
   };
 
@@ -64,7 +75,26 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
     if (typed !== "DELETE" || loading) return;
     setLoading(true);
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = verifiedToken ?? session?.access_token;
+
+      if (!accessToken) {
+        toast({
+          title: "Session expired",
+          description: "Please verify your password again before deleting your account.",
+          variant: "destructive",
+        });
+        setStep("verify");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("delete-account", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: { feedback: feedback || null },
       });
       if (error || (data as any)?.error) {
@@ -73,6 +103,19 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
           error?.message ||
           "Unable to delete account. Please try again.";
         console.error("[DeleteAccount] failed:", error, data);
+
+        if (/unauthorized|jwt|session/i.test(msg)) {
+          setStep("verify");
+          setVerifiedToken(null);
+          toast({
+            title: "Please verify again",
+            description: "Your session expired during deletion. Re-enter your password and try again.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
         toast({ title: "Unable to delete account", description: msg, variant: "destructive" });
         setLoading(false);
         return;
