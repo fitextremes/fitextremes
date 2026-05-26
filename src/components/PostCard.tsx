@@ -108,7 +108,27 @@ const PostCard = ({ post }: PostCardProps) => {
       {/* Content */}
       <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
       {post.image_url && (
-        <img src={post.image_url} alt="Post image" className="mt-3 rounded-lg max-h-96 w-full object-cover" />
+        <>
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="mt-3 block w-full overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Expand image"
+          >
+            <img
+              src={post.image_url}
+              alt="Post image"
+              loading="lazy"
+              className="max-h-96 w-full object-cover transition-transform hover:scale-[1.02] cursor-zoom-in"
+            />
+          </button>
+          <ImageLightbox
+            open={lightboxOpen}
+            src={post.image_url}
+            alt="Post image"
+            onClose={() => setLightboxOpen(false)}
+          />
+        </>
       )}
 
       {/* Reaction counts */}
