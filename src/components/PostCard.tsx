@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
+import ImageLightbox from "@/components/ImageLightbox";
 
 const REACTION_EMOJIS = ["💪", "✊", "🔥", "🔩"];
 
