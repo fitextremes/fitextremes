@@ -166,7 +166,7 @@ const PostCard = ({ post }: PostCardProps) => {
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          <MessageCircle className="h-4 w-4" /> {post.comments.length}
+          <MessageCircle className="h-4 w-4" /> {postComments.length}
         </button>
       </div>
 
