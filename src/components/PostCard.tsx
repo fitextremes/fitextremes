@@ -30,6 +30,7 @@ const PostCard = ({ post }: PostCardProps) => {
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const toggleReaction = useToggleReaction();
   const addComment = useAddComment();
