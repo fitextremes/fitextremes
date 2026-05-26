@@ -3,48 +3,75 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const useFeedPosts = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   return useQuery({
     queryKey: ["feed-posts", user?.id],
+    enabled: !!user && !authLoading,
+    retry: 1,
     queryFn: async () => {
       if (!user) return [];
 
-      // Get followed user IDs
-      const { data: follows } = await supabase
-        .from("follows")
-        .select("following_id")
-        .eq("follower_id", user.id);
+      try {
+        // Followed users
+        const { data: follows } = await supabase
+          .from("follows")
+          .select("following_id")
+          .eq("follower_id", user.id);
+        const followedIds = (follows ?? []).map((f: any) => f.following_id).filter(Boolean);
 
-      const followedIds = follows?.map((f) => f.following_id) || [];
+        // Public profiles (best-effort; never throw)
+        let publicIds: string[] = [];
+        try {
+          const excluded = [user.id, ...followedIds];
+          const { data: publicProfiles } = await supabase
+            .from("profiles_public" as any)
+            .select("id")
+            .eq("profile_visibility", "public")
+            .limit(50);
+          publicIds = ((publicProfiles as any[]) ?? [])
+            .map((p) => p?.id)
+            .filter((id) => id && !excluded.includes(id));
+        } catch (e) {
+          console.warn("[Feed] public profiles fetch failed (ignored):", e);
+        }
 
-      // Get public profiles (not followed but public)
-      const { data: publicProfiles } = await supabase
-        .from("profiles_public" as any)
-        .select("id")
-        .eq("profile_visibility", "public")
-        .not("id", "in", `(${[user.id, ...followedIds].join(",")})`)
-        .limit(20);
+        const feedUserIds = Array.from(new Set([user.id, ...followedIds, ...publicIds]));
 
-      const publicIds = (publicProfiles as any[] | null)?.map((p) => p.id) || [];
-      const feedUserIds = [user.id, ...followedIds, ...publicIds];
+        const { data, error } = await supabase
+          .from("posts")
+          .select(`
+            *,
+            profiles:user_id (id, username, full_name, avatar_url),
+            reactions (id, emoji, user_id),
+            comments (id)
+          `)
+          .in("user_id", feedUserIds)
+          .order("created_at", { ascending: false })
+          .limit(50);
 
-      const { data, error } = await supabase
-        .from("posts")
-        .select(`
-          *,
-          profiles:user_id (id, username, full_name, avatar_url),
-          reactions (id, emoji, user_id),
-          comments (id)
-        `)
-        .in("user_id", feedUserIds)
-        .order("created_at", { ascending: false })
-        .limit(50);
+        if (error) {
+          console.error("[Feed] posts query error:", error);
+          return [];
+        }
 
-      if (error) throw error;
-      return data;
+        // Normalize: ensure no required nested field is null
+        return (data ?? []).map((p: any) => ({
+          ...p,
+          profiles: p.profiles ?? {
+            id: p.user_id,
+            username: null,
+            full_name: "FitExtremes User",
+            avatar_url: null,
+          },
+          reactions: Array.isArray(p.reactions) ? p.reactions : [],
+          comments: Array.isArray(p.comments) ? p.comments : [],
+        }));
+      } catch (e) {
+        console.error("[Feed] unexpected error:", e);
+        return [];
+      }
     },
-    enabled: !!user,
   });
 };
 
@@ -63,8 +90,16 @@ export const useUserPosts = (userId?: string) => {
         `)
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("[UserPosts] error:", error);
+        return [];
+      }
+      return (data ?? []).map((p: any) => ({
+        ...p,
+        profiles: p.profiles ?? { id: p.user_id, username: null, full_name: "FitExtremes User", avatar_url: null },
+        reactions: Array.isArray(p.reactions) ? p.reactions : [],
+        comments: Array.isArray(p.comments) ? p.comments : [],
+      }));
     },
     enabled: !!userId,
   });
