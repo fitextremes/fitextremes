@@ -1,6 +1,6 @@
 // Delete the currently authenticated user account and all associated data.
-// Requires the caller to have re-authenticated client-side (password verified
-// via supabase.auth.signInWithPassword) immediately before invoking this fn.
+// The caller must provide their current password so this function can
+// re-verify identity server-side before deletion proceeds.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
