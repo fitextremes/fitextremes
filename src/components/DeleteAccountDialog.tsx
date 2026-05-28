@@ -136,7 +136,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
   };
 
   const handleVerifyAndDelete = async () => {
-    if (!user?.email || !password || loading) return;
+    if (!user || !password || loading) return;
 
     try {
       setPhase("deleting");
