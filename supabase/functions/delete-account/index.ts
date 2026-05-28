@@ -76,10 +76,10 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    const uid = claimsData?.claims?.sub;
-    if (claimsError || !uid) {
-      console.error("[delete-account] auth.getClaims failed", claimsError);
+    const { data: userData, error: userError } = await userClient.auth.getUser(token);
+    const uid = userData?.user?.id;
+    if (userError || !uid) {
+      console.error("[delete-account] auth.getUser failed", userError);
       return json({ error: "Unauthorized" }, 401);
     }
 

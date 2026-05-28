@@ -16,7 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-type Step = "warn" | "verify" | "confirm";
+type Step = "warn" | "verify";
+type Phase = "idle" | "verifying" | "deleting";
 
 interface Props {
   open: boolean;
@@ -24,134 +25,143 @@ interface Props {
 }
 
 const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("warn");
   const [password, setPassword] = useState("");
-  const [typed, setTyped] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
-  const isDeleteConfirmed = typed.trim().toUpperCase() === "DELETE";
+
+  const loading = phase !== "idle";
 
   const reset = () => {
     setStep("warn");
     setPassword("");
-    setTyped("");
     setFeedback("");
     setVerifiedToken(null);
-    setLoading(false);
+    setPhase("idle");
   };
 
-  const handleOpenChange = (o: boolean) => {
-    if (!o) reset();
-    onOpenChange(o);
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && loading) return;
+    if (!nextOpen) reset();
+    onOpenChange(nextOpen);
   };
 
-  const verifyPassword = async () => {
-    if (!user?.email || !password) return;
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password,
+  const deleteAccount = async (accessToken: string) => {
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ feedback: feedback || null }),
     });
-    setLoading(false);
-    if (error) {
-      toast({ title: "Incorrect password", description: error.message, variant: "destructive" });
-      return;
-    }
-    if (!data.session?.access_token) {
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || (data as any)?.error) {
+      const message =
+        (data as any)?.error ||
+        response.statusText ||
+        "Unable to delete account. Please try again.";
+
+      console.error("[DeleteAccount] failed:", response.status, data);
+
+      if (/unauthorized|jwt|session/i.test(message)) {
+        setVerifiedToken(null);
+        toast({
+          title: "Please verify again",
+          description: "Your session expired during deletion. Re-enter your password and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: "Verification failed",
-        description: "Your session could not be refreshed. Please log in again and retry.",
+        title: "Unable to delete account",
+        description: message,
         variant: "destructive",
       });
       return;
     }
-    setVerifiedToken(data.session.access_token);
-    setStep("confirm");
+
+    toast({
+      title: "Account deleted",
+      description: "Your account has been permanently deleted.",
+    });
+
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (error) {
+      console.warn("[DeleteAccount] local sign out failed:", error);
+    }
+
+    try {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith("sb-") || key.includes("supabase"))
+        .forEach((key) => localStorage.removeItem(key));
+    } catch (error) {
+      console.warn("[DeleteAccount] local storage cleanup failed:", error);
+    }
+
+    reset();
+    onOpenChange(false);
+    navigate("/", { replace: true });
   };
 
-  const handleDelete = async () => {
-    if (!isDeleteConfirmed || loading) return;
-    setLoading(true);
+  const handleVerifyAndDelete = async () => {
+    if (!user?.email || !password || loading) return;
+
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const accessToken = verifiedToken ?? session?.access_token;
+      let accessToken = verifiedToken;
 
       if (!accessToken) {
-        toast({
-          title: "Session expired",
-          description: "Please verify your password again before deleting your account.",
-          variant: "destructive",
+        setPhase("verifying");
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password,
         });
-        setStep("verify");
-        setLoading(false);
-        return;
-      }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ feedback: feedback || null }),
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok || (data as any)?.error) {
-        const msg =
-          (data as any)?.error ||
-          response.statusText ||
-          "Unable to delete account. Please try again.";
-        console.error("[DeleteAccount] failed:", response.status, data);
-
-        if (/unauthorized|jwt|session/i.test(msg)) {
-          setStep("verify");
-          setVerifiedToken(null);
+        if (error) {
           toast({
-            title: "Please verify again",
-            description: "Your session expired during deletion. Re-enter your password and try again.",
+            title: "Incorrect password",
+            description: error.message,
             variant: "destructive",
           });
-          setLoading(false);
           return;
         }
 
-        toast({ title: "Unable to delete account", description: msg, variant: "destructive" });
-        setLoading(false);
-        return;
+        accessToken = data.session?.access_token ?? null;
+
+        if (!accessToken) {
+          toast({
+            title: "Verification failed",
+            description: "Your session could not be refreshed. Please log in again and retry.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setVerifiedToken(accessToken);
       }
-      toast({
-        title: "Account deleted",
-        description: "Your account has been permanently deleted.",
-      });
-      // Best-effort signOut + always clear local session
-      try { await signOut(); } catch (_) { /* ignore */ }
-      try {
-        Object.keys(localStorage)
-          .filter((k) => k.startsWith("sb-") || k.includes("supabase"))
-          .forEach((k) => localStorage.removeItem(k));
-      } catch (_) { /* ignore */ }
-      reset();
-      onOpenChange(false);
-      navigate("/", { replace: true });
-    } catch (e: any) {
-      console.error("[DeleteAccount] exception:", e);
+
+      setPhase("deleting");
+      await deleteAccount(accessToken);
+    } catch (error: any) {
+      console.error("[DeleteAccount] exception:", error);
       toast({
         title: "Unable to delete account",
-        description: e?.message || "Unexpected error. Please try again.",
+        description: error?.message || "Unexpected error. Please try again.",
         variant: "destructive",
       });
-      setLoading(false);
+    } finally {
+      setPhase("idle");
     }
   };
-
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
@@ -182,8 +192,8 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => setStep("verify")}>Continue</Button>
+              <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={loading}>Cancel</Button>
+              <Button variant="destructive" onClick={() => setStep("verify")} disabled={loading}>Continue</Button>
             </AlertDialogFooter>
           </>
         )}
@@ -193,51 +203,24 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
             <AlertDialogHeader>
               <AlertDialogTitle>Verify your identity</AlertDialogTitle>
               <AlertDialogDescription>
-                Please enter your password to continue.
+                Enter your password once to verify and permanently delete your account.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="space-y-2">
-              <Label htmlFor="del-pwd">Password</Label>
-              <Input
-                id="del-pwd"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoFocus
-                onKeyDown={(e) => e.key === "Enter" && verifyPassword()}
-              />
-            </div>
-            <AlertDialogFooter>
-              <Button variant="outline" onClick={() => setStep("warn")} disabled={loading}>Back</Button>
-              <Button variant="destructive" onClick={verifyPassword} disabled={!password || loading}>
-                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Verify
-              </Button>
-            </AlertDialogFooter>
-          </>
-        )}
 
-        {step === "confirm" && (
-          <>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-destructive">Final confirmation</AlertDialogTitle>
-              <AlertDialogDescription>
-                Type <span className="font-mono font-bold text-foreground">DELETE</span> below to permanently remove your account.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
             <div className="space-y-3">
-              <Input
-                value={typed}
-                onChange={(e) => setTyped(e.target.value.toUpperCase())}
-                placeholder="Type DELETE"
-                autoFocus
-                autoCapitalize="characters"
-                autoCorrect="off"
-                spellCheck={false}
-                onKeyDown={(e) => e.key === "Enter" && handleDelete()}
-              />
-              <p className="text-xs text-muted-foreground">
-                Confirmation is not case-sensitive, and extra spaces are ignored.
-              </p>
+              <div className="space-y-2">
+                <Label htmlFor="del-pwd">Password</Label>
+                <Input
+                  id="del-pwd"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleVerifyAndDelete()}
+                />
+              </div>
+
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">
                   Why are you leaving? (optional)
@@ -250,15 +233,16 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
                 />
               </div>
             </div>
+
             <AlertDialogFooter>
-              <Button variant="outline" onClick={() => setStep("warn")} disabled={loading}>Cancel</Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={!isDeleteConfirmed || loading}
-              >
-                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Permanently Delete My Account
+              <Button variant="outline" onClick={() => setStep("warn")} disabled={loading}>Back</Button>
+              <Button variant="destructive" onClick={handleVerifyAndDelete} disabled={!password || loading}>
+                {phase !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {phase === "verifying"
+                  ? "Verifying..."
+                  : phase === "deleting"
+                    ? "Deleting account..."
+                    : "Verify & Delete Account"}
               </Button>
             </AlertDialogFooter>
           </>
