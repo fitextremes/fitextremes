@@ -14,10 +14,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 type Step = "warn" | "verify";
-type Phase = "idle" | "verifying" | "deleting";
+type Phase = "idle" | "deleting";
 
 interface Props {
   open: boolean;
@@ -25,13 +24,11 @@ interface Props {
 }
 
 const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user, session } = useAuth();
   const [step, setStep] = useState<Step>("warn");
   const [password, setPassword] = useState("");
   const [feedback, setFeedback] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
-  const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
 
   const loading = phase !== "idle";
 
@@ -39,7 +36,6 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
     setStep("warn");
     setPassword("");
     setFeedback("");
-    setVerifiedToken(null);
     setPhase("idle");
   };
 
@@ -49,7 +45,18 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
     onOpenChange(nextOpen);
   };
 
-  const deleteAccount = async (accessToken: string) => {
+  const deleteAccount = async () => {
+    const accessToken = session?.access_token ?? (await supabase.auth.getSession()).data.session?.access_token;
+
+    if (!accessToken) {
+      toast({
+        title: "Session expired",
+        description: "Please log in again, then retry deleting your account.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
       method: "POST",
       headers: {
@@ -57,7 +64,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ feedback: feedback || null }),
+      body: JSON.stringify({ password, feedback: feedback || null }),
     });
 
     const data = await response.json().catch(() => null);
@@ -70,14 +77,22 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
 
       console.error("[DeleteAccount] failed:", response.status, data);
 
-      if (/unauthorized|jwt|session/i.test(message)) {
-        setVerifiedToken(null);
+      if (response.status === 401 && /incorrect password/i.test(message)) {
         toast({
-          title: "Please verify again",
-          description: "Your session expired during deletion. Re-enter your password and try again.",
+          title: "Incorrect password",
+          description: "The password you entered is incorrect.",
           variant: "destructive",
         });
-        return;
+        return false;
+      }
+
+      if (/unauthorized|jwt|session/i.test(message)) {
+        toast({
+          title: "Session expired",
+          description: "Please log in again, then retry deleting your account.",
+          variant: "destructive",
+        });
+        return false;
       }
 
       toast({
@@ -85,7 +100,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
         description: message,
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     toast({
@@ -107,50 +122,25 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
       console.warn("[DeleteAccount] local storage cleanup failed:", error);
     }
 
+    try {
+      sessionStorage.clear();
+    } catch (error) {
+      console.warn("[DeleteAccount] session storage cleanup failed:", error);
+    }
+
     reset();
     onOpenChange(false);
-    navigate("/", { replace: true });
+
+    window.location.replace("/");
+    return true;
   };
 
   const handleVerifyAndDelete = async () => {
-    if (!user?.email || !password || loading) return;
+    if (!user || !password || loading) return;
 
     try {
-      let accessToken = verifiedToken;
-
-      if (!accessToken) {
-        setPhase("verifying");
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: user.email,
-          password,
-        });
-
-        if (error) {
-          toast({
-            title: "Incorrect password",
-            description: error.message,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        accessToken = data.session?.access_token ?? null;
-
-        if (!accessToken) {
-          toast({
-            title: "Verification failed",
-            description: "Your session could not be refreshed. Please log in again and retry.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        setVerifiedToken(accessToken);
-      }
-
       setPhase("deleting");
-      await deleteAccount(accessToken);
+      await deleteAccount();
     } catch (error: any) {
       console.error("[DeleteAccount] exception:", error);
       toast({
@@ -238,11 +228,7 @@ const DeleteAccountDialog = ({ open, onOpenChange }: Props) => {
               <Button variant="outline" onClick={() => setStep("warn")} disabled={loading}>Back</Button>
               <Button variant="destructive" onClick={handleVerifyAndDelete} disabled={!password || loading}>
                 {phase !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {phase === "verifying"
-                  ? "Verifying..."
-                  : phase === "deleting"
-                    ? "Deleting account..."
-                    : "Verify & Delete Account"}
+                {phase === "deleting" ? "Deleting account..." : "Verify & Delete Account"}
               </Button>
             </AlertDialogFooter>
           </>

@@ -1,15 +1,21 @@
 // Delete the currently authenticated user account and all associated data.
-// Requires the caller to have re-authenticated client-side (password verified
-// via supabase.auth.signInWithPassword) immediately before invoking this fn.
+// The caller must provide their current password so this function can
+// re-verify identity server-side before deletion proceeds.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3.25.76";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ["trial", "trial_ending", "active", "payment_due", "grace", "past_due"];
+
+const DeleteAccountBody = z.object({
+  password: z.string().min(1, "Password is required.").max(256, "Password is too long."),
+  feedback: z.string().max(500).nullable().optional(),
+});
 
 async function deleteRows(admin: ReturnType<typeof createClient>, table: string, column: string, userId: string) {
   const { error } = await admin.from(table).delete().eq(column, userId);
@@ -55,6 +61,27 @@ async function cancelStripeSubscriptionIfNeeded(admin: ReturnType<typeof createC
   }
 }
 
+async function verifyPassword(email: string | undefined, password: string) {
+  if (!email) {
+    throw new Error("Account email is unavailable. Please log in again and retry.");
+  }
+
+  const verifyClient = createClient(SUPABASE_URL, ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await verifyClient.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  await verifyClient.auth.signOut().catch(() => undefined);
+
+  if (error || !data.user) {
+    throw new Error("Incorrect password.");
+  }
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -83,11 +110,24 @@ Deno.serve(async (req) => {
       return json({ error: "Unauthorized" }, 401);
     }
 
-    let feedback: string | null = null;
+    let parsedBody;
     try {
-      const body = await req.json();
-      feedback = typeof body?.feedback === "string" ? body.feedback.slice(0, 500) : null;
-    } catch (_) { /* no body */ }
+      parsedBody = DeleteAccountBody.safeParse(await req.json());
+    } catch (_) {
+      parsedBody = DeleteAccountBody.safeParse({});
+    }
+
+    if (!parsedBody.success) {
+      return json({ error: parsedBody.error.issues[0]?.message || "Password is required." }, 400);
+    }
+
+    const feedback = parsedBody.data.feedback?.trim() || null;
+
+    try {
+      await verifyPassword(userData.user.email, parsedBody.data.password);
+    } catch (verificationError) {
+      return json({ error: (verificationError as Error).message }, 401);
+    }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
       auth: { persistSession: false, autoRefreshToken: false },
