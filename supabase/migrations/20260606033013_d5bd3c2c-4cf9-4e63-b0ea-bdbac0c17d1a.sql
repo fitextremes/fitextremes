@@ -1,0 +1,1 @@
+CREATE POLICY "Post owners can delete comments on their posts" ON public.comments FOR DELETE TO authenticated USING (EXISTS (SELECT 1 FROM public.posts WHERE posts.id = comments.post_id AND posts.user_id = auth.uid()));
