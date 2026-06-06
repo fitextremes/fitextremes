@@ -1,14 +1,10 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { X, ImagePlus, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useCreatePost } from "@/hooks/usePosts";
-import { toast } from "sonner";
-
-const ACCEPTED_EXTENSIONS = /\.(jpe?g|png|webp|heic|heif|gif)$/i;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+import { usePostComposer } from "@/hooks/usePostComposer";
 
 interface CreatePostModalProps {
   open: boolean;
@@ -16,64 +12,35 @@ interface CreatePostModalProps {
 }
 
 const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
-  const [caption, setCaption] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const createPost = useCreatePost();
+  const {
+    content,
+    setContent,
+    imageFile,
+    imagePreview,
+    isSubmitting,
+    handleImageSelect,
+    clearImage,
+    reset,
+    submit,
+  } = usePostComposer();
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-
-    if (!selected.type.startsWith("image/") && !ACCEPTED_EXTENSIONS.test(selected.name)) {
-      toast.error("Please select an image file");
-      return;
-    }
-    if (selected.size > MAX_FILE_SIZE) {
-      toast.error("File must be under 5 MB");
-      return;
-    }
-
-    if (preview) URL.revokeObjectURL(preview);
-    setFile(selected);
-    setPreview(URL.createObjectURL(selected));
-
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleImageSelect(e.target.files?.[0]);
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const removeFile = () => {
-    if (preview) URL.revokeObjectURL(preview);
-    setFile(null);
-    setPreview(null);
-  };
-
   const handleSubmit = async () => {
-    if (!file) {
-      toast.error("An image is required");
-      return;
-    }
-    if (!caption.trim()) {
-      toast.error("Caption is required");
-      return;
-    }
-
-    try {
-      await createPost.mutateAsync({ content: caption.trim(), imageFile: file });
-      toast.success("Post created!");
-      setCaption("");
-      removeFile();
-      onOpenChange(false);
-    } catch (err: any) {
-      console.error("[CreatePostModal] failed:", err);
-      toast.error(err?.message || "Failed to create post");
-    }
+    await submit({
+      requireImage: true,
+      successMessage: "Post created!",
+      onSuccess: () => onOpenChange(false),
+    });
   };
 
   const handleClose = (val: boolean) => {
     if (!val) {
-      setCaption("");
-      removeFile();
+      reset();
     }
     onOpenChange(val);
   };
@@ -92,11 +59,11 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
               Image <span className="text-destructive">*</span> (JPG, PNG, WEBP · Max 5 MB)
             </Label>
 
-            {preview ? (
+            {imagePreview ? (
               <div className="relative aspect-square rounded-lg overflow-hidden bg-secondary max-w-[200px] mx-auto mb-3">
-                <img src={preview} alt="" className="h-full w-full object-cover" />
+                <img src={imagePreview} alt="" className="h-full w-full object-cover" />
                 <button
-                  onClick={removeFile}
+                  onClick={clearImage}
                   className="absolute top-1 right-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
                 >
                   <X className="h-3 w-3" />
@@ -117,7 +84,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
               ref={fileRef}
               type="file"
               accept="image/*"
-              onChange={handleFileSelect}
+              onChange={handleFileChange}
               className="hidden"
             />
           </div>
@@ -126,8 +93,8 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
           <div className="space-y-1.5">
             <Label>Caption <span className="text-destructive">*</span></Label>
             <Textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               placeholder="Write a caption..."
               rows={3}
             />
@@ -138,9 +105,9 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
             variant="hero"
             className="w-full"
             onClick={handleSubmit}
-            disabled={createPost.isPending || !file || !caption.trim()}
+            disabled={isSubmitting || !imageFile || !content.trim()}
           >
-            {createPost.isPending ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Posting...
