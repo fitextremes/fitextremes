@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useCreatePost } from "@/hooks/usePosts";
 import { toast } from "sonner";
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ACCEPTED_EXTENSIONS = /\.(jpe?g|png|webp|heic|heif|gif)$/i;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface CreatePostModalProps {
@@ -26,8 +26,8 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
 
-    if (!ACCEPTED_TYPES.includes(selected.type)) {
-      toast.error("Only JPG, JPEG, PNG, WEBP allowed");
+    if (!selected.type.startsWith("image/") && !ACCEPTED_EXTENSIONS.test(selected.name)) {
+      toast.error("Please select an image file");
       return;
     }
     if (selected.size > MAX_FILE_SIZE) {
@@ -64,8 +64,9 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
       setCaption("");
       removeFile();
       onOpenChange(false);
-    } catch {
-      toast.error("Failed to create post");
+    } catch (err: any) {
+      console.error("[CreatePostModal] failed:", err);
+      toast.error(err?.message || "Failed to create post");
     }
   };
 
@@ -115,7 +116,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
             <input
               ref={fileRef}
               type="file"
-              accept=".jpg,.jpeg,.png,.webp"
+              accept="image/*"
               onChange={handleFileSelect}
               className="hidden"
             />
