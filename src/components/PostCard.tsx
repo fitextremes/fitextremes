@@ -216,18 +216,31 @@ const PostCard = ({ post }: PostCardProps) => {
             <div className="mt-3 space-y-2 border-t border-border pt-3">
               {comments?.map((c: any) => {
                 const canDelete = user?.id === c.user_id || user?.id === post.user_id;
+                const commenterHandle = c.profiles?.username || c.user_id;
                 return (
                   <div key={c.id} className="flex gap-2 group">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs overflow-hidden">
+                    <Link
+                      to={`/user/${commenterHandle}`}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs overflow-hidden hover:ring-2 hover:ring-primary/40 transition"
+                      aria-label={`View ${c.profiles?.full_name || "user"}'s profile`}
+                    >
                       {c.profiles?.avatar_url ? (
                         <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
                       ) : (
                         "👤"
                       )}
-                    </div>
+                    </Link>
                     <div className="flex-1">
                       <p className="text-xs">
-                        <span className="font-medium text-foreground">{c.profiles?.full_name}</span>{" "}
+                        <Link
+                          to={`/user/${commenterHandle}`}
+                          className="font-medium text-foreground hover:text-primary transition-colors"
+                        >
+                          {c.profiles?.full_name || "FitExtremes User"}
+                          {c.profiles?.username && (
+                            <span className="ml-1 text-muted-foreground">@{c.profiles.username}</span>
+                          )}
+                        </Link>{" "}
                         <span className="text-muted-foreground">{c.content}</span>
                       </p>
                     </div>
