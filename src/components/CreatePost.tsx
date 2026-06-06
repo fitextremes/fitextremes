@@ -13,13 +13,13 @@ const CreatePost = () => {
     imageFile,
     imagePreview,
     isSubmitting,
-    handleImageSelect,
+    handleImageSelect: selectImage,
     clearImage,
     submit,
   } = usePostComposer();
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleImageSelect(e.target.files?.[0]);
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    selectImage(e.target.files?.[0]);
     if (fileRef.current) fileRef.current.value = "";
   };
 
@@ -63,7 +63,7 @@ const CreatePost = () => {
             >
               <ImagePlus className="h-5 w-5" />
             </button>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+            <input ref={fileRef} type="file" accept="image/*" onChange={onFileChange} className="hidden" />
             <Button
               variant="hero"
               size="sm"
