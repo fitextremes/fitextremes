@@ -14,23 +14,28 @@ const FollowListModal = ({ open, onOpenChange, userId, type }: FollowListModalPr
   const { data: users, isLoading } = useQuery({
     queryKey: [type, userId, "list"],
     queryFn: async () => {
-      if (type === "followers") {
-        const { data, error } = await supabase
-          .from("follows")
-          .select("follower_id, profiles:follower_id (id, username, full_name, avatar_url)")
-          .eq("following_id", userId);
-        if (error) throw error;
-        return data?.map((f: any) => f.profiles) || [];
-      } else {
-        const { data, error } = await supabase
-          .from("follows")
-          .select("following_id, profiles:following_id (id, username, full_name, avatar_url)")
-          .eq("follower_id", userId);
-        if (error) throw error;
-        return data?.map((f: any) => f.profiles) || [];
-      }
+      if (!userId) return [];
+      const selectCol = type === "followers" ? "follower_id" : "following_id";
+      const filterCol = type === "followers" ? "following_id" : "follower_id";
+
+      const { data: rows, error: followsErr } = await supabase
+        .from("follows")
+        .select(selectCol)
+        .eq(filterCol, userId);
+      if (followsErr) throw followsErr;
+
+      const ids = (rows || []).map((r: any) => r[selectCol]).filter(Boolean);
+      if (ids.length === 0) return [];
+
+      const { data: profiles, error: profErr } = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url")
+        .in("id", ids);
+      if (profErr) throw profErr;
+      return profiles || [];
     },
-    enabled: open,
+    enabled: open && !!userId,
+    retry: false,
   });
 
   return (
