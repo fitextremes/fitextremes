@@ -1,37 +1,30 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCreatePost } from "@/hooks/usePosts";
 import { useProfile } from "@/hooks/useProfile";
-import { toast } from "sonner";
+import { usePostComposer } from "@/hooks/usePostComposer";
 
 const CreatePost = () => {
-  const [content, setContent] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const createPost = useCreatePost();
   const { data: profile } = useProfile();
+  const {
+    content,
+    setContent,
+    imageFile,
+    imagePreview,
+    isSubmitting,
+    handleImageSelect,
+    clearImage,
+    submit,
+  } = usePostComposer();
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
+    handleImageSelect(e.target.files?.[0]);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleSubmit = async () => {
-    if (!content.trim()) return;
-    try {
-      await createPost.mutateAsync({ content: content.trim(), imageFile: imageFile || undefined });
-      setContent("");
-      setImageFile(null);
-      setImagePreview(null);
-      toast.success("Post shared!");
-    } catch {
-      toast.error("Failed to create post");
-    }
+    await submit({ successMessage: "Post shared!" });
   };
 
   return (
@@ -56,7 +49,7 @@ const CreatePost = () => {
             <div className="relative inline-block">
               <img src={imagePreview} alt="Preview" className="max-h-40 rounded-lg" />
               <button
-                onClick={() => { setImageFile(null); setImagePreview(null); }}
+                onClick={clearImage}
                 className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground"
               >
                 <X className="h-3 w-3" />
@@ -75,9 +68,9 @@ const CreatePost = () => {
               variant="hero"
               size="sm"
               onClick={handleSubmit}
-              disabled={!content.trim() || createPost.isPending}
+              disabled={!content.trim() || isSubmitting}
             >
-              {createPost.isPending ? "Posting..." : "Post"}
+              {isSubmitting ? "Posting..." : "Post"}
             </Button>
           </div>
         </div>
