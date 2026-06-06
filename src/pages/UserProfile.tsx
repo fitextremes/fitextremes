@@ -16,11 +16,13 @@ const UserProfile = () => {
   const { user } = useAuth();
 
   const isUUID = identifier && /^[0-9a-f-]{36}$/i.test(identifier);
-  const { data: profileByUsername } = useProfileByUsername(!isUUID ? identifier || "" : "");
-  const { data: profileById } = useProfile(isUUID ? identifier : undefined);
+  const { data: profileByUsername, isLoading: loadingByUsername, isFetched: fetchedByUsername } = useProfileByUsername(!isUUID ? identifier || "" : "");
+  const { data: profileById, isLoading: loadingById, isFetched: fetchedById } = useProfile(isUUID ? identifier : undefined);
 
   const profile = profileByUsername || profileById;
   const profileId = profile?.id;
+  const isLoadingProfile = loadingByUsername || loadingById;
+  const hasFetched = (isUUID ? fetchedById : fetchedByUsername);
 
   const isOwnProfile = user?.id === profileId;
   const isPrivate = profile?.profile_visibility === "private";
@@ -37,7 +39,9 @@ const UserProfile = () => {
       <div className="min-h-screen bg-background">
         <ProfileViewHeader />
         <div className="flex items-center justify-center pt-32">
-          <p className="text-muted-foreground">User not found</p>
+          <p className="text-muted-foreground">
+            {isLoadingProfile || !hasFetched ? "Loading..." : "User not found"}
+          </p>
         </div>
       </div>
     );

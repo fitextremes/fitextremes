@@ -120,6 +120,10 @@ const Notifications = () => {
           <div className="space-y-2">
             {notifications.map((n, i) => {
               const isRequest = n.type === "follow_request_received" && n.request_pending;
+              const actorHandle = n.actor?.username || n.actor_id;
+              const actorHref = actorHandle ? `/user/${actorHandle}` : null;
+              const isSelfActor = n.actor_id && user && n.actor_id === user.id;
+              const linkable = actorHref && !isSelfActor;
               return (
                 <motion.div
                   key={n.id}
@@ -131,18 +135,37 @@ const Notifications = () => {
                     !n.read && "border-primary/40 bg-primary/5"
                   )}
                 >
-                  <div className="relative shrink-0">
-                    {n.actor?.avatar_url ? (
-                      <img src={n.actor.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover" />
-                    ) : (
-                      <div className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center text-lg">👤</div>
-                    )}
-                    <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-0.5 border border-border">
-                      {typeIcon(n.type)}
-                    </span>
-                  </div>
+                  {linkable ? (
+                    <Link to={actorHref!} className="relative shrink-0" aria-label="View profile">
+                      {n.actor?.avatar_url ? (
+                        <img src={n.actor.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover" />
+                      ) : (
+                        <div className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center text-lg">👤</div>
+                      )}
+                      <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-0.5 border border-border">
+                        {typeIcon(n.type)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="relative shrink-0">
+                      {n.actor?.avatar_url ? (
+                        <img src={n.actor.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover" />
+                      ) : (
+                        <div className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center text-lg">👤</div>
+                      )}
+                      <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-0.5 border border-border">
+                        {typeIcon(n.type)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">{typeText(n)}</p>
+                    {linkable ? (
+                      <Link to={actorHref!} className="text-sm text-foreground hover:text-primary transition-colors block">
+                        {typeText(n)}
+                      </Link>
+                    ) : (
+                      <p className="text-sm text-foreground">{typeText(n)}</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                     </p>
