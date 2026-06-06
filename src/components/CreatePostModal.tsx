@@ -64,8 +64,9 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
       setCaption("");
       removeFile();
       onOpenChange(false);
-    } catch {
-      toast.error("Failed to create post");
+    } catch (err: any) {
+      console.error("[CreatePostModal] failed:", err);
+      toast.error(err?.message || "Failed to create post");
     }
   };
 
