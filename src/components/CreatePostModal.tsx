@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useCreatePost } from "@/hooks/usePosts";
 import { toast } from "sonner";
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ACCEPTED_EXTENSIONS = /\.(jpe?g|png|webp|heic|heif|gif)$/i;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface CreatePostModalProps {
