@@ -26,8 +26,8 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
 
-    if (!ACCEPTED_TYPES.includes(selected.type)) {
-      toast.error("Only JPG, JPEG, PNG, WEBP allowed");
+    if (!selected.type.startsWith("image/") && !ACCEPTED_EXTENSIONS.test(selected.name)) {
+      toast.error("Please select an image file");
       return;
     }
     if (selected.size > MAX_FILE_SIZE) {
