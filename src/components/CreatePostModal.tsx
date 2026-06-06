@@ -115,7 +115,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
             <input
               ref={fileRef}
               type="file"
-              accept=".jpg,.jpeg,.png,.webp"
+              accept="image/*"
               onChange={handleFileSelect}
               className="hidden"
             />
