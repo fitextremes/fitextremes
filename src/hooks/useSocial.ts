@@ -173,6 +173,21 @@ export const useAddComment = () => {
   });
 };
 
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ commentId }: { commentId: string; postId: string }) => {
+      const { error } = await supabase.from("comments").delete().eq("id", commentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["post-comments"] });
+      queryClient.invalidateQueries({ queryKey: ["feed-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-posts"] });
+    },
+  });
+};
+
 export const usePostComments = (postId?: string) => {
   return useQuery({
     queryKey: ["post-comments", postId],

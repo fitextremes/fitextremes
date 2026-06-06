@@ -3,7 +3,17 @@ import { Heart, MessageCircle, Trash2, SmilePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToggleReaction, useAddComment, usePostComments } from "@/hooks/useSocial";
+import { useToggleReaction, useAddComment, usePostComments, useDeleteComment } from "@/hooks/useSocial";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useDeletePost } from "@/hooks/usePosts";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -32,9 +42,11 @@ const PostCard = ({ post }: PostCardProps) => {
   const [showReactions, setShowReactions] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [pendingDeleteCommentId, setPendingDeleteCommentId] = useState<string | null>(null);
   const toggleReaction = useToggleReaction();
   const addComment = useAddComment();
   const deletePost = useDeletePost();
+  const deleteComment = useDeleteComment();
   const { data: comments } = usePostComments(showComments ? post?.id : undefined);
 
   if (!post) return null;
@@ -202,23 +214,35 @@ const PostCard = ({ post }: PostCardProps) => {
             className="overflow-hidden"
           >
             <div className="mt-3 space-y-2 border-t border-border pt-3">
-              {comments?.map((c: any) => (
-                <div key={c.id} className="flex gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs overflow-hidden">
-                    {c.profiles?.avatar_url ? (
-                      <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      "👤"
+              {comments?.map((c: any) => {
+                const canDelete = user?.id === c.user_id || user?.id === post.user_id;
+                return (
+                  <div key={c.id} className="flex gap-2 group">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs overflow-hidden">
+                      {c.profiles?.avatar_url ? (
+                        <img src={c.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        "👤"
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs">
+                        <span className="font-medium text-foreground">{c.profiles?.full_name}</span>{" "}
+                        <span className="text-muted-foreground">{c.content}</span>
+                      </p>
+                    </div>
+                    {canDelete && (
+                      <button
+                        onClick={() => setPendingDeleteCommentId(c.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        aria-label="Delete comment"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs">
-                      <span className="font-medium text-foreground">{c.profiles?.full_name}</span>{" "}
-                      <span className="text-muted-foreground">{c.content}</span>
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {user && (
                 <div className="flex gap-2 pt-1">
                   <Input
