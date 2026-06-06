@@ -267,6 +267,33 @@ const PostCard = ({ post }: PostCardProps) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={!!pendingDeleteCommentId} onOpenChange={(o) => !o && setPendingDeleteCommentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!pendingDeleteCommentId) return;
+                const id = pendingDeleteCommentId;
+                setPendingDeleteCommentId(null);
+                try {
+                  await deleteComment.mutateAsync({ commentId: id, postId: post.id });
+                  toast.success("Comment deleted successfully.");
+                } catch (e: any) {
+                  toast.error(e?.message || "Failed to delete comment");
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 };
