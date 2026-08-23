@@ -27,8 +27,8 @@ const FollowListModal = ({ open, onOpenChange, userId, type }: FollowListModalPr
       const ids = (rows || []).map((r: any) => r[selectCol]).filter(Boolean);
       if (ids.length === 0) return [];
 
-      const { data: profiles, error: profErr } = await supabase
-        .from("profiles")
+      const { data: profiles, error: profErr } = await (supabase as any)
+        .from("profiles_public")
         .select("id, username, full_name, avatar_url")
         .in("id", ids);
       if (profErr) throw profErr;

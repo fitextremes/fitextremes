@@ -170,18 +170,22 @@ export const useIncomingFollowRequests = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("follow_requests" as any)
-        .select(`
-          id,
-          requester_id,
-          status,
-          created_at,
-          profiles:requester_id (id, username, full_name, avatar_url, location)
-        `)
+        .select("id, requester_id, status, created_at")
         .eq("target_id", user.id)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      const rows = (data ?? []) as any[];
+      const ids = Array.from(new Set(rows.map((r) => r.requester_id).filter(Boolean)));
+      let byId: Record<string, any> = {};
+      if (ids.length) {
+        const { data: profs } = await (supabase as any)
+          .from("profiles_public")
+          .select("id, username, full_name, avatar_url, location")
+          .in("id", ids);
+        (profs ?? []).forEach((p: any) => (byId[p.id] = p));
+      }
+      return rows.map((r) => ({ ...r, profiles: byId[r.requester_id] ?? null }));
     },
     enabled: !!user,
   });
