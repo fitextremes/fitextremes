@@ -101,8 +101,8 @@ export const useTrainerList = () => {
   return useQuery({
     queryKey: ["trainer-list"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
+      const { data, error } = await (supabase as any)
+        .from("profiles_public")
         .select("id, full_name, username, avatar_url, location, bio, hourly_min, hourly_max, years_experience")
         .eq("role", "trainer")
         .order("created_at", { ascending: false });
