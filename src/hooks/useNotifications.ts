@@ -113,7 +113,7 @@ export const useNotifications = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`notifications-${user.id}-${Math.random().toString(36).slice(2)}`)
+      .channel(`notifications:${user.id}`, { config: { private: true } })
       .on(
         "postgres_changes",
         {
