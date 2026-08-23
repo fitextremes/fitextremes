@@ -195,11 +195,30 @@ export const usePostComments = (postId?: string) => {
       if (!postId) return [];
       const { data, error } = await supabase
         .from("comments")
-        .select(`*, profiles:user_id (id, username, full_name, avatar_url)`)
+        .select("*")
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return data;
+      const rows = (data ?? []) as any[];
+      const ids = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
+      let byId: Record<string, any> = {};
+      if (ids.length) {
+        const { data: profs } = await (supabase as any)
+          .from("profiles_public")
+          .select("id, username, full_name, avatar_url")
+          .in("id", ids);
+        (profs ?? []).forEach((p: any) => (byId[p.id] = p));
+      }
+      return rows.map((r) => ({
+        ...r,
+        profiles:
+          byId[r.user_id] ?? {
+            id: r.user_id,
+            username: null,
+            full_name: "FitExtremes User",
+            avatar_url: null,
+          },
+      }));
     },
     enabled: !!postId,
   });
