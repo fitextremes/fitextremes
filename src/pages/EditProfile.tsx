@@ -167,7 +167,10 @@ const EditProfile = () => {
         const { error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(path, compressed, { upsert: true, contentType: compressed.type });
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("AVATAR UPLOAD ERROR:", uploadError);
+          throw uploadError;
+        }
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;
       } catch (err) {
@@ -186,8 +189,8 @@ const EditProfile = () => {
         avatar_url,
         profile_visibility: isPublic ? "public" : "private",
       });
-    } catch (err) {
-      console.error("[EditProfile] profile update failed:", err);
+      } catch (err) {
+        console.error("PROFILE UPDATE ERROR:", err);
       toast.error("Unable to save profile changes. Please try again.");
       return;
     }
