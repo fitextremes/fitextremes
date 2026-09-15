@@ -204,7 +204,7 @@ export const usePostComments = (postId?: string) => {
       let byId: Record<string, any> = {};
       if (ids.length) {
         const { data: profs } = await (supabase as any)
-          .from("profiles_public")
+          .from("post_authors")
           .select("id, username, full_name, avatar_url")
           .in("id", ids);
         (profs ?? []).forEach((p: any) => (byId[p.id] = p));
