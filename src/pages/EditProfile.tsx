@@ -155,11 +155,12 @@ const EditProfile = () => {
       let avatar_url = profile?.avatar_url || null;
 
       if (avatarFile && user) {
-        const ext = avatarFile.name.split(".").pop();
+        const compressed = await compressImage(avatarFile);
+        const ext = compressed.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(path, avatarFile, { upsert: true });
+          .upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;

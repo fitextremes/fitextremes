@@ -137,9 +137,10 @@ const TrainerEditProfile = () => {
     try {
       let avatar_url = (profile as any)?.avatar_url || null;
       if (avatarFile && user) {
-        const ext = avatarFile.name.split(".").pop();
+        const compressed = await compressImage(avatarFile);
+        const ext = compressed.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
-        const { error } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+        const { error } = await supabase.storage.from("avatars").upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (error) throw error;
         const { data } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = `${data.publicUrl}?t=${Date.now()}`;
