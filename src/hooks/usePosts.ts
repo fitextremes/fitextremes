@@ -2,6 +2,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Fetch author profiles (name, username, avatar) for a set of user ids.
+const fetchAuthors = async (userIds: (string | null | undefined)[]) => {
+  const ids = Array.from(new Set(userIds.filter(Boolean))) as string[];
+  const byId: Record<string, any> = {};
+  if (!ids.length) return byId;
+  const { data, error } = await (supabase as any)
+    .from("post_authors")
+    .select("id, username, full_name, avatar_url")
+    .in("id", ids);
+  if (error) {
+    console.warn("[Posts] author profiles fetch failed:", error);
+    return byId;
+  }
+  (data ?? []).forEach((p: any) => (byId[p.id] = p));
+  return byId;
+};
+
 export const useFeedPosts = () => {
   const { user, loading: authLoading } = useAuth();
 
@@ -42,7 +59,6 @@ export const useFeedPosts = () => {
           .from("posts")
           .select(`
             *,
-            profiles:user_id (id, username, full_name, avatar_url),
             reactions (id, emoji, user_id),
             comments (id)
           `)
@@ -55,10 +71,13 @@ export const useFeedPosts = () => {
           return [];
         }
 
+        const rows = (data ?? []) as any[];
+        const authors = await fetchAuthors(rows.map((p) => p.user_id));
+
         // Normalize: ensure no required nested field is null
-        return (data ?? []).map((p: any) => ({
+        return rows.map((p: any) => ({
           ...p,
-          profiles: p.profiles ?? {
+          profiles: authors[p.user_id] ?? {
             id: p.user_id,
             username: null,
             full_name: "FitExtremes User",
@@ -84,7 +103,6 @@ export const useUserPosts = (userId?: string) => {
         .from("posts")
         .select(`
           *,
-          profiles:user_id (id, username, full_name, avatar_url),
           reactions (id, emoji, user_id),
           comments (id)
         `)
@@ -94,9 +112,11 @@ export const useUserPosts = (userId?: string) => {
         console.error("[UserPosts] error:", error);
         return [];
       }
-      return (data ?? []).map((p: any) => ({
+      const rows = (data ?? []) as any[];
+      const authors = await fetchAuthors([userId]);
+      return rows.map((p: any) => ({
         ...p,
-        profiles: p.profiles ?? { id: p.user_id, username: null, full_name: "FitExtremes User", avatar_url: null },
+        profiles: authors[p.user_id] ?? { id: p.user_id, username: null, full_name: "FitExtremes User", avatar_url: null },
         reactions: Array.isArray(p.reactions) ? p.reactions : [],
         comments: Array.isArray(p.comments) ? p.comments : [],
       }));

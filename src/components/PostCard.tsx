@@ -100,7 +100,7 @@ const PostCard = ({ post }: PostCardProps) => {
           <div>
             <p className="text-sm font-medium text-foreground">{profile.full_name || "FitExtremes User"}</p>
             <p className="text-xs text-muted-foreground">
-              {profile.username ? `@${profile.username}` : ""} · {timeAgo}
+              {profile.username ? `@${profile.username} · ` : ""}{timeAgo}
             </p>
           </div>
         </Link>
