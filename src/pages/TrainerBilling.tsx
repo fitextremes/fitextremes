@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, BadgeCheck, Sparkles } from "lucide-react";

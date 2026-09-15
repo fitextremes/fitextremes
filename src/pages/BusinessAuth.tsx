@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
