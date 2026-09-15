@@ -4,14 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 
 export type NotificationType =
-  | "follow_request_sent"
   | "follow_request_received"
   | "follow_request_accepted"
-  | "follow_request_accepted_self"
   | "follow_request_declined"
-  | "follow_request_declined_self"
-  | "follow_request_cancelled"
-  | "follow_success"
   | "new_follower"
   | "post_reaction"
   | "post_comment";
