@@ -83,7 +83,7 @@ const Discover = () => {
     const live = (realBusinesses || [])
       .filter((b: any) => b.business_type === "gym")
       .map((b: any) => mapBusiness(b, "🏋️", "Fitness Centre"));
-    return [...live, ...mockGyms.map(g => ({ ...g, isReal: false }))];
+    return live;
   }, [realBusinesses]);
 
   const supplementItems = useMemo(() => {
