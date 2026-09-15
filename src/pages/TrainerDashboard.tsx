@@ -83,7 +83,7 @@ const TrainerDashboard = () => {
         </motion.div>
 
         {/* Dynamic subscription card */}
-        <SubscriptionCard />
+        {BILLING_ENABLED && <SubscriptionCard />}
 
         {/* Counters */}
         <div className="grid grid-cols-2 gap-4">

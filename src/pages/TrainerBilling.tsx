@@ -46,7 +46,7 @@ const TrainerBilling = () => {
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Button>
 
-        <SubscriptionCard />
+        {BILLING_ENABLED && <SubscriptionCard />}
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
