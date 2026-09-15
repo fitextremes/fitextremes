@@ -84,7 +84,7 @@ const Discover = () => {
     const live = (realBusinesses || [])
       .filter((b: any) => b.business_type === "supplement_store" || b.business_type === "supplements")
       .map((b: any) => mapBusiness(b, "💊", "Supplement Store"));
-    return [...live, ...mockSupplements.map(s => ({ ...s, isReal: false }))];
+    return live;
   }, [realBusinesses]);
 
   const getFilteredItems = () => {
