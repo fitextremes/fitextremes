@@ -17,14 +17,6 @@ const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "trainers", label: "Personal Trainers", icon: Star },
 ];
 
-const mockGyms = [
-  { id: 1, name: "Iron Paradise Fitness Centre", location: "Toronto, ON", rating: 4.8, type: "Full Fitness Centre", image: "🏋️" },
-  { id: 2, name: "CrossFit Thunder", location: "Vancouver, BC", rating: 4.6, type: "CrossFit Box", image: "⚡" },
-  { id: 3, name: "Zen Fitness Studio", location: "Montreal, QC", rating: 4.9, type: "Boutique Studio", image: "🧘" },
-  { id: 4, name: "PowerLift Arena", location: "Calgary, AB", rating: 4.7, type: "Powerlifting", image: "💪" },
-  { id: 5, name: "FlexZone", location: "Ottawa, ON", rating: 4.5, type: "24/7 Fitness Centre", image: "🔥" },
-  { id: 6, name: "Peak Performance", location: "Edmonton, AB", rating: 4.8, type: "Athletic Training", image: "🏔️" },
-];
 
 const mockSupplements = [
   { id: 1, name: "NutriMax Store", location: "Toronto, ON", rating: 4.7, type: "Full Range Supplements", image: "💊" },
@@ -91,7 +83,7 @@ const Discover = () => {
     const live = (realBusinesses || [])
       .filter((b: any) => b.business_type === "gym")
       .map((b: any) => mapBusiness(b, "🏋️", "Fitness Centre"));
-    return [...live, ...mockGyms.map(g => ({ ...g, isReal: false }))];
+    return live;
   }, [realBusinesses]);
 
   const supplementItems = useMemo(() => {
@@ -221,7 +213,9 @@ const Discover = () => {
 
         {items.length === 0 && (
           <div className="mt-16 text-center text-muted-foreground">
-            <p className="text-lg">No results found</p>
+            <p className="text-lg">
+              {activeTab === "gyms" ? "No fitness centres available yet." : "No results found"}
+            </p>
             <p className="text-sm">Try adjusting your filters</p>
           </div>
         )}
