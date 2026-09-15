@@ -35,30 +35,9 @@ const BusinessDashboard = () => {
     if (!roleLoading && user && !isBusiness) navigate("/dashboard");
   }, [roleLoading, isBusiness, user, navigate]);
 
-  // Gate: require a Stripe-managed subscription (card on file) to access dashboard
-  const { data: subGate, isLoading: subLoading } = useQuery({
-    queryKey: ["business-sub-gate", user?.id],
-    enabled: !!user?.id && isBusiness,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("stripe_subscription_id")
-        .eq("trainer_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
-    },
-  });
+  // Business accounts are free — no subscription/payment gate.
 
-  useEffect(() => {
-    if (!BILLING_ENABLED) return;
-    if (!authLoading && !roleLoading && !subLoading && user && isBusiness && !subGate?.stripe_subscription_id) {
-      navigate("/business-checkout", { replace: true });
-    }
-  }, [authLoading, roleLoading, subLoading, user, isBusiness, subGate, navigate]);
-
-  if (authLoading || roleLoading || subLoading) {
+  if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
   }
 
