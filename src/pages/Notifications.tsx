@@ -157,6 +157,9 @@ const Notifications = () => {
                     ) : (
                       <p className="text-sm text-foreground">{typeText(n)}</p>
                     )}
+                    {n.actor?.username && (
+                      <p className="text-xs text-muted-foreground">@{n.actor.username}</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                     </p>
