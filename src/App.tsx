@@ -18,6 +18,7 @@ import EditProfile from "./pages/EditProfile";
 import UserProfile from "./pages/UserProfile";
 import FollowRequests from "./pages/FollowRequests";
 import Notifications from "./pages/Notifications";
+import PostDetail from "./pages/PostDetail";
 import TrainerProfile from "./pages/TrainerProfile";
 import BusinessPublicProfile from "./pages/BusinessPublicProfile";
 import TrainerDashboard from "./pages/TrainerDashboard";
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/user/:identifier" element={<UserProfile />} />
             <Route path="/follow-requests" element={<FollowRequests />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/post/:id" element={<PostDetail />} />
             <Route path="/trainer-dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/edit" element={<TrainerEditProfile />} />
             <Route path="/profile/gallery" element={<TrainerGallery />} />
