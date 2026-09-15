@@ -11,18 +11,12 @@ const typeIcon = (type: NotificationItem["type"]) => {
   switch (type) {
     case "follow_request_received":
       return <UserPlus className="h-4 w-4 text-primary" />;
-    case "follow_request_sent":
-      return <Send className="h-4 w-4 text-muted-foreground" />;
     case "follow_request_accepted":
-    case "follow_request_accepted_self":
       return <UserCheck className="h-4 w-4 text-primary" />;
     case "follow_request_declined":
-    case "follow_request_declined_self":
       return <UserX className="h-4 w-4 text-destructive" />;
     case "new_follower":
       return <Heart className="h-4 w-4 text-primary" />;
-    case "follow_success":
-      return <UserCheck className="h-4 w-4 text-primary" />;
     case "post_reaction":
       return <Smile className="h-4 w-4 text-primary" />;
     case "post_comment":
@@ -32,27 +26,22 @@ const typeIcon = (type: NotificationItem["type"]) => {
   }
 };
 
+export const actorName = (n: NotificationItem) =>
+  n.actor?.full_name || (n.actor?.username ? `@${n.actor.username}` : "Someone");
+
 const typeText = (n: NotificationItem) => {
-  const name = n.actor?.username ? `@${n.actor.username}` : n.actor?.full_name || "Someone";
+  const name = actorName(n);
   switch (n.type) {
     case "follow_request_received":
       return `${name} requested to follow you`;
-    case "follow_request_sent":
-      return `Follow request sent`;
     case "follow_request_accepted":
       return `${name} accepted your follow request`;
-    case "follow_request_accepted_self":
-      return `You accepted ${name}'s follow request`;
     case "follow_request_declined":
-      return `Your follow request was declined`;
-    case "follow_request_declined_self":
-      return `You declined ${name}'s follow request`;
+      return `${name} declined your follow request`;
     case "new_follower":
       return `${name} started following you`;
-    case "follow_success":
-      return `You started following ${name}`;
     case "post_reaction":
-      return `${name} reacted to your post`;
+      return `${name} liked your post`;
     case "post_comment":
       return `${name} commented on your post`;
     default:
