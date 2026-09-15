@@ -129,6 +129,27 @@ const WorkoutLogPage = () => {
     setLogs((prev) => prev.filter((l) => l.id !== id));
   };
 
+  const handleDeleteDay = async (ids: string[]) => {
+    const { error } = await supabase.from("workout_logs").delete().in("id", ids);
+    if (error) {
+      toast.error("Failed to delete workouts");
+      return;
+    }
+    toast.success("Workout day deleted");
+    setLogs((prev) => prev.filter((l) => !ids.includes(l.id)));
+  };
+
+  // Group logs by calendar day (newest day first, logs already sorted desc)
+  const groupedDays = (() => {
+    const map = new Map<string, WorkoutLog[]>();
+    for (const log of logs) {
+      const key = format(new Date(log.created_at), "yyyy-MM-dd");
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(log);
+    }
+    return Array.from(map.entries()).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  })();
+
   if (authLoading || roleLoading || !user || !isSocial) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
