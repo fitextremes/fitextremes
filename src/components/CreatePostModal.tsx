@@ -56,7 +56,7 @@ const CreatePostModal = ({ open, onOpenChange }: CreatePostModalProps) => {
           {/* Single image upload */}
           <div>
             <Label className="text-xs text-muted-foreground mb-2 block">
-              Image <span className="text-destructive">*</span> (JPG, PNG, WEBP · Max 5 MB)
+              Image <span className="text-destructive">*</span> (JPG, PNG, WEBP · Max 20 MB)
             </Label>
 
             {imagePreview ? (

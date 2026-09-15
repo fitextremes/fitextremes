@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { ACCEPTED_IMAGE_TYPES, MAX_IMAGE_BYTES, IMAGE_TOO_LARGE_MESSAGE, compressImage } from "@/lib/imageUpload";
 
 export type GalleryItem = {
   id: string;
@@ -13,8 +14,8 @@ export type GalleryItem = {
   updated_at: string;
 };
 
-const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const MAX_BYTES = 5 * 1024 * 1024;
+const ALLOWED = ACCEPTED_IMAGE_TYPES;
+const MAX_BYTES = MAX_IMAGE_BYTES;
 const MAX_IMAGES = 10;
 
 export const useTrainerGallery = (trainerId?: string) => {
@@ -58,13 +59,14 @@ export const useUploadGalleryImages = () => {
           throw new Error("Only JPG, JPEG, PNG, WEBP files are allowed.");
         }
         if (f.size > MAX_BYTES) {
-          throw new Error("Each image must be 5 MB or less.");
+          throw new Error(IMAGE_TOO_LARGE_MESSAGE);
         }
       }
 
       let nextOrder = (existing as any[])?.reduce((m, r) => Math.max(m, r.sort_order ?? 0), -1) + 1;
 
-      for (const file of files) {
+      for (const original of files) {
+        const file = await compressImage(original);
         const ext = file.name.split(".").pop() || "jpg";
         const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: upErr } = await supabase.storage
