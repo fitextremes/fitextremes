@@ -13,7 +13,7 @@ const PostDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SocialTopBar title="Post" />
+      <SocialTopBar title="Feed" />
       <div className="container mx-auto px-4 pt-20 pb-12 max-w-2xl">
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back
