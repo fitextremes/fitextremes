@@ -40,7 +40,7 @@ const UserProfile = () => {
         <ProfileViewHeader />
         <div className="flex items-center justify-center pt-32">
           <p className="text-muted-foreground">
-            {isLoadingProfile || !hasFetched ? "Loading..." : "User not found"}
+            {isLoadingProfile || !hasFetched ? "Loading..." : "This profile is no longer available."}
           </p>
         </div>
       </div>
