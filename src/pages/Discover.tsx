@@ -51,7 +51,7 @@ const Discover = () => {
       image: "💪",
       avatar_url: t.avatar_url,
     }));
-    return [...live, ...mockTrainers.map(t => ({ ...t, isReal: false }))];
+    return live;
   }, [realTrainers]);
 
   const mapBusiness = (b: any, fallbackImage: string, fallbackType: string) => ({
