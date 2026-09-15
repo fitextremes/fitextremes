@@ -2,6 +2,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Fetch author profiles (name, username, avatar) for a set of user ids.
+const fetchAuthors = async (userIds: (string | null | undefined)[]) => {
+  const ids = Array.from(new Set(userIds.filter(Boolean))) as string[];
+  const byId: Record<string, any> = {};
+  if (!ids.length) return byId;
+  const { data, error } = await (supabase as any)
+    .from("post_authors")
+    .select("id, username, full_name, avatar_url")
+    .in("id", ids);
+  if (error) {
+    console.warn("[Posts] author profiles fetch failed:", error);
+    return byId;
+  }
+  (data ?? []).forEach((p: any) => (byId[p.id] = p));
+  return byId;
+};
+
 export const useFeedPosts = () => {
   const { user, loading: authLoading } = useAuth();
 
