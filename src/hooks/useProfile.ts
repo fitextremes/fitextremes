@@ -45,7 +45,7 @@ export const useUpdateProfile = () => {
         .from("profiles")
         .update(updates)
         .eq("id", user.id)
-        .select()
+        .select("id, username, full_name, role, avatar_url, bio, location, profile_visibility, updated_at")
         .single();
       if (error) throw error;
       return data;
