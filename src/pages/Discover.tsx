@@ -204,7 +204,7 @@ const Discover = () => {
                 ? "No fitness centres available yet."
                 : activeTab === "supplements"
                 ? "No supplement stores available yet."
-                : "No results found"}
+                : "No personal trainers available yet."}
             </p>
             <p className="text-sm">Try adjusting your filters</p>
           </div>
