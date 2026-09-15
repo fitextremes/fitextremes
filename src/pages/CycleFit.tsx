@@ -70,8 +70,9 @@ const CycleFit = () => {
   const { role, isSocial, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
-  const { logs, loading, reload, stats } = useCycleFit();
+  const { logs, loading, reload, stats, avgCycleSetting, saveAvgCycle } = useCycleFit();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [avgDialogOpen, setAvgDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CycleLog | null>(null);
   const [deleting, setDeleting] = useState<CycleLog | null>(null);
   const [month, setMonth] = useState(new Date());
