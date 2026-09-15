@@ -21,6 +21,15 @@ const BusinessCheckout = () => {
     if (!authLoading && !user) navigate("/business-auth?tab=login", { replace: true });
   }, [authLoading, user, navigate]);
 
+  // Billing is disabled — business accounts are free. Never show checkout.
+  useEffect(() => {
+    if (!BILLING_ENABLED) navigate("/business-dashboard", { replace: true });
+  }, [navigate]);
+
+  if (!BILLING_ENABLED) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
+  }
+
   useEffect(() => {
     if (!roleLoading && user && !isBusiness) navigate("/dashboard", { replace: true });
   }, [roleLoading, isBusiness, user, navigate]);
