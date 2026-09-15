@@ -37,7 +37,7 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const error = validateImageFile(file);
+    const error = validateImageFile(file, { restrictTypes: true });
     if (error) {
       toast.error(error);
       return;
@@ -47,21 +47,32 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
   };
 
   const handleSave = async () => {
-    try {
-      let avatar_url = profile.avatar_url;
+    if (!user) {
+      toast.error("You must be signed in to update your profile");
+      return;
+    }
 
-      if (avatarFile && user) {
+    let avatar_url = profile.avatar_url;
+
+    if (avatarFile) {
+      try {
         const compressed = await compressImage(avatarFile);
-        const ext = compressed.name.split(".").pop();
-        const path = `${user.id}/avatar.${ext}`;
+        const ext = (compressed.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+        const path = `${user.id}/avatar-${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;
+      } catch (err) {
+        console.error("[EditProfileDialog] avatar upload failed:", err);
+        toast.error("Unable to upload profile photo. Please try again.");
+        return;
       }
+    }
 
+    try {
       await updateProfile.mutateAsync({
         full_name: fullName.trim(),
         bio: bio.trim(),
@@ -69,12 +80,16 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
         avatar_url,
         profile_visibility: visibility,
       });
+      setAvatarFile(null);
+      setAvatarPreview(avatar_url);
       toast.success("Profile updated!");
       onOpenChange(false);
-    } catch {
-      toast.error("Failed to update profile");
+    } catch (err) {
+      console.error("[EditProfileDialog] profile update failed:", err);
+      toast.error("Unable to save profile changes. Please try again.");
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

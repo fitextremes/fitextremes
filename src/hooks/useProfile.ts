@@ -41,18 +41,23 @@ export const useUpdateProfile = () => {
       profile_visibility?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
+      // NOTE: no `.select()` here — SELECT is not granted on `profiles` to the
+      // `authenticated` role (owner reads go through get_my_full_profile), so a
+      // returning-select would fail the whole update with a permission error.
+      const { error } = await supabase
         .from("profiles")
         .update(updates)
-        .eq("id", user.id)
-        .select("id, username, full_name, role, avatar_url, bio, location, profile_visibility, updated_at")
-        .single();
-      if (error) throw error;
-      return data;
+        .eq("id", user.id);
+      if (error) {
+        console.error("[useUpdateProfile] update failed:", error);
+        throw error;
+      }
+      return updates;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
+
   });
 };
 
