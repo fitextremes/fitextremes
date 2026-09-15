@@ -29,6 +29,7 @@ import BusinessGallery from "./pages/BusinessGallery";
 import NotFound from "./pages/NotFound";
 import CalorieTracker from "./pages/CalorieTracker";
 import WorkoutLog from "./pages/WorkoutLog";
+import CycleFit from "./pages/CycleFit";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Legal from "./pages/Legal";
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/business-checkout" element={<Navigate to="/business-dashboard" replace />} />
             <Route path="/calorie-tracker" element={<CalorieTracker />} />
             <Route path="/workout-log" element={<WorkoutLog />} />
+            <Route path="/cyclefit" element={<CycleFit />} />
             <Route path="/legal" element={<Legal />} />
             <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/terms" element={<Navigate to="/legal#terms" replace />} />
