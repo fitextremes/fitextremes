@@ -198,11 +198,6 @@ const CalorieTracker = () => {
     );
   }, [logs]);
 
-  const grouped = useMemo(() => {
-    const g: Record<MealType, FoodLog[]> = { breakfast: [], lunch: [], dinner: [], snacks: [] };
-    logs.forEach((l) => g[l.meal_type].push(l));
-    return g;
-  }, [logs]);
 
   const openAddModal = (food: FoodResult) => {
     setAddModal({ food, quantity: parsedQty || 1, mealType: "breakfast" });
