@@ -37,7 +37,7 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const error = validateImageFile(file);
+    const error = validateImageFile(file, { restrictTypes: true });
     if (error) {
       toast.error(error);
       return;
