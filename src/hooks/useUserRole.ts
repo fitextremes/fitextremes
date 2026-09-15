@@ -38,7 +38,7 @@ export const useUserRole = () => {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, authLoading]);
 
   return {
     role,
