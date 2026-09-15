@@ -19,14 +19,6 @@ const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
 
 
 
-const mockTrainers = [
-  { id: 1, name: "Alex Carter", location: "Toronto, ON", rating: 5.0, specialty: "Strength & Conditioning", priceMin: 40, priceMax: 60, image: "💪" },
-  { id: 2, name: "Maria Santos", location: "Vancouver, BC", rating: 4.9, specialty: "Weight Loss", priceMin: 35, priceMax: 50, image: "🏃" },
-  { id: 3, name: "James Wilson", location: "Calgary, AB", rating: 4.8, specialty: "Bodybuilding", priceMin: 45, priceMax: 70, image: "🏋️" },
-  { id: 4, name: "Priya Sharma", location: "Montreal, QC", rating: 4.7, specialty: "Yoga & Flexibility", priceMin: 30, priceMax: 45, image: "🧘" },
-  { id: 5, name: "Derek Lee", location: "Ottawa, ON", rating: 4.6, specialty: "HIIT & Cardio", priceMin: 25, priceMax: 40, image: "⚡" },
-  { id: 6, name: "Samantha Cross", location: "Edmonton, AB", rating: 4.9, specialty: "Powerlifting", priceMin: 50, priceMax: 80, image: "🔥" },
-];
 
 const locations = ["All Locations", "Toronto, ON", "Vancouver, BC", "Montreal, QC", "Calgary, AB", "Ottawa, ON", "Edmonton, AB"];
 const priceRanges = [
