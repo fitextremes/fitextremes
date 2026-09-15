@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, User, Compass, Apple, Dumbbell } from "lucide-react";
+import { Home, Users, User, Compass, Apple, Dumbbell, CalendarHeart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -9,6 +9,7 @@ const tabs = [
   { to: "/discover", icon: Compass, label: "Discover" },
   { to: "/calorie-tracker", icon: Apple, label: "Calories" },
   { to: "/workout-log", icon: Dumbbell, label: "Workouts" },
+  { to: "/cyclefit", icon: CalendarHeart, label: "CycleFit" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 
@@ -22,14 +23,14 @@ const MobileTabBar = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">
+      <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-1">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.to;
           return (
             <Link
               key={tab.to}
               to={tab.to}
-              className={`flex flex-col items-center gap-1 px-3 py-1 transition-colors ${
+              className={`flex flex-col items-center gap-1 px-1.5 py-1 transition-colors ${
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
