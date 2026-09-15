@@ -62,7 +62,10 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
         const { error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(path, compressed, { upsert: true, contentType: compressed.type });
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("AVATAR UPLOAD ERROR:", uploadError);
+          throw uploadError;
+        }
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;
       } catch (err) {
@@ -85,7 +88,7 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
       toast.success("Profile updated!");
       onOpenChange(false);
     } catch (err) {
-      console.error("[EditProfileDialog] profile update failed:", err);
+      console.error("PROFILE UPDATE ERROR:", err);
       toast.error("Unable to save profile changes. Please try again.");
     }
   };
