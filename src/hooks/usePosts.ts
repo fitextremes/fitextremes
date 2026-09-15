@@ -103,7 +103,6 @@ export const useUserPosts = (userId?: string) => {
         .from("posts")
         .select(`
           *,
-          profiles:user_id (id, username, full_name, avatar_url),
           reactions (id, emoji, user_id),
           comments (id)
         `)
@@ -113,9 +112,11 @@ export const useUserPosts = (userId?: string) => {
         console.error("[UserPosts] error:", error);
         return [];
       }
-      return (data ?? []).map((p: any) => ({
+      const rows = (data ?? []) as any[];
+      const authors = await fetchAuthors([userId]);
+      return rows.map((p: any) => ({
         ...p,
-        profiles: p.profiles ?? { id: p.user_id, username: null, full_name: "FitExtremes User", avatar_url: null },
+        profiles: authors[p.user_id] ?? { id: p.user_id, username: null, full_name: "FitExtremes User", avatar_url: null },
         reactions: Array.isArray(p.reactions) ? p.reactions : [],
         comments: Array.isArray(p.comments) ? p.comments : [],
       }));
