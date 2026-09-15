@@ -263,36 +263,95 @@ const WorkoutLogPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
-            {logs.map((log) => (
-              <Card key={log.id}>
-                <CardContent className="py-4 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate">{log.exercise_name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {log.sets} Sets • {log.reps} Reps • {Number(log.weight)} {log.weight_unit}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Logged {format(new Date(log.created_at), "MMM d, yyyy")}
-                    </div>
+          <div className="space-y-6">
+            {groupedDays.map(([dayKey, dayLogs]) => (
+              <Card key={dayKey}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-display uppercase tracking-wider">
+                    {format(new Date(dayLogs[0].created_at), "MMMM d, yyyy")}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {dayLogs.length} {dayLogs.length === 1 ? "Exercise" : "Exercises"} Logged
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="-mx-2 overflow-x-auto">
+                    <table className="w-full min-w-[520px] text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
+                          <th className="px-2 py-2 font-medium">Exercise</th>
+                          <th className="px-2 py-2 font-medium text-right">Sets</th>
+                          <th className="px-2 py-2 font-medium text-right">Reps</th>
+                          <th className="px-2 py-2 font-medium text-right">Weight</th>
+                          <th className="px-2 py-2 font-medium">Unit</th>
+                          <th className="px-2 py-2 font-medium text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dayLogs.map((log) => (
+                          <tr key={log.id} className="border-b border-border/50 last:border-0">
+                            <td className="px-2 py-3 font-medium text-foreground">{log.exercise_name}</td>
+                            <td className="px-2 py-3 text-right text-muted-foreground">{log.sets}</td>
+                            <td className="px-2 py-3 text-right text-muted-foreground">{log.reps}</td>
+                            <td className="px-2 py-3 text-right text-muted-foreground">{Number(log.weight)}</td>
+                            <td className="px-2 py-3 text-muted-foreground">{log.weight_unit}</td>
+                            <td className="px-2 py-3 text-right">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    aria-label={`Delete ${log.exercise_name}`}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete this exercise?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {log.exercise_name} will be removed from this day. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(log.id)}>Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4 w-full text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Entire Day
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this workout?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete this whole workout day?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone.
+                          All {dayLogs.length} exercises logged on{" "}
+                          {format(new Date(dayLogs[0].created_at), "MMMM d, yyyy")} will be removed. This action cannot
+                          be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(log.id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleDeleteDay(dayLogs.map((l) => l.id))}>
+                          Delete Day
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
