@@ -42,7 +42,6 @@ export const useFeedPosts = () => {
           .from("posts")
           .select(`
             *,
-            profiles:user_id (id, username, full_name, avatar_url),
             reactions (id, emoji, user_id),
             comments (id)
           `)
@@ -55,10 +54,13 @@ export const useFeedPosts = () => {
           return [];
         }
 
+        const rows = (data ?? []) as any[];
+        const authors = await fetchAuthors(rows.map((p) => p.user_id));
+
         // Normalize: ensure no required nested field is null
-        return (data ?? []).map((p: any) => ({
+        return rows.map((p: any) => ({
           ...p,
-          profiles: p.profiles ?? {
+          profiles: authors[p.user_id] ?? {
             id: p.user_id,
             username: null,
             full_name: "FitExtremes User",
