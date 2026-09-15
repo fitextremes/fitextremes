@@ -213,7 +213,9 @@ const Discover = () => {
 
         {items.length === 0 && (
           <div className="mt-16 text-center text-muted-foreground">
-            <p className="text-lg">No results found</p>
+            <p className="text-lg">
+              {activeTab === "gyms" ? "No fitness centres available yet." : "No results found"}
+            </p>
             <p className="text-sm">Try adjusting your filters</p>
           </div>
         )}
