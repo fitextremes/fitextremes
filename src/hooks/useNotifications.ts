@@ -63,7 +63,8 @@ export const useNotifications = () => {
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      const rows = (data ?? []) as any[];
+      // Defensive: never surface notifications caused by the user's own actions
+      const rows = ((data ?? []) as any[]).filter((r) => r.actor_id !== user.id);
       const actorIds = Array.from(
         new Set(rows.map((r) => r.actor_id).filter(Boolean))
       ) as string[];
