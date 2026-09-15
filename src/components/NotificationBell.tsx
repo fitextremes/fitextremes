@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, Check, X, UserPlus, UserCheck, UserX, Send, Heart, MessageCircle, Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useNotifications, useMarkNotificationsRead, NotificationItem } from "@/hooks/useNotifications";
+import { useNotifications, useMarkNotificationsRead, NotificationItem, notificationTarget } from "@/hooks/useNotifications";
 import { useRespondFollowRequest } from "@/hooks/useFollowRequest";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -57,6 +57,14 @@ const NotificationBell = ({ className }: Props) => {
   const { data: notifications = [], isLoading } = useNotifications();
   const markRead = useMarkNotificationsRead();
   const respond = useRespondFollowRequest();
+  const navigate = useNavigate();
+
+  const handleOpen = (n: NotificationItem) => {
+    const target = notificationTarget(n);
+    if (!n.read) markRead.mutate([n.id]);
+    if (target) navigate(target);
+  };
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleOpenChange = (open: boolean) => {
