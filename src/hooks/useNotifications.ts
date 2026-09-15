@@ -159,3 +159,27 @@ export const useMarkNotificationsRead = () => {
     },
   });
 };
+
+/**
+ * Central notification routing: decide the destination from the structured
+ * notification type + stored ids (never from the message text).
+ * Returns null when there is nothing to open.
+ */
+export const notificationTarget = (n: NotificationItem): string | null => {
+  switch (n.type) {
+    case "post_reaction":
+    case "post_comment":
+      return n.post_id ? `/post/${n.post_id}` : null;
+    case "new_follower":
+    case "follow_request_received":
+    case "follow_request_accepted":
+    case "follow_request_declined":
+      return n.actor?.username
+        ? `/user/${n.actor.username}`
+        : n.actor_id
+        ? `/user/${n.actor_id}`
+        : null;
+    default:
+      return null;
+  }
+};
