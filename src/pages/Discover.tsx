@@ -18,12 +18,6 @@ const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
 ];
 
 
-const mockSupplements = [
-  { id: 1, name: "NutriMax Store", location: "Toronto, ON", rating: 4.7, type: "Full Range Supplements", image: "💊" },
-  { id: 2, name: "Protein Planet", location: "Vancouver, BC", rating: 4.8, type: "Protein & Recovery", image: "🥤" },
-  { id: 3, name: "Vitality Health", location: "Calgary, AB", rating: 4.6, type: "Vitamins & Wellness", image: "🌿" },
-  { id: 4, name: "MuscleFuel", location: "Montreal, QC", rating: 4.5, type: "Performance Supplements", image: "💪" },
-];
 
 const mockTrainers = [
   { id: 1, name: "Alex Carter", location: "Toronto, ON", rating: 5.0, specialty: "Strength & Conditioning", priceMin: 40, priceMax: 60, image: "💪" },
@@ -90,7 +84,7 @@ const Discover = () => {
     const live = (realBusinesses || [])
       .filter((b: any) => b.business_type === "supplement_store" || b.business_type === "supplements")
       .map((b: any) => mapBusiness(b, "💊", "Supplement Store"));
-    return [...live, ...mockSupplements.map(s => ({ ...s, isReal: false }))];
+    return live;
   }, [realBusinesses]);
 
   const getFilteredItems = () => {
@@ -214,7 +208,11 @@ const Discover = () => {
         {items.length === 0 && (
           <div className="mt-16 text-center text-muted-foreground">
             <p className="text-lg">
-              {activeTab === "gyms" ? "No fitness centres available yet." : "No results found"}
+              {activeTab === "gyms"
+                ? "No fitness centres available yet."
+                : activeTab === "supplements"
+                ? "No supplement stores available yet."
+                : "No results found"}
             </p>
             <p className="text-sm">Try adjusting your filters</p>
           </div>
