@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInCalendarDays, format } from "date-fns";
-import { CalendarHeart, Plus, Pencil, Trash2 } from "lucide-react";
+import { CalendarHeart, Plus, Pencil, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileTabBar from "@/components/MobileTabBar";
 import LogPeriodDialog from "@/components/cyclefit/LogPeriodDialog";
+import AvgCycleDialog from "@/components/cyclefit/AvgCycleDialog";
 import CycleCalendar from "@/components/cyclefit/CycleCalendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,22 +28,52 @@ import {
 
 const NOT_ENOUGH = "Not enough data yet";
 
-const SummaryCard = ({ label, value }: { label: string; value: string }) => (
-  <Card>
+const SummaryCard = ({
+  label,
+  value,
+  muted,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+  onClick?: () => void;
+}) => {
+  const body = (
     <CardContent className="p-4">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-display">{label}</p>
-      <p className="mt-1 text-lg font-display uppercase tracking-wide text-primary">{value}</p>
+      <p
+        className={`mt-1 font-display uppercase tracking-wide ${
+          muted ? "text-sm text-muted-foreground" : "text-lg text-primary"
+        }`}
+      >
+        {value}
+      </p>
     </CardContent>
-  </Card>
-);
+  );
+  return onClick ? (
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
+      className="cursor-pointer transition-colors hover:border-primary/60"
+    >
+      {body}
+    </Card>
+  ) : (
+    <Card>{body}</Card>
+  );
+};
 
 const CycleFit = () => {
   const { user, loading: authLoading } = useAuth();
   const { role, isSocial, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
-  const { logs, loading, reload, stats } = useCycleFit();
+  const { logs, loading, reload, stats, avgCycleSetting, saveAvgCycle } = useCycleFit();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [avgDialogOpen, setAvgDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CycleLog | null>(null);
   const [deleting, setDeleting] = useState<CycleLog | null>(null);
   const [month, setMonth] = useState(new Date());
@@ -145,11 +176,21 @@ const CycleFit = () => {
               />
               <SummaryCard
                 label="Next Period"
-                value={stats.nextPeriod ? `Est. ${format(stats.nextPeriod, "MMM d")}` : NOT_ENOUGH}
+                muted={!stats.nextPeriod}
+                value={
+                  stats.nextPeriod
+                    ? `Est. ${format(stats.nextPeriod, "MMM d, yyyy")}`
+                    : !stats.lastStart
+                      ? "Log your period to calculate"
+                      : "Set Avg Cycle to estimate"
+                }
+                onClick={!stats.nextPeriod && stats.lastStart ? () => setAvgDialogOpen(true) : undefined}
               />
               <SummaryCard
                 label="Avg. Cycle"
-                value={stats.avgCycle ? `${stats.avgCycle} Days` : NOT_ENOUGH}
+                muted={!stats.avgCycle}
+                value={stats.avgCycle ? `${stats.avgCycle} Days` : "Set cycle length"}
+                onClick={() => setAvgDialogOpen(true)}
               />
               <SummaryCard
                 label="Avg. Period"
@@ -157,9 +198,37 @@ const CycleFit = () => {
               />
             </div>
 
-            <Button variant="hero" className="mt-6 w-full" onClick={openNew}>
-              <Plus className="mr-1 h-4 w-4" /> Log Period
-            </Button>
+            {stats.loggedAvgCycle && stats.loggedAvgCycle !== stats.avgCycle && (
+              <Card className="mt-3">
+                <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Your logged-cycle average: {stats.loggedAvgCycle} days
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const { error } = await saveAvgCycle(stats.loggedAvgCycle!);
+                      if (error) toast.error("Couldn't update your cycle length");
+                      else toast.success(`Using ${stats.loggedAvgCycle} days for predictions`);
+                    }}
+                  >
+                    Use {stats.loggedAvgCycle} days for predictions
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button variant="hero" className="flex-1" onClick={openNew}>
+                <Plus className="mr-1 h-4 w-4" /> Log Period
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setAvgDialogOpen(true)}>
+                <Settings2 className="mr-1 h-4 w-4" />
+                {stats.avgCycle ? `Avg Cycle: ${stats.avgCycle} Days` : "Set Avg Cycle"}
+              </Button>
+            </div>
+
 
             <div className="mt-6">
               <CycleCalendar
@@ -244,6 +313,13 @@ const CycleFit = () => {
           should not be used as contraception or as a medical diagnosis.
         </p>
       </main>
+
+      <AvgCycleDialog
+        open={avgDialogOpen}
+        onOpenChange={setAvgDialogOpen}
+        currentValue={avgCycleSetting}
+        onSave={saveAvgCycle}
+      />
 
       <LogPeriodDialog
         open={dialogOpen}

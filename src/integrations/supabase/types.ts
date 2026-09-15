@@ -196,6 +196,27 @@ export type Database = {
         }
         Relationships: []
       }
+      cycle_settings: {
+        Row: {
+          avg_cycle_days: number | null
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_cycle_days?: number | null
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_cycle_days?: number | null
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follow_requests: {
         Row: {
           created_at: string
