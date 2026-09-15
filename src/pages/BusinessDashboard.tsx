@@ -1,18 +1,14 @@
 import { useEffect } from "react";
-import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus, PhoneCall, Globe, Truck, Send, Building2 } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
-import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useBusinessStats, useBusinessLeads, useUpdateLeadStatus } from "@/hooks/useBusiness";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const businessLabel = (t?: string | null) =>
@@ -35,30 +31,9 @@ const BusinessDashboard = () => {
     if (!roleLoading && user && !isBusiness) navigate("/dashboard");
   }, [roleLoading, isBusiness, user, navigate]);
 
-  // Gate: require a Stripe-managed subscription (card on file) to access dashboard
-  const { data: subGate, isLoading: subLoading } = useQuery({
-    queryKey: ["business-sub-gate", user?.id],
-    enabled: !!user?.id && isBusiness,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("stripe_subscription_id")
-        .eq("trainer_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
-    },
-  });
+  // Business accounts are free — no subscription/payment gate.
 
-  useEffect(() => {
-    if (!BILLING_ENABLED) return;
-    if (!authLoading && !roleLoading && !subLoading && user && isBusiness && !subGate?.stripe_subscription_id) {
-      navigate("/business-checkout", { replace: true });
-    }
-  }, [authLoading, roleLoading, subLoading, user, isBusiness, subGate, navigate]);
-
-  if (authLoading || roleLoading || subLoading) {
+  if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
   }
 
@@ -104,8 +79,6 @@ const BusinessDashboard = () => {
             </div>
           </div>
         </motion.div>
-
-        <SubscriptionCard />
 
         {/* Analytics */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
