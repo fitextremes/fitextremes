@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useBusinessStats, useBusinessLeads, useUpdateLeadStatus } from "@/hooks/useBusiness";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const businessLabel = (t?: string | null) =>
