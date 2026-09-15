@@ -25,16 +25,27 @@ export const useUserRole = () => {
       return;
     }
     setLoading(true);
-    supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        setRole(data?.role ?? null);
-        setLoading(false);
-      });
+    (async () => {
+      // Primary: owner RPC (unaffected by profiles PII policies)
+      const { data: rpcData, error: rpcError } = await (supabase as any).rpc("get_my_full_profile");
+      let resolved: string | null = null;
+      if (!rpcError && rpcData) {
+        const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+        resolved = row?.role ?? null;
+      }
+      if (!resolved) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        resolved = (data as any)?.role ?? null;
+      }
+      if (!active) return;
+      // Default to the social experience so navigation never disappears
+      setRole(resolved ?? "user");
+      setLoading(false);
+    })();
     return () => {
       active = false;
     };
