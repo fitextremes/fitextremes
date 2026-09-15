@@ -27,8 +27,8 @@ const ROLE_LABEL: Record<string, string> = {
 
 const roles = [
   { value: "user", label: "Social User", description: "Explore fitness centres, trainers & connect", price: "Free" },
-  { value: "trainer", label: "Personal Trainer", description: "Showcase services & receive leads", price: "$15/mo" },
-  { value: "business", label: "Business Owner", description: "List your fitness centre or supplement store", price: "$30/mo" },
+  { value: "trainer", label: "Personal Trainer", description: "Showcase services & receive leads", price: "Free" },
+  { value: "business", label: "Business Owner", description: "List your fitness centre or supplement store", price: "Free" },
 ];
 
 // --- Validation helpers ---
@@ -401,16 +401,12 @@ const Signup = () => {
 
             {/* Submit */}
             <Button variant="hero" className="w-full" size="lg" type="submit" disabled={loading || !isFormValid}>
-              {loading
-                ? (selectedRole === "business" ? "Starting Trial..." : "Creating Account...")
-                : (selectedRole === "business" ? "Start Your Free Trial" : "Create Account")}
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
 
-            {selectedRole !== "user" && (
-              <p className="text-center text-xs text-muted-foreground">
-                🎉 First month free! Then {selectedRole === "trainer" ? "$15" : "$30"}/month.
-              </p>
-            )}
+            <p className="text-center text-xs text-muted-foreground">
+              🎉 100% free — no credit card required.
+            </p>
 
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
