@@ -23,7 +23,6 @@ import BusinessPublicProfile from "./pages/BusinessPublicProfile";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerEditProfile from "./pages/TrainerEditProfile";
 import TrainerGallery from "./pages/TrainerGallery";
-import TrainerBilling from "./pages/TrainerBilling";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import BusinessEditProfile from "./pages/BusinessEditProfile";
 import BusinessGallery from "./pages/BusinessGallery";
