@@ -27,14 +27,43 @@ import {
 
 const NOT_ENOUGH = "Not enough data yet";
 
-const SummaryCard = ({ label, value }: { label: string; value: string }) => (
-  <Card>
+const SummaryCard = ({
+  label,
+  value,
+  muted,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+  onClick?: () => void;
+}) => {
+  const body = (
     <CardContent className="p-4">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-display">{label}</p>
-      <p className="mt-1 text-lg font-display uppercase tracking-wide text-primary">{value}</p>
+      <p
+        className={`mt-1 font-display uppercase tracking-wide ${
+          muted ? "text-sm text-muted-foreground" : "text-lg text-primary"
+        }`}
+      >
+        {value}
+      </p>
     </CardContent>
-  </Card>
-);
+  );
+  return onClick ? (
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
+      className="cursor-pointer transition-colors hover:border-primary/60"
+    >
+      {body}
+    </Card>
+  ) : (
+    <Card>{body}</Card>
+  );
+};
 
 const CycleFit = () => {
   const { user, loading: authLoading } = useAuth();
