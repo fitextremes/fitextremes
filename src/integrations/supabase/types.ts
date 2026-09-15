@@ -157,6 +157,45 @@ export type Database = {
         }
         Relationships: []
       }
+      cycle_logs: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          flow: string
+          id: string
+          is_ongoing: boolean
+          notes: string | null
+          start_date: string
+          symptoms: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          flow?: string
+          id?: string
+          is_ongoing?: boolean
+          notes?: string | null
+          start_date: string
+          symptoms?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          flow?: string
+          id?: string
+          is_ongoing?: boolean
+          notes?: string | null
+          start_date?: string
+          symptoms?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follow_requests: {
         Row: {
           created_at: string
