@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInCalendarDays, format } from "date-fns";
-import { CalendarHeart, Plus, Pencil, Trash2 } from "lucide-react";
+import { CalendarHeart, Plus, Pencil, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
