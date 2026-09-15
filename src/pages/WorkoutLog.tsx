@@ -38,7 +38,7 @@ interface WorkoutLog {
 
 const WorkoutLogPage = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isSocial, loading: roleLoading } = useUserRole();
+  const { role, isSocial, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
   const [exerciseName, setExerciseName] = useState("");
@@ -57,10 +57,10 @@ const WorkoutLogPage = () => {
       navigate("/login");
       return;
     }
-    if (!isSocial) {
+    if (role && !isSocial) {
       navigate("/");
     }
-  }, [user, isSocial, authLoading, roleLoading, navigate]);
+  }, [user, role, isSocial, authLoading, roleLoading, navigate]);
 
   const loadLogs = async () => {
     if (!user) return;
