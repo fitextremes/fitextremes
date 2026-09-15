@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, ArrowLeft, LogOut } from "lucide-react";
@@ -19,6 +20,15 @@ const BusinessCheckout = () => {
   useEffect(() => {
     if (!authLoading && !user) navigate("/business-auth?tab=login", { replace: true });
   }, [authLoading, user, navigate]);
+
+  // Billing is disabled — business accounts are free. Never show checkout.
+  useEffect(() => {
+    if (!BILLING_ENABLED) navigate("/business-dashboard", { replace: true });
+  }, [navigate]);
+
+  if (!BILLING_ENABLED) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading...</p></div>;
+  }
 
   useEffect(() => {
     if (!roleLoading && user && !isBusiness) navigate("/dashboard", { replace: true });
