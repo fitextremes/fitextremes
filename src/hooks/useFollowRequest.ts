@@ -133,11 +133,8 @@ export const useFollowAction = () => {
         .from("follows")
         .insert({ follower_id: user.id, following_id: targetUserId });
       if (error) throw error;
-      // Notify target (new follower) and sender (follow success)
-      await Promise.all([
-        createNotification({ recipientId: targetUserId, actorId: user.id, type: "new_follower" }),
-        createNotification({ recipientId: user.id, actorId: user.id, type: "follow_success" }),
-      ]);
+      // Notify only the followed user — never the follower themselves
+      await createNotification({ recipientId: targetUserId, actorId: user.id, type: "new_follower" });
       return { state: "following" as FollowState, action: "followed" };
     },
     onSuccess: (_, variables) => {
