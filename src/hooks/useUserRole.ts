@@ -7,12 +7,18 @@ import { useAuth } from "@/contexts/AuthContext";
  * Roles: 'user' (Socials), 'trainer', 'business'.
  */
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    // Wait for the session to be restored before deciding there is no role,
+    // otherwise role-gated pages redirect during the auth hydration window.
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
     if (!user) {
       setRole(null);
       setLoading(false);
@@ -32,7 +38,7 @@ export const useUserRole = () => {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, authLoading]);
 
   return {
     role,
