@@ -1,17 +1,14 @@
 import { useEffect } from "react";
-import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus, PhoneCall, Globe, Truck, Send, Building2 } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
-import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useBusinessStats, useBusinessLeads, useUpdateLeadStatus } from "@/hooks/useBusiness";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -83,8 +80,6 @@ const BusinessDashboard = () => {
             </div>
           </div>
         </motion.div>
-
-        <SubscriptionCard />
 
         {/* Analytics */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
