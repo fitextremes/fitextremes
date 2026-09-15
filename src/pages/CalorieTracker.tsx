@@ -156,7 +156,7 @@ const CalorieTracker = () => {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, selectedDate]);
 
   // Debounced food search
   useEffect(() => {
@@ -198,11 +198,6 @@ const CalorieTracker = () => {
     );
   }, [logs]);
 
-  const grouped = useMemo(() => {
-    const g: Record<MealType, FoodLog[]> = { breakfast: [], lunch: [], dinner: [], snacks: [] };
-    logs.forEach((l) => g[l.meal_type].push(l));
-    return g;
-  }, [logs]);
 
   const openAddModal = (food: FoodResult) => {
     setAddModal({ food, quantity: parsedQty || 1, mealType: "breakfast" });
@@ -428,69 +423,99 @@ const CalorieTracker = () => {
           </CardContent>
         </Card>
 
-        {/* Meal sections */}
+        {/* Single daily food log table */}
         {logsLoading ? (
           <Skeleton className="h-32 w-full" />
         ) : (
-          (Object.keys(MEAL_LABELS) as MealType[]).map((meal) => {
-            const items = grouped[meal];
-            const subTotal = items.reduce((s, l) => s + l.calories * (l.quantity || 1), 0);
-            return (
-              <Card key={meal}>
-                <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-                  <CardTitle className="font-display uppercase tracking-wider text-sm">
-                    {MEAL_LABELS[meal]}
-                  </CardTitle>
-                  <span className="text-sm text-muted-foreground">{Math.round(subTotal)} kcal</span>
-                </CardHeader>
-                <CardContent className="space-y-2 pt-0">
-                  {items.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">No items yet.</p>
-                  ) : (
-                    items.map((l) => (
-                      <div key={l.id} className="flex items-center gap-2 rounded-md border border-border/60 p-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground line-clamp-1">{l.food_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {l.serving_size} • {Math.round(l.calories * (l.quantity || 1))} kcal
-                          </p>
-                        </div>
-                        <Input
-                          type="number"
-                          min="0.1"
-                          step="0.1"
-                          value={l.quantity}
-                          onChange={(e) => updateQty(l.id, parseFloat(e.target.value) || 0)}
-                          className="w-16 h-8 text-sm"
-                        />
-                        <Button size="icon" variant="ghost" onClick={() => deleteLog(l.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display uppercase tracking-wider text-sm">
+                {isSameDay(selectedDate, new Date()) ? "Today's Food Log" : "Food Log"} —{" "}
+                {format(selectedDate, "MMM d").toUpperCase()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {logs.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic py-2">No items logged for this day.</p>
+              ) : (
+                <div className="overflow-x-auto -mx-2 px-2">
+                  <table className="w-full text-xs min-w-[620px]">
+                    <thead>
+                      <tr className="text-muted-foreground uppercase tracking-wider font-display text-[10px] border-b border-border">
+                        <th className="text-left py-2 pr-2">Meal</th>
+                        <th className="text-left py-2 pr-2">Food</th>
+                        <th className="text-left py-2 pr-2">Serving</th>
+                        <th className="text-left py-2 pr-2">Qty</th>
+                        <th className="text-right py-2 pr-2">Cal</th>
+                        <th className="text-right py-2 pr-2">Protein</th>
+                        <th className="text-right py-2 pr-2">Carbs</th>
+                        <th className="text-right py-2 pr-2">Fat</th>
+                        <th className="py-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {logs.map((l) => {
+                        const q = l.quantity || 1;
+                        return (
+                          <tr key={l.id} className="border-b border-border/50 last:border-0">
+                            <td className="py-1.5 pr-2 text-muted-foreground whitespace-nowrap">
+                              {MEAL_LABELS[l.meal_type]}
+                            </td>
+                            <td className="py-1.5 pr-2 text-foreground max-w-[180px] truncate">{l.food_name}</td>
+                            <td className="py-1.5 pr-2 text-muted-foreground whitespace-nowrap">
+                              {l.serving_size ?? "—"}
+                            </td>
+                            <td className="py-1.5 pr-2">
+                              <Input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={l.quantity}
+                                onChange={(e) => updateQty(l.id, parseFloat(e.target.value) || 0)}
+                                className="w-14 h-7 text-xs px-1"
+                              />
+                            </td>
+                            <td className="py-1.5 pr-2 text-right text-foreground">{Math.round(l.calories * q)}</td>
+                            <td className="py-1.5 pr-2 text-right text-muted-foreground">
+                              {Math.round(l.protein * q)}g
+                            </td>
+                            <td className="py-1.5 pr-2 text-right text-muted-foreground">
+                              {Math.round(l.carbs * q)}g
+                            </td>
+                            <td className="py-1.5 pr-2 text-right text-muted-foreground">{Math.round(l.fat * q)}g</td>
+                            <td className="py-1.5 text-right">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => deleteLog(l.id)}
+                                aria-label="Delete entry"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t border-primary/40 font-semibold text-foreground">
+                        <td className="py-2 pr-2 uppercase tracking-wider font-display text-[10px]" colSpan={4}>
+                          Daily Total
+                        </td>
+                        <td className="py-2 pr-2 text-right">{Math.round(totals.calories)}</td>
+                        <td className="py-2 pr-2 text-right">{Math.round(totals.protein)}g</td>
+                        <td className="py-2 pr-2 text-right">{Math.round(totals.carbs)}g</td>
+                        <td className="py-2 pr-2 text-right">{Math.round(totals.fat)}g</td>
+                        <td />
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
-
-        {/* Grand totals */}
-        <Card className="border-accent/40">
-          <CardContent className="pt-6 grid grid-cols-4 gap-3 text-center">
-            {[
-              ["Cal", Math.round(totals.calories)],
-              ["P", Math.round(totals.protein) + "g"],
-              ["C", Math.round(totals.carbs) + "g"],
-              ["F", Math.round(totals.fat) + "g"],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">{k}</p>
-                <p className="text-base font-semibold text-foreground">{v}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
 
       <MobileTabBar />
