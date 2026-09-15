@@ -156,7 +156,7 @@ const CalorieTracker = () => {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, selectedDate]);
 
   // Debounced food search
   useEffect(() => {
