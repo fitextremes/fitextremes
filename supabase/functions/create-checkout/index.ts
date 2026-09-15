@@ -67,6 +67,13 @@ async function resolveOrCreateCustomer(
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  // All FitExtremes account types are free. Keep this endpoint disabled so no
+  // dashboard, stale client, or deep link can create a recurring subscription.
+  return new Response(JSON.stringify({ error: "Billing is disabled. All accounts are free." }), {
+    status: 410,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+  /* Historical checkout implementation retained below for a future premium tier.
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -132,4 +139,5 @@ Deno.serve(async (req) => {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  */
 });

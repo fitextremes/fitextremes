@@ -1,11 +1,9 @@
 import { useEffect } from "react";
-import { BILLING_ENABLED } from "@/config/billing";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, BadgeCheck, Sparkles } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
-import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -45,8 +43,6 @@ const TrainerBilling = () => {
         <Button variant="ghost" size="sm" onClick={() => navigate("/trainer-dashboard")}>
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Button>
-
-        {BILLING_ENABLED && <SubscriptionCard />}
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}

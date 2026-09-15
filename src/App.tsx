@@ -28,8 +28,6 @@ import BusinessDashboard from "./pages/BusinessDashboard";
 import BusinessEditProfile from "./pages/BusinessEditProfile";
 import BusinessGallery from "./pages/BusinessGallery";
 import NotFound from "./pages/NotFound";
-import CheckoutReturn from "./pages/CheckoutReturn";
-import BusinessCheckout from "./pages/BusinessCheckout";
 import CalorieTracker from "./pages/CalorieTracker";
 import WorkoutLog from "./pages/WorkoutLog";
 import Terms from "./pages/Terms";
@@ -78,7 +76,7 @@ const App = () => (
             <Route path="/trainer-dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/edit" element={<TrainerEditProfile />} />
             <Route path="/profile/gallery" element={<TrainerGallery />} />
-            <Route path="/trainer/billing" element={<TrainerBilling />} />
+            <Route path="/trainer/billing" element={<Navigate to="/trainer-dashboard" replace />} />
             <Route path="/trainer/:id" element={<TrainerProfile />} />
             <Route path="/business" element={<Navigate to="/login?role=business" replace />} />
             <Route path="/business/profile/public-preview" element={<BusinessPublicProfile />} />
@@ -86,8 +84,8 @@ const App = () => (
             <Route path="/business-dashboard" element={<BusinessDashboard />} />
             <Route path="/business/edit" element={<BusinessEditProfile />} />
             <Route path="/business/gallery" element={<BusinessGallery />} />
-            <Route path="/checkout/return" element={<CheckoutReturn />} />
-            <Route path="/business-checkout" element={<BusinessCheckout />} />
+            <Route path="/checkout/return" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/business-checkout" element={<Navigate to="/business-dashboard" replace />} />
             <Route path="/calorie-tracker" element={<CalorieTracker />} />
             <Route path="/workout-log" element={<WorkoutLog />} />
             <Route path="/legal" element={<Legal />} />

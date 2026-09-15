@@ -1,11 +1,9 @@
 import { useEffect } from "react";
-import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus } from "lucide-react";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
-import SubscriptionCard from "@/components/SubscriptionCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -81,9 +79,6 @@ const TrainerDashboard = () => {
             </div>
           </div>
         </motion.div>
-
-        {/* Dynamic subscription card */}
-        {BILLING_ENABLED && <SubscriptionCard />}
 
         {/* Counters */}
         <div className="grid grid-cols-2 gap-4">
