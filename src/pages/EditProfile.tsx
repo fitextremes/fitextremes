@@ -12,9 +12,15 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import MobileTabBar from "@/components/MobileTabBar";
 import DeleteAccountDialog from "@/components/DeleteAccountDialog";
+import {
+  ACCEPTED_IMAGE_TYPES as IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGE_SIZE_LABEL,
+  IMAGE_TOO_LARGE_MESSAGE,
+  compressImage,
+} from "@/lib/imageUpload";
 
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = IMAGE_TYPES;
 
 const validateFullName = (value: string): string => {
   const trimmed = value.trim();
@@ -122,8 +128,8 @@ const EditProfile = () => {
       toast.error("Only JPG, JPEG, PNG, and WEBP images are allowed");
       return;
     }
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("Image must be less than 5 MB");
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error(IMAGE_TOO_LARGE_MESSAGE);
       return;
     }
 
@@ -149,11 +155,12 @@ const EditProfile = () => {
       let avatar_url = profile?.avatar_url || null;
 
       if (avatarFile && user) {
-        const ext = avatarFile.name.split(".").pop();
+        const compressed = await compressImage(avatarFile);
+        const ext = compressed.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(path, avatarFile, { upsert: true });
+          .upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;
@@ -235,7 +242,7 @@ const EditProfile = () => {
               onChange={handleAvatarChange}
               className="hidden"
             />
-            <p className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · Max 5 MB</p>
+            <p className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · Max {MAX_IMAGE_SIZE_LABEL}</p>
           </div>
 
           {/* Full Name */}

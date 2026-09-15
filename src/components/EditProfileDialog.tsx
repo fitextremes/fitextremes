@@ -9,6 +9,7 @@ import { useUpdateProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { validateImageFile, compressImage } from "@/lib/imageUpload";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -35,10 +36,14 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+    if (!file) return;
+    const error = validateImageFile(file);
+    if (error) {
+      toast.error(error);
+      return;
     }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const handleSave = async () => {
@@ -46,11 +51,12 @@ const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogPro
       let avatar_url = profile.avatar_url;
 
       if (avatarFile && user) {
-        const ext = avatarFile.name.split(".").pop();
+        const compressed = await compressImage(avatarFile);
+        const ext = compressed.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(path, avatarFile, { upsert: true });
+          .upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = urlData.publicUrl;

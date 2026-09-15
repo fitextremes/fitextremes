@@ -6,9 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useBusinessGallery, useUploadBusinessGalleryImage, useDeleteBusinessGalleryImage } from "@/hooks/useBusiness";
 import { toast } from "sonner";
+import { ACCEPTED_IMAGE_TYPES as IMAGE_TYPES, MAX_IMAGE_BYTES, IMAGE_TOO_LARGE_MESSAGE } from "@/lib/imageUpload";
 
-const ACCEPTED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const MAX = 5 * 1024 * 1024;
+const ACCEPTED = IMAGE_TYPES;
+const MAX = MAX_IMAGE_BYTES;
 const LIMIT = 10;
 
 const BusinessGallery = () => {
@@ -31,7 +32,7 @@ const BusinessGallery = () => {
     }
     for (const f of files) {
       if (!ACCEPTED.includes(f.type)) { toast.error(`${f.name}: only JPG/PNG/WEBP allowed`); continue; }
-      if (f.size > MAX) { toast.error(`${f.name}: image must be 5 MB or less`); continue; }
+      if (f.size > MAX) { toast.error(`${f.name}: ${IMAGE_TOO_LARGE_MESSAGE}`); continue; }
       try {
         await upload.mutateAsync(f);
       } catch (err: any) {

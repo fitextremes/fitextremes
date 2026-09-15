@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { prepareImageForUpload } from "@/lib/imageUpload";
 
 export type BusinessEventType =
   | "call_click" | "whatsapp_click" | "website_click" | "delivery_request" | "instagram_click";
@@ -152,8 +153,9 @@ export const useUploadBusinessGalleryImage = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async (input: File) => {
       if (!user) throw new Error("Not signed in");
+      const file = await prepareImageForUpload(input, { restrictTypes: true });
       const ext = file.name.split(".").pop();
       const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("business-gallery").upload(path, file, { upsert: false });

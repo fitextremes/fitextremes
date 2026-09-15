@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useCreatePost } from "@/hooks/usePosts";
+import { MAX_IMAGE_BYTES, IMAGE_TOO_LARGE_MESSAGE } from "@/lib/imageUpload";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = MAX_IMAGE_BYTES;
 
 interface SubmitOptions {
   requireImage?: boolean;
@@ -33,7 +34,7 @@ export const usePostComposer = () => {
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("File must be under 5 MB");
+      toast.error(IMAGE_TOO_LARGE_MESSAGE);
       return;
     }
 

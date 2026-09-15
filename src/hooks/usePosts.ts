@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { prepareImageForUpload } from "@/lib/imageUpload";
 
 // Fetch author profiles (name, username, avatar) for a set of user ids.
 const fetchAuthors = async (userIds: (string | null | undefined)[]) => {
@@ -135,11 +136,12 @@ export const useCreatePost = () => {
 
       let image_url: string | null = null;
       if (imageFile) {
-        const ext = imageFile.name.split(".").pop();
+        const uploadFile = await prepareImageForUpload(imageFile);
+        const ext = uploadFile.name.split(".").pop();
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("post-images")
-          .upload(path, imageFile);
+          .upload(path, uploadFile, { contentType: uploadFile.type });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
         image_url = urlData.publicUrl;

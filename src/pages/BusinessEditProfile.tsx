@@ -12,9 +12,16 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DeleteAccountDialog from "@/components/DeleteAccountDialog";
+import {
+  ACCEPTED_IMAGE_TYPES as IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGE_SIZE_LABEL,
+  IMAGE_TOO_LARGE_MESSAGE,
+  compressImage,
+} from "@/lib/imageUpload";
 
-const ACCEPTED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-const MAX = 5 * 1024 * 1024;
+const ACCEPTED = IMAGE_TYPES;
+const MAX = MAX_IMAGE_BYTES;
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -97,7 +104,7 @@ const BusinessEditProfile = () => {
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     if (!ACCEPTED.includes(f.type)) { toast.error("Only JPG, JPEG, PNG, WEBP allowed"); return; }
-    if (f.size > MAX) { toast.error("Image must be 5 MB or less"); return; }
+    if (f.size > MAX) { toast.error(IMAGE_TOO_LARGE_MESSAGE); return; }
     setAvatarFile(f); setAvatarPreview(URL.createObjectURL(f));
   };
 
@@ -121,9 +128,10 @@ const BusinessEditProfile = () => {
     try {
       let avatar_url = (profile as any)?.avatar_url || null;
       if (avatarFile && user) {
-        const ext = avatarFile.name.split(".").pop();
+        const compressed = await compressImage(avatarFile);
+        const ext = compressed.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
-        const { error } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+        const { error } = await supabase.storage.from("avatars").upload(path, compressed, { upsert: true, contentType: compressed.type });
         if (error) throw error;
         const { data } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = `${data.publicUrl}?t=${Date.now()}`;
@@ -186,7 +194,7 @@ const BusinessEditProfile = () => {
             </div>
             <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>Upload Profile Picture</Button>
             <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={onFile} className="hidden" />
-            <p className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · Max 5 MB</p>
+            <p className="text-[10px] text-muted-foreground">JPG, PNG, WEBP · Max {MAX_IMAGE_SIZE_LABEL}</p>
           </div>
 
           <div className="space-y-1.5">

@@ -98,7 +98,7 @@ const TrainerGallery = () => {
                 Workout Gallery
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {items.length}/{GALLERY_LIMITS.MAX_IMAGES} photos · JPG, PNG, WEBP · max 5 MB each
+                {items.length}/{GALLERY_LIMITS.MAX_IMAGES} photos · JPG, PNG, WEBP · max 20 MB each
               </p>
             </div>
             <Button
