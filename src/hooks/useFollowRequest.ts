@@ -119,21 +119,13 @@ export const useFollowAction = () => {
           .single();
         if (error) throw error;
         const reqId = (inserted as any)?.id ?? null;
-        // Notify target (new request received) and sender (request sent confirmation)
-        await Promise.all([
-          createNotification({
-            recipientId: targetUserId,
-            actorId: user.id,
-            type: "follow_request_received",
-            followRequestId: reqId,
-          }),
-          createNotification({
-            recipientId: user.id,
-            actorId: user.id,
-            type: "follow_request_sent",
-            followRequestId: reqId,
-          }),
-        ]);
+        // Notify only the target — never the actor themselves
+        await createNotification({
+          recipientId: targetUserId,
+          actorId: user.id,
+          type: "follow_request_received",
+          followRequestId: reqId,
+        });
         return { state: "requested" as FollowState, action: "request_sent" };
       }
 
