@@ -313,6 +313,13 @@ const CycleFit = () => {
         </p>
       </main>
 
+      <AvgCycleDialog
+        open={avgDialogOpen}
+        onOpenChange={setAvgDialogOpen}
+        currentValue={avgCycleSetting}
+        onSave={saveAvgCycle}
+      />
+
       <LogPeriodDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
