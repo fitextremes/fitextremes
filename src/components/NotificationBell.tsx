@@ -141,8 +141,10 @@ const NotificationBell = ({ className }: Props) => {
                 return (
                   <li
                     key={n.id}
+                    onClick={() => handleOpen(n)}
                     className={cn(
                       "px-4 py-3 hover:bg-secondary/50 transition-colors",
+                      notificationTarget(n) && "cursor-pointer",
                       !n.read && "bg-primary/5"
                     )}
                   >
@@ -173,14 +175,14 @@ const NotificationBell = ({ className }: Props) => {
                         {isRequest && n.follow_request_id && (
                           <div className="flex gap-2 mt-2">
                             <button
-                              onClick={() => handleAccept(n)}
+                              onClick={(e) => { e.stopPropagation(); handleAccept(n); }}
                               disabled={respond.isPending}
                               className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                             >
                               <Check className="h-3 w-3" /> Accept
                             </button>
                             <button
-                              onClick={() => handleDecline(n)}
+                              onClick={(e) => { e.stopPropagation(); handleDecline(n); }}
                               disabled={respond.isPending}
                               className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
                             >
