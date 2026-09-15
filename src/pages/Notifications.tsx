@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import SocialTopBar from "@/components/SocialTopBar";
 import MobileTabBar from "@/components/MobileTabBar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNotifications, useMarkNotificationsRead, NotificationItem } from "@/hooks/useNotifications";
+import { useNotifications, useMarkNotificationsRead, NotificationItem, notificationTarget } from "@/hooks/useNotifications";
 import { useRespondFollowRequest } from "@/hooks/useFollowRequest";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -70,6 +70,12 @@ const Notifications = () => {
     return null;
   }
 
+  const handleOpen = (n: NotificationItem) => {
+    const target = notificationTarget(n);
+    if (!n.read) markRead.mutate([n.id]);
+    if (target) navigate(target);
+  };
+
   const handleAccept = (n: NotificationItem) => {
     if (!n.follow_request_id || !n.actor_id) return;
     respond.mutate(
@@ -121,8 +127,10 @@ const Notifications = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
+                  onClick={() => handleOpen(n)}
                   className={cn(
                     "flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-card",
+                    notificationTarget(n) && "cursor-pointer hover:bg-secondary/40 transition-colors",
                     !n.read && "border-primary/40 bg-primary/5"
                   )}
                 >
@@ -165,10 +173,10 @@ const Notifications = () => {
                     </p>
                     {isRequest && n.follow_request_id && (
                       <div className="flex gap-2 mt-3">
-                        <Button variant="hero" size="sm" onClick={() => handleAccept(n)} disabled={respond.isPending}>
+                        <Button variant="hero" size="sm" onClick={(e) => { e.stopPropagation(); handleAccept(n); }} disabled={respond.isPending}>
                           <Check className="h-4 w-4 mr-1" /> Accept
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDecline(n)} disabled={respond.isPending}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDecline(n); }} disabled={respond.isPending}>
                           <X className="h-4 w-4 mr-1" /> Decline
                         </Button>
                       </div>

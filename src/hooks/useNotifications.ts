@@ -17,6 +17,8 @@ export interface NotificationItem {
   actor_id: string | null;
   type: NotificationType;
   follow_request_id: string | null;
+  post_id?: string | null;
+  comment_id?: string | null;
   read: boolean;
   created_at: string;
   /** True only when this notification's follow_request still exists and is pending. */
@@ -156,4 +158,28 @@ export const useMarkNotificationsRead = () => {
       queryClient.invalidateQueries({ queryKey: ["notifications", user?.id] });
     },
   });
+};
+
+/**
+ * Central notification routing: decide the destination from the structured
+ * notification type + stored ids (never from the message text).
+ * Returns null when there is nothing to open.
+ */
+export const notificationTarget = (n: NotificationItem): string | null => {
+  switch (n.type) {
+    case "post_reaction":
+    case "post_comment":
+      return n.post_id ? `/post/${n.post_id}` : null;
+    case "new_follower":
+    case "follow_request_received":
+    case "follow_request_accepted":
+    case "follow_request_declined":
+      return n.actor?.username
+        ? `/user/${n.actor.username}`
+        : n.actor_id
+        ? `/user/${n.actor_id}`
+        : null;
+    default:
+      return null;
+  }
 };

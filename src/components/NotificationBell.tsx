@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, Check, X, UserPlus, UserCheck, UserX, Send, Heart, MessageCircle, Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useNotifications, useMarkNotificationsRead, NotificationItem } from "@/hooks/useNotifications";
+import { useNotifications, useMarkNotificationsRead, NotificationItem, notificationTarget } from "@/hooks/useNotifications";
 import { useRespondFollowRequest } from "@/hooks/useFollowRequest";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -57,6 +57,14 @@ const NotificationBell = ({ className }: Props) => {
   const { data: notifications = [], isLoading } = useNotifications();
   const markRead = useMarkNotificationsRead();
   const respond = useRespondFollowRequest();
+  const navigate = useNavigate();
+
+  const handleOpen = (n: NotificationItem) => {
+    const target = notificationTarget(n);
+    if (!n.read) markRead.mutate([n.id]);
+    if (target) navigate(target);
+  };
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleOpenChange = (open: boolean) => {
@@ -133,8 +141,10 @@ const NotificationBell = ({ className }: Props) => {
                 return (
                   <li
                     key={n.id}
+                    onClick={() => handleOpen(n)}
                     className={cn(
                       "px-4 py-3 hover:bg-secondary/50 transition-colors",
+                      notificationTarget(n) && "cursor-pointer",
                       !n.read && "bg-primary/5"
                     )}
                   >
@@ -165,14 +175,14 @@ const NotificationBell = ({ className }: Props) => {
                         {isRequest && n.follow_request_id && (
                           <div className="flex gap-2 mt-2">
                             <button
-                              onClick={() => handleAccept(n)}
+                              onClick={(e) => { e.stopPropagation(); handleAccept(n); }}
                               disabled={respond.isPending}
                               className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                             >
                               <Check className="h-3 w-3" /> Accept
                             </button>
                             <button
-                              onClick={() => handleDecline(n)}
+                              onClick={(e) => { e.stopPropagation(); handleDecline(n); }}
                               disabled={respond.isPending}
                               className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
                             >

@@ -176,3 +176,41 @@ export const useDeletePost = () => {
     },
   });
 };
+
+/** Fetch a single post by id (used by the /post/:id detail route). */
+export const usePost = (postId?: string) => {
+  return useQuery({
+    queryKey: ["post", postId],
+    enabled: !!postId,
+    queryFn: async () => {
+      if (!postId) return null;
+      const { data, error } = await supabase
+        .from("posts")
+        .select(`
+          *,
+          reactions (id, emoji, user_id),
+          comments (id)
+        `)
+        .eq("id", postId)
+        .maybeSingle();
+      if (error) {
+        console.error("[Post] error:", error);
+        return null;
+      }
+      if (!data) return null;
+      const p = data as any;
+      const authors = await fetchAuthors([p.user_id]);
+      return {
+        ...p,
+        profiles: authors[p.user_id] ?? {
+          id: p.user_id,
+          username: null,
+          full_name: "FitExtremes User",
+          avatar_url: null,
+        },
+        reactions: Array.isArray(p.reactions) ? p.reactions : [],
+        comments: Array.isArray(p.comments) ? p.comments : [],
+      };
+    },
+  });
+};
