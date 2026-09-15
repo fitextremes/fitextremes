@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus, PhoneCall, Globe, Truck, Send, Building2 } from "lucide-react";
@@ -51,6 +52,7 @@ const BusinessDashboard = () => {
   });
 
   useEffect(() => {
+    if (!BILLING_ENABLED) return;
     if (!authLoading && !roleLoading && !subLoading && user && isBusiness && !subGate?.stripe_subscription_id) {
       navigate("/business-checkout", { replace: true });
     }

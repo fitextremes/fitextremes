@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,7 +134,8 @@ const BusinessAuth = () => {
         toast.error(next.email || next.username!);
         return;
       }
-      setShowPayment(true);
+      if (BILLING_ENABLED) setShowPayment(true);
+      else await handleStartTrial();
     } catch {
       toast.error("Could not validate your details. Please try again.");
     } finally {
@@ -158,10 +160,10 @@ const BusinessAuth = () => {
       return;
     }
     if (session) {
-      toast.success("Account created. Add a payment method to activate your trial.");
-      navigate("/business-checkout");
+      toast.success("Account created. Welcome to FitExtremes!");
+      navigate(BILLING_ENABLED ? "/business-checkout" : "/business-dashboard");
     } else {
-      toast.success("Account created. Check your email to confirm, then log in to add payment.");
+      toast.success("Account created. Check your email to confirm, then log in.");
       navigate("/business-auth?tab=login");
     }
   };
@@ -278,10 +280,10 @@ const BusinessAuth = () => {
                 />
 
                 <Button variant="hero" className="w-full" size="lg" disabled={checkingUnique || !legalAccepted} onClick={handleStartClick}>
-                  {checkingUnique ? "Validating..." : "Start Your Free Trial"}
+                  {checkingUnique || loading ? "Creating Account..." : "Create Free Account"}
                 </Button>
                 <p className="text-center text-[11px] text-muted-foreground">
-                  1 month free. Then $30/month. Cancel anytime.
+                  100% free — no credit card required.
                 </p>
               </TabsContent>
 

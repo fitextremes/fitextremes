@@ -187,7 +187,7 @@ const Index = () => {
               </div>
               <h3 className="font-display text-2xl uppercase tracking-wider text-foreground">Personal Trainers</h3>
               <p className="mt-2 text-muted-foreground">
-                Showcase your expertise, receive leads, and grow your client base. First month free, then $15/month.
+                Showcase your expertise, receive leads, and grow your client base. Completely free.
               </p>
               <Button variant="hero" className="mt-6" asChild>
                 <Link to="/signup?role=trainer">
@@ -209,7 +209,7 @@ const Index = () => {
               </div>
               <h3 className="font-display text-2xl uppercase tracking-wider text-foreground">Business Owners</h3>
               <p className="mt-2 text-muted-foreground">
-                List your fitness centre or supplement store and connect with potential customers. First month free, then $30/month.
+                List your fitness centre or supplement store and connect with potential customers. Completely free.
               </p>
               <Button variant="accent" className="mt-6" asChild>
                 <Link to="/signup?role=business">

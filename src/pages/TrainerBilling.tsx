@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, BadgeCheck, Sparkles } from "lucide-react";
@@ -45,7 +46,7 @@ const TrainerBilling = () => {
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Button>
 
-        <SubscriptionCard />
+        {BILLING_ENABLED && <SubscriptionCard />}
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -58,7 +59,7 @@ const TrainerBilling = () => {
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Unlimited leads from clients</li>
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Public profile & photo gallery</li>
             <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Discover ranking & visibility</li>
-            <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> First month free, then $15 CAD/month</li>
+            <li className="flex items-start gap-2"><BadgeCheck className="h-4 w-4 text-primary mt-0.5" /> Completely free — no subscription required</li>
           </ul>
         </motion.div>
 

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { BILLING_ENABLED } from "@/config/billing";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Edit, Eye, Users, ExternalLink, Mail, Phone, MessageSquare, ImagePlus } from "lucide-react";
@@ -82,7 +83,7 @@ const TrainerDashboard = () => {
         </motion.div>
 
         {/* Dynamic subscription card */}
-        <SubscriptionCard />
+        {BILLING_ENABLED && <SubscriptionCard />}
 
         {/* Counters */}
         <div className="grid grid-cols-2 gap-4">
